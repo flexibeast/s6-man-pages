@@ -1,0 +1,382 @@
+.Dd August 17, 2020
+.Dt S6-SVSCAN 1
+.Os
+.Sh NAME
+.Nm s6-svscan
+.Nd start and monitor a collection of
+.Xr s6-supervise 1
+processes
+.Sh SYNOPSIS
+.Nm
+.Op -S | -s
+.Op -d notif
+.Op -X consoleholder
+.Op -c max
+.Op -t rescan
+.Op scandir
+.Sh DESCRIPTION
+.Nm
+starts and monitors a collection of
+.Xr s6-supervise 1
+processes, each of these processes monitoring a single service. It is
+designed to be either the root or a branch of a
+.Em supervision tree .
+.Pp
+If given a
+.Ar scandir
+argument,
+.Nm
+switches to it. Else it uses its current directory as scan directory.
+.Pp
+It exits 100 if another
+.Nm s6-svscan
+process is already monitoring this scan directory.
+.Pp
+If the
+.Pa ./.s6-svscan
+control directory does not exist,
+.Nm
+creates it. However, it is recommended to already have a
+.Pa .s6-svscan
+subdirectory in your scan directory, because
+.Nm
+may try and execute into the
+.Pa .s6-svscan/crash
+or
+.Pa .s6-svscan/finish
+files at some point - so those files should exist and be executable.
+.Pp
+From this point on,
+.Nm s6-svscan
+never dies. It tries its best to keep control of what's happening. In case of a major system call failure, which means that the kernel or hardware is broken in some fashion, it executes into the
+.Pa .s6-svscan/crash
+program. (But if that execution fails,
+.Nm
+exits 111.)
+.Pp
+.Nm
+performs an initial scan of its scan directory.
+.Pp
+.Nm
+then occasionally runs scans or reaps, see below.
+.Pp
+.Nm
+runs until it is told to stop via
+.Xr s6-svscanctl 1 ,
+or a signal. Then it executes into the
+.Pa .s6-svscan/finish
+program. The program is given an argument that depends on the
+.Xr s6-svscanctl 1
+options that were used.
+.Pp
+If that execution fails,
+.Nm
+falls back on a
+.Pa .s6-svscan/crash
+execution.
+.Sh OPTIONS
+.Bl -tag -width -x
+.It Fl S
+Do not divert signals. This is the default for now; it may change in a future version of s6.
+.It Fl s
+Divert signals - see below.
+.It Fl d Ar notif
+Notify readiness on file descriptor
+.Ar notif .
+When
+.Nm
+is ready to accept commands from
+.Xr s6-svscanctl 1 ,
+it will write a newline to
+.Ar notif .
+.Ar notif
+cannot be lesser than 3. By default, no notification is sent. Please
+note that using this option signals shallow readiness:
+.Nm
+being
+.Dq ready
+only means that it is ready to accept commands. It does not mean that
+all the services it launches at start are themselves ready, or even
+started, or even that the relevant
+.Xr s6-supervise 1
+processes have been started. If you need to test for deep readiness,
+meaning that all the services in the supervision tree have been
+started and are ready, you cannot rely on this option.
+.It Fl X Ar consoleholder
+Assume the output console is available on descriptor
+.Ar consoleholder .
+If this option is given, and a s6-svscan-log service exists, the
+.Xr s6-supervise 1
+process for that service will be run with
+.Ar consoleholder
+as its standard error. This is mainly useful for a setup done via
+s6-linux-init, where all error messages go to the s6-svscan-log
+catch-all logger service by default, except messages from this service
+itself, which fall back to
+.Ar consoleholder .
+If you're not sure what to use this option for, or how, you don't need it.
+.It Fl c Ar max
+Maintain services for up to max service directories. Default is
+500. Lower limit is 2. There is no upper limit, but:
+.Bl -dash -width x
+.It
+The higher
+.Ar max
+is, the more stack memory
+.Nm
+will use, approximately 50 bytes per service.
+.It
+.Nm
+uses 2 file descriptors per logged service.
+.El
+.Pp
+It is the admin's responsibility to make sure that
+.Nm
+has enough available descriptors to function properly and does not
+exceed its stack limit. The default of 500 is safe and provides enough
+room for every reasonable system.
+.It Fl t Ar rescan
+perform a scan every
+.Ar rescan
+milliseconds. If
+.Ar rescan
+is 0 (the default), automatic scans are never performed after the first one and
+.Nm
+will only detect new services when told to via a
+.Ql s6-svscanctl -a
+command. It is strongly discouraged to set
+.Ar rescan
+to a positive value under 500.
+.El
+.Sh SIGNALS
+.Nm
+always reacts to the following signals:
+.Bl -tag -width x
+.It SIGCHLD
+Triggers the reaper.
+.It SIGALRM
+Triggers the scanner.
+.It SIGABRT
+Acts as if a
+.Ql s6-svscanctl -b
+command had been received.
+.El
+.Pp
+By default, it also reacts to the following signals:
+.Bl -tag -width x
+.It SIGTERM
+Acts as if a
+.Ql s6-svscanctl -t
+command had been received.
+.It SIGHUP
+Acts as if a
+.Ql s6-svscanctl -h
+command had been received.
+.It SIGQUIT
+Acts as if a
+.Ql s6-svscanctl -q
+command had been received.
+.It SIGINT
+Acts as if a
+.Ql s6-svscanctl -6
+command had been received.
+.El
+.Pp
+But if the
+.Fl s
+option was given, then instead of those default actions,
+.Nm
+uses configurable handlers: it forks and executes a program every time
+it receives one of the following signals.
+.Bl -tag -width x
+.It SIGTERM
+Fork and execute
+.Pa .s6-svscan/SIGTERM
+.It SIGHUP
+Fork and execute
+.Pa .s6-svscan/SIGHUP
+.It SIGQUIT
+Fork and execute
+.Pa .s6-svscan/SIGQUIT
+.It SIGINT
+Fork and execute
+.Pa .s6-svscan/SIGINT
+.It SIGUSR1
+Fork and execute
+.Pa .s6-svscan/SIGUSR1
+.It SIGUSR2
+Fork and execute
+.Pa .s6-svscan/SIGUSR2
+.It SIGPWR (on systems that define it)
+Fork and execute
+.Pa .s6-svscan/SIGPWR
+.It SIGWINCH (on systems that define it)
+Fork and execute
+.Pa .s6-svscan/SIGWINCH
+.El
+.Pp
+If an action cannot be taken (the relevant file doesn't exist, or
+isn't executable, or any kind of error happens),
+.Nm
+prints a warning message to its standard error but does nothing else
+with the signal.
+.Pp
+The
+.Fl s
+mechanism is useful, for instance, when
+.Nm
+is running as process 1 and needs to trap signals such as SIGINT (sent
+on some systems by a Ctrl-Alt-Del press) in order to perform some
+specific work instead of executing into
+.Pa .s6-svscan/finish
+on the spot.
+.Pp
+.Nm
+will not exit its loop on its own when it receives a signal such as
+SIGINT and the
+.Fl s
+option has been given. To make it exit its loop, invoke a
+.Xr s6-svscanctl 1
+command from the signal handling script. For instance, a
+.Pa .s6-svscan/SIGINT
+script could look like this:
+.Bd -literal -offset indent
+#!/command/execlineb -P
+foreground { shutdown-the-services }
+s6-svscanctl -i .
+.Ed
+.Sh THE REAPER
+Upon receipt of a SIGCHLD, or a
+.Ql s6-svscanctl -z
+command,
+.Nm
+runs a reaper routine.
+.Pp
+The reaper acknowledges (via some wait() function), without blocking,
+every terminated child of
+.Nm ,
+even ones it does not know it has. This is especially important when
+.Nm
+is run as process 1.
+.Pp
+If the dead child is a
+.Xr s6-supervise 1
+process watched by
+.Nm ,
+and the last scan flagged that process as active, then it is restarted one second later.
+.Sh THE SCANNER
+Every
+.Ar rescan
+milliseconds, or upon receipt of a SIGALRM or a
+.Ql s6-svscanctl -a
+command,
+.Nm
+runs a scanner routine.
+.Pp
+The scanner scans the current directory for subdirectories (or
+symbolic links to directories), which must be service directories. It
+skips names starting with dots. It will not create services for more
+than
+.Ar max
+subdirectories.
+.Pp
+For every new subdirectory
+.Ar dir
+it finds, the scanner spawns a
+.Xr s6-supervise 1
+process on it. If
+.Sm off
+.Ar dir
+/log
+.Sm on
+exists, it spawns a
+.Xr s6-supervise 1
+process on both
+.Ar dir
+and
+.Sm off
+.Ar dir
+/log,
+.Sm on
+and maintains a never-closing pipe from the service's stdout to
+the logger's stdin. This is
+.Em starting the service ,
+with or without a corresponding logger. Every service the scanner
+finds is flagged as
+.Dq active .
+.Pp
+The scanner remembers the services it found. If a service has been
+started in an earlier scan, but the current scan can't find the
+corresponding directory, the service is then flagged as inactive. No
+command is sent to stop inactive
+.Xr s6-supervise 1
+processes (unless the administrator uses
+.Sm off
+.Ql s6-svscanctl -n
+),
+.Sm on
+but inactive
+.Xr s6-supervise 1
+processes will not be restarted if they die.
+.Sh NOTES
+.Bl -dash -width x
+.It
+.Nm
+is designed to run until the machine is shut down. It is also designed
+as a suitable candidate for process 1. So, it goes out of its way to
+stay alive, even in dire situations. When it encounters a fatal
+situation, something it really cannot handle, it executes into
+.Pa .s6-svscan/crash
+instead of dying; when it is told to exit, it executes into
+.Pa .s6-svscan/finish .
+Administrators should make sure to design appropriate crash and finish routines.
+.It
+.Nm
+is a fully asynchronous state machine. It will read and process
+commands at any time, even when the computer is in trouble.
+.It
+.Nm
+does not use
+.Xr malloc 3 .
+That means it will never leak memory. However,
+.Nm s6-svscan uses
+.Xr opendir 3 ,
+and most
+.Xr opendir 3
+implementations internally use heap memory - so unfortunately, it's
+impossible to guarantee that
+.Nm
+does not use heap memory at all.
+.It
+When run with the
+.Fl t0
+option,
+.Nm s6-svscan
+never polls, it only wakes up on notifications, just like
+.Xr s6-supervise 1 .
+The s6 supervision tree can be used in energy-critical environments.
+.It
+The supervision tree (i.e. the tree of processes made of
+.Nm
+and all its scions) is not supposed to have a controlling terminal;
+.Nm
+generally is either process 1 or a child of process 1, not something
+that is launched from a terminal. If you run
+.Nm
+from an interactive shell, be warned that typing ^C in the controlling
+terminal (which sends a SIGINT to all processes in the foreground
+process group in the terminal) will terminate the supervision tree,
+but not the supervised processes - so, the supervised processes will
+keep running as orphans. This is by design: supervised processes
+should be as resilient as possible, even when their supervisors
+die. However, if you want to launch
+.Nm
+from an interactive shell and need your services to die with the
+supervision tree when you ^C it, you can obtain this behaviour by
+creating
+.Pa ./nosetsid
+files in every service directory.
+.Sh SEE ALSO
+.Lk http://skarnet.org/software/s6/
+.Sh AUTHORS
+.An Laurent Bercot
