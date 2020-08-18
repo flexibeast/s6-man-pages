@@ -48,7 +48,9 @@ files at some point - so those files should exist and be executable.
 .Pp
 From this point on,
 .Nm s6-svscan
-never dies. It tries its best to keep control of what's happening. In case of a major system call failure, which means that the kernel or hardware is broken in some fashion, it executes into the
+never dies. It tries its best to keep control of what's happening. In
+case of a major system call failure, which means that the kernel or
+hardware is broken in some fashion, it executes into the
 .Pa .s6-svscan/crash
 program. (But if that execution fails,
 .Nm
@@ -118,7 +120,7 @@ If you're not sure what to use this option for, or how, you don't need it.
 .It Fl c Ar max
 Maintain services for up to max service directories. Default is
 500. Lower limit is 2. There is no upper limit, but:
-.Bl -dash -width x
+.Bl -bullet -width x
 .It
 The higher
 .Ar max
@@ -252,8 +254,9 @@ command,
 .Nm
 runs a reaper routine.
 .Pp
-The reaper acknowledges (via some wait() function), without blocking,
-every terminated child of
+The reaper acknowledges (via some
+.Fn wait
+function), without blocking, every terminated child of
 .Nm ,
 even ones it does not know it has. This is especially important when
 .Nm
@@ -319,7 +322,7 @@ but inactive
 .Xr s6-supervise 1
 processes will not be restarted if they die.
 .Sh NOTES
-.Bl -dash -width x
+.Bl -bullet -width x
 .It
 .Nm
 is designed to run until the machine is shut down. It is also designed
@@ -377,6 +380,20 @@ creating
 .Pa ./nosetsid
 files in every service directory.
 .Sh SEE ALSO
-.Lk http://skarnet.org/software/s6/
+.Xr s6-svscanctl 1 ,
+.Xr s6-supervise 1 ,
+.Xr s6-svc 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svstat 1 ,
+.Xr s6-svwait 1 ,
+.Xr s6-svlisten1 1 ,
+.Xr s6-svlisten 1 ,
+.Xr s6-notifyoncheck 1 ,
+.Xr s6-svdt 1 ,
+.Xr s6-svdt-clear 1 ,
+.Xr s6-permafailon 1
+.Pp
+This man page is based on the authoritative documentation at
+.Lk http://skarnet.org/software/s6/ .
 .Sh AUTHORS
 .An Laurent Bercot
