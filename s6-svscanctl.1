@@ -1,0 +1,180 @@
+.Dd August 18, 2020
+.Dt S6-SVSCANCTL 1
+.Os
+.Sh NAME
+.Nm s6-svscanctl
+sends commands to a running
+.Xr s6-svscan 1
+process.
+.Sh SYNOPSIS
+.Nm
+.Op -phratszbnNiq0678
+.Ar svscandir
+.Sh DESCRIPTION
+.Nm
+sends the given series of commands to the
+.Xr s6-svscan 1
+process monitoring the
+.Ar svscandir
+directory, then exits 0. It exits 111 if it cannot send a command, or 100 if no
+.Xr s6-svscan 1
+process is running on
+.Ar svscandir .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl p
+Poweroff mode.
+.Xr s6-svscan 1
+will exec into
+.Ql ./.s6-svscan/finish poweroff
+when it is told to terminate.
+.It Fl h
+Hangup.
+.Xr s6-svscan 1
+will send a SIGHUP to all the maintained
+.Xr s6-supervise 1
+processes, then run its finish procedure.
+.It Fl r
+Reboot mode.
+.Xr s6-svscan 1
+will exec into
+.Ql ./.s6-svscan/finish reboot
+when it is told to terminate. This is
+.Xr s6-svscan 1
+.Ap
+s default mode.
+.It Fl a
+Alarm.
+.Xr s6-svscan 1
+will immediately perform a scan of
+.Ar svscandir
+to check for services.
+.It Fl t
+Terminate.
+.Xr s6-svscan 1
+will send a SIGTERM to all the
+.Xr s6-supervise 1
+processes supervising a service and a SIGHUP to all the
+.Xr s6-supervise 1
+processes supervising a logger, then run its finish procedure.
+.It Fl s
+Halt mode.
+.Xr s6-svscan 1
+will exec into
+.Ql ./.s6-svscan/finish halt
+when it is told to terminate.
+.It Fl z
+Destroy zombies. Immediately triggers
+.Xr s6-svscan 1
+.Ap
+s reaper mechanism.
+.It Fl b
+Abort.
+.Xr s6-svscan 1
+will exec into its finishing procedure. It will not kill any of the
+maintained
+.Xr s6-supervise 1
+processes.
+.It Fl n
+Nuke.
+.Xr s6-svscan 1
+will kill all the
+.Xr s6-supervise 1
+processes it has launched but that did not match a service directory
+last time
+.Ar svscandir
+was scanned, i.e. it prunes the supervision tree so that it matches
+exactly what was in
+.Ar svscandir
+at the time of the last scan. A SIGTERM is sent to the
+.Xr s6-supervise 1
+processes supervising services and a SIGHUP is sent to the
+.Xr s6-supervise 1
+processes supervising loggers.
+.It Fl N
+Really nuke. Does the same thing as
+.Fl n ,
+except that SIGTERM is sent to all the relevant
+.Xr s6-supervise 1
+processes, even if they are supervising loggers. That means that the
+logger processes will be killed with a SIGTERM instead of being
+allowed to exit at their own pace.
+.It Fl i
+Interrupt. Equivalent to
+.Fl rt :
+.Xr s6-svscan 1
+will terminate in reboot mode.
+.It Fl q
+Quit.
+.Xr s6-svscan 1
+will send all its s6-supervise processes a SIGTERM, then exec into its
+finish procedure.
+.It Fl 0
+Halt. Equivalent to
+.Fl st :
+.Xr s6-svscan 1
+will terminate in halt mode.
+.It Fl 6
+Reboot. Equivalent to
+.Fl i .
+.It Fl 7
+Poweroff. Equivalent to
+.Fl pt :
+.Xr s6-svscan 1
+will terminate in poweroff mode.
+.It Fl 8
+Other.
+.Xr s6-svscan 1
+will terminate in
+.Dq other
+mode.
+.El
+.Sh EXAMPLES
+.Pp
+.Dl s6-svscanctl -an /service
+.Pp
+Updates the process supervision tree to exactly match the services listed in
+.Pa /service .
+.Pp
+.Dl s6-svscanctl -6 /service
+.Pp
+Orders the
+.Xr s6-svscan 1
+process monitoring
+.Pa /service
+to exit in reboot mode: all the supervision tree at
+.Pa /service
+will be terminated, and
+.Xr s6-svscan 1
+will execute into the
+.Ql /service/.s6-svscan/finish
+script with the
+.Ql reboot
+argument.
+.SH INTERNALS
+.Nm
+writes control commands into the
+.Pa svscandir/.s6-svscan/control
+FIFO. A
+.Xr s6-svscan 1 process running on
+.Ar svscandir
+will be listening to this FIFO, and will read and interpret those
+commands.
+.Sh SEE ALSO
+.Xr s6-svscan 1 ,
+.Xr s6-supervise 1 ,
+.Xr s6-svc 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svstat 1 ,
+.Xr s6-svwait 1 ,
+.Xr s6-svlisten1 1 ,
+.Xr s6-svlisten 1 ,
+.Xr s6-notifyoncheck 1 ,
+.Xr s6-svdt 1 ,
+.Xr s6-svdt-clear 1 ,
+.Xr s6-permafailon 1
+.Pp
+This man page is based on the authoritative documentation at
+.Lk http://skarnet.org/software/s6/ .
+.Sh AUTHORS
+.An Laurent Bercot
