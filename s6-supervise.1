@@ -1,0 +1,423 @@
+.Dd August 18, 2020
+.Dt S6-SUPERVISE 1
+.Os
+.Sh NAME
+.Nm s6-supervise
+monitors a long-lived process (or service), making sure it stays
+alive, sending notifications to registered processes when it dies, and
+providing an interface to control its state.
+.Nm
+is designed to be the last non-leaf branch of a supervision tree, the
+supervised process being a leaf.
+.Sh SYNOPSIS
+.Nm
+.Ar servicedir
+.Sh DESCRIPTION
+.Nm
+.Ap
+s behaviour is approximately the following:
+.Bl -bullet -width x
+.It
+.Nm
+changes its current directory to
+.Ar servicedir .
+.It
+It exits 100 if another
+.Nm
+process is already monitoring this service.
+.It
+It forks and executes the
+.Pa ./run
+file in the service directory.
+.It
+.Pa ./run
+should be a long-lived process: it can chain load (i.e. exec into
+other binaries), but should not die. It's the daemon that
+.Nm
+monitors and manages.
+.It
+When
+.Pa ./run
+dies,
+.Nm
+spawns
+.Pa ./finish ,
+if it exists. This script should be short-lived: it's meant to clean
+up application state, if necessary, that has not been cleaned up by
+.Pa ./run
+itself before dying.
+.It
+When
+.Pa ./finish
+dies,
+.Nm
+spawns
+.Pa ./run
+again.
+.It
+.Nm
+operation can be controlled by the
+.Xr s6-svc 1
+program. It can be sent commands like
+.Dq restart the service ,
+.Dq bring the service down ,
+etc.
+.It
+.Nm
+normally runs forever. If told to exit by
+.Xr s6-svc 1 ,
+it waits for the service to go down one last time, then exits 0.
+.El
+.Pp
+For a precise description of
+.Nm
+.Ap
+s behaviour, check the
+.Sx DETAILED OPERATION
+section below, as well as the service directory page:
+.Nm
+operation can be extensively configured by the presence of certain
+files in the service directory.
+.Sh OPTIONS
+.Nm
+does not support options, because it is normally not run manually via
+a command line; it is usually launched by its own supervisor,
+.Xr s6-svscan 1 .
+The way to tune
+.Nm
+.Ap
+s behaviour is via files in the service directory.
+.Sh READINESS NOTIFICATION SUPPORT
+If the service directory contains a valid
+.Pa notification-fd
+file when the service is started, or restarted,
+.Nm
+creates and listens to an additional pipe from the service for
+readiness notification. When the notification occurs,
+.Nm
+updates the
+.Pa ./supervise/status
+file accordingly, then sends a
+.Sq U
+event to
+.Pa ./event .
+.Pp
+If the service is logged, i.e. if the service directory has a
+.Pa log
+subdirectory that is also a service directory, and the
+.Nm
+process has been launched by that is also
+.Xr s6-svscan 1 ,
+then by default the service's stdout goes into the logging pipe. If
+you set
+.Pa notification-fd
+to 1, the logging pipe will be overwritten by the notification pipe,
+which is probably not what you want. Instead, if your daemon writes a
+notification message to its stdout, you should set
+.Pa notification-fd
+to (for instance) 3, and redirect outputs in your run script. For
+instance, to redirect stderr to the logger and stdout to a
+.Pa notification-fd
+set to 3, you would start your daemon as
+.Ql fdmove -c 2 1 fdmove 1 3 prog...
+(in execline), or
+.Ql exec 2>&1 1>&3 3<&- prog...
+(in shell).
+.Sh SIGNALS
+.Nm
+reacts to the following signals:
+.Bl -tag -width x
+.It SIGTERM
+Bring down the service and exit, as if a
+.Ql s6-svc -xd
+command had been received.
+.It SIGHUP
+Exit as soon as the service stops, as if a
+.Ql s6-svc -x
+command had been received
+.It SIGQUIT
+Close stdin, stdout and stderr and exit as soon as the service stops,
+as if a
+.Ql s6-svc -X
+command had been received.
+.El
+.Sh DETAILED OPERATION
+.Bl -bullet -width x
+.It
+.Nm
+switches to the
+.Ar servicedir
+service directory.
+.It
+It creates a
+.Pa supervise/
+subdirectory (if it doesn't exist yet) to store its internal data.
+.It
+It exits 100 if another
+.Nm
+process is already monitoring this service.
+.It
+If the
+.Pa ./event
+fifodir does not exist,
+.Nm
+creates it and allows subscriptions to it from processes having the
+same effective group id as the
+.Nm
+process. If it already exists, it uses it as is, without modifying the
+subscription rights.
+.It
+It sends a
+.Sq s
+event to
+.Pa ./event .
+.It
+If the default service state is up (i.e. there is no
+.Pa ./down
+file),
+.Nm
+spawns
+.Pa ./run.
+.It
+.Nm
+sends a
+.Sq u
+event to
+.Pa ./event
+whenever it successfully spawns
+.Pa ./run .
+.It
+If there is a
+.Pa ./notification-fd
+file in the service directory and, at some point after the service has
+been spawned,
+.Nm
+is told that the service is ready, it sends a
+.Sq U
+event to
+.Pa ./event .
+There are several ways to tell
+.Nm
+that the service is ready:
+.Bl -bullet -width x
+.It
+the daemon may do so itself.
+.It
+the
+.Pa run
+script may have forked a
+.Xr s6-notifyoncheck 1
+process that polls the service for readiness.
+.El
+.It
+When
+.Pa ./run
+dies,
+.Nm
+sends a
+.Sq d
+event to
+.Pa ./event .
+It then spawns
+.Pa ./finish
+if it exists.
+.Pa ./finish
+will have
+.Pa ./run
+.Ap
+s exit code as first argument, or 256 if
+.Pa ./run
+was signaled; it will have the number of the signal that killed
+.Pa ./run
+as second argument, or an undefined number if
+.Pa ./run
+was not signaled.
+.It
+By default,
+.Pa ./finish
+must exit in less than 5 seconds. If it takes more than that,
+.Nm
+kills it with a SIGKILL. This can be configured via the
+.Pa ./timeout-finish
+file, see the description in the service directory page.
+.It
+When
+.Pa ./finish
+dies (or is killed),
+.Nm
+sends a
+.Sq D
+event to
+.Pa ./event .
+Then it restarts
+.Pa ./run
+unless it has been told not to.
+.It
+If
+.Pa ./finish
+exits 125, then
+.Nm
+sends a
+.Sq O
+event to
+.Pa ./event
+before the
+.Sq D ,
+and it does not restart the service, as if
+.Ql s6-svc -O
+had been called. This can be used to signify permanent failure to
+start the service.
+.It
+There is a minimum 1-second delay between two
+.Pa ./run
+spawns, to avoid busylooping if
+.Pa ./run
+exits too quickly.
+.It
+When killed or asked to exit, it waits for the service to go down one
+last time, then sends a
+.Sq x
+event to
+.Pa ./event
+before exiting 0.
+.El
+.Pp
+Make sure to also check the service directory documentation page, for
+the full list of files that can be present in a service directory and
+impact
+.Nm
+.Ap
+s behaviour in any way.
+.Sh USAGE NOTES
+.Bl -bullet -width x
+.It
+.Nm
+is a long-lived process. It normally runs forever, from the system's
+boot scripts, until shutdown time; it should not be killed or told to
+exit. If you have no use for a service, just turn it off; the
+.Nm
+process does not hurt.
+.It
+Even in boot scripts,
+.Nm
+should normally not be run directly. It's better to have a collection
+of service directories in a single scan directory, and just run
+.Xr s6-svscan 1
+on that scan directory.
+.Xr s6-svscan 1
+will spawn the necessary
+.Nm
+processes, and will also take care of logged services.
+.It
+.Nm
+is not supposed to have a controlling terminal: it's generally
+launched by a
+.Xr s6-svscan 1
+process that itself does not have a controlling terminal. If you run
+.Nm
+from an interactive shell, be warned that typing ^C in the controlling
+terminal (which sends a SIGINT to all processes in the foreground
+process group in the terminal) will terminate
+.Nm ,
+but not the supervised processes - so, the daemon will keep running as
+an orphan. This is by design: supervised processes should be as
+resilient as possible, even when their supervisors die. However, if
+you want to launch
+.Nm
+from an interactive shell and need your service to die when you ^C it,
+you can obtain this behaviour by creating a
+.Pa ./nosetsid
+file in the service directory.
+.It
+You can use
+.Xr s6-svc 1
+to send commands to the
+.Nm
+process; mostly to change the service state and send signals to the
+monitored process.
+.It
+You can use
+.Xr s6-svok 1
+to check whether
+.Nm
+is successfully running.
+.It
+You can use
+.Xr s6-svstat 1
+to check the status of a service.
+.It
+.Nm
+maintains internal information inside the
+.Pa ./supervise
+subdirectory of
+.Ar servicedir .
+.Ar servicedir
+itself can be read-only, but both
+.Sm off
+.Ar servicedir
+/supervise
+.Sm on
+and
+.Sm off
+.Ar servicedir
+/event
+.Sm on
+need to be read-write.
+.El
+.Sh IMPLEMENTATION NOTES
+.Bl -bullet -width x
+.It
+.Nm
+tries its best to stay alive and running despite possible system call
+failures. It will write to its standard error everytime it encounters
+a problem. However, unlike
+.Xr s6-svscan 1 ,
+it will not go out of its way to stay alive; if it encounters an
+unsolvable situation, it will just die.
+.It
+Unlike other
+.Dq supervise
+implementations,
+.Nm
+is a fully asynchronous state machine. That means that it can read and
+process commands at any time, even when the machine is in trouble
+(full process table, for instance).
+.It
+.Nm
+does not use
+.Xr malloc 3 .
+That means it will never leak memory. However,
+.Nm s6-supervise
+uses
+.Xr opendir 3 ,
+and most
+.Xr opendir 3
+implementations internally use heap memory - so unfortunately, it's
+impossible to guarantee that
+.Nm
+does not use heap memory at all.
+.It
+.Nm
+has been carefully designed so every instance maintains as little data
+as possible, so it uses a very small amount of non-sharable memory. It
+is not a problem to have several dozens of
+.Nm
+processes, even on constrained systems: resource consumption will be negligible.
+.Sh SEE ALSO
+.Xr s6-svscan 1 ,
+.Xr s6-svscanctl 1 ,
+.Xr s6-svc 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svstat 1 ,
+.Xr s6-svwait 1 ,
+.Xr s6-svlisten1 1 ,
+.Xr s6-svlisten 1 ,
+.Xr s6-notifyoncheck 1 ,
+.Xr s6-svdt 1 ,
+.Xr s6-svdt-clear 1 ,
+.Xr s6-permafailon 1
+.Pp
+This man page is based on the authoritative documentation at
+.Lk http://skarnet.org/software/s6/ .
+.Sh AUTHORS
+.An Laurent Bercot
