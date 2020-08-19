@@ -1,9 +1,9 @@
-.Dd August 18, 2020
+.Dd August 19, 2020
 .Dt S6-SVSCANCTL 1
 .Os
 .Sh NAME
 .Nm s6-svscanctl
-sends commands to a running
+.Nd send commands to a running
 .Xr s6-svscan 1
 process.
 .Sh SYNOPSIS
@@ -16,7 +16,8 @@ sends the given series of commands to the
 .Xr s6-svscan 1
 process monitoring the
 .Ar svscandir
-directory, then exits 0. It exits 111 if it cannot send a command, or 100 if no
+directory, then exits 0. It exits 111 if it cannot send a command, or
+100 if no
 .Xr s6-svscan 1
 process is running on
 .Ar svscandir .
@@ -174,7 +175,7 @@ commands.
 .Xr s6-svdt-clear 1 ,
 .Xr s6-permafailon 1
 .Pp
-This man page is based on the authoritative documentation at
+This man page is ported from the authoritative documentation at
 .Lk http://skarnet.org/software/s6/ .
 .Sh AUTHORS
 .An Laurent Bercot
