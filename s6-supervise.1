@@ -1,18 +1,18 @@
-.Dd August 18, 2020
+.Dd August 19, 2020
 .Dt S6-SUPERVISE 1
 .Os
 .Sh NAME
 .Nm s6-supervise
-monitors a long-lived process (or service), making sure it stays
+.Nd monitor a long-lived process (or service), making sure it stays
 alive, sending notifications to registered processes when it dies, and
 providing an interface to control its state.
-.Nm
-is designed to be the last non-leaf branch of a supervision tree, the
-supervised process being a leaf.
 .Sh SYNOPSIS
 .Nm
 .Ar servicedir
 .Sh DESCRIPTION
+.Nm
+is designed to be the last non-leaf branch of a supervision tree, the
+supervised process being a leaf.
 .Nm
 .Ap
 s behaviour is approximately the following:
@@ -417,7 +417,7 @@ processes, even on constrained systems: resource consumption will be negligible.
 .Xr s6-svdt-clear 1 ,
 .Xr s6-permafailon 1
 .Pp
-This man page is based on the authoritative documentation at
+This man page is ported from the authoritative documentation at
 .Lk http://skarnet.org/software/s6/ .
 .Sh AUTHORS
 .An Laurent Bercot
