@@ -1,4 +1,4 @@
-.Dd August 17, 2020
+.Dd August 19, 2020
 .Dt S6-SVSCAN 1
 .Os
 .Sh NAME
@@ -8,12 +8,12 @@
 processes
 .Sh SYNOPSIS
 .Nm
-.Op -S | -s
-.Op -d notif
-.Op -X consoleholder
-.Op -c max
-.Op -t rescan
-.Op scandir
+.Op Fl S | s
+.Op Fl d Ar notif
+.Op Fl X Ar consoleholder
+.Op Fl c Ar max
+.Op Fl t Ar rescan
+.Op Ar scandir
 .Sh DESCRIPTION
 .Nm
 starts and monitors a collection of
@@ -393,7 +393,7 @@ files in every service directory.
 .Xr s6-svdt-clear 1 ,
 .Xr s6-permafailon 1
 .Pp
-This man page is based on the authoritative documentation at
+This man page is ported from the authoritative documentation at
 .Lk http://skarnet.org/software/s6/ .
 .Sh AUTHORS
 .An Laurent Bercot
