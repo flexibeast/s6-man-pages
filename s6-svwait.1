@@ -1,0 +1,128 @@
+.Dd August 20, 2020
+.Dt S6-SVWAIT 1
+.Os
+.Sh NAME
+.Nm s6-svwait
+.Nd block until a collection of supervised services goes up, or down.
+.Sh SYNOPSIS
+.Nm
+.Op Fl U | u | D | d
+.Op Fl a | o
+.Op Fl t Ar timeout
+.Ar servicedir...
+.Sh DESCRIPTION
+.Nm
+only waits for notifications; it never polls.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl u
+Up.
+.Nm
+will wait until the services are up, as reported by
+.Xr s6-supervise 1 .
+This is the default; it is not reliable, but it does not depend on
+specific support in the service programs. See
+.Xr s6-notifywhenup 7
+for details.
+.It Fl U
+Really up.
+.Nm
+will wait until the services are up and ready as reported by the
+services themselves. This requires specific support in the service
+programs, and the use of the
+.Pa notification-fd
+file in the service directory. See the explanation in
+.Xr s6-notifywhenup 7 .
+.It Fl d
+Down.
+.Nm
+will wait until the services are down.
+.It Fl D
+Really down.
+.Nm
+will wait until the services are down and the cleanup scripts in
+.Sm off
+.Ar servicedir /
+.Pa finish
+.Sm on
+for every
+.Ar servicedir
+have finished executing (or have timed out and been killed).
+.It Fl o
+Or.
+.Nm
+will wait until
+.Em one
+of the given services comes up or down.
+.It Fl a
+And.
+.Nm
+will wait until
+.Em all
+of the given services come up or down. This is the default.
+.It Fl t Ar timeout
+If the requested events have not happened after timeout milliseconds,
+.Nm
+will print a message to stderr and exit 99. By default,
+.Ar timeout
+is 0, which means no time limit.
+.El
+.Sh NOTES
+.Nm
+should be given one or more service directories as arguments, not a
+scan directory. If you need to wait for a whole scan directory, give
+all its contents as arguments to
+.Nm s6-svwait .
+.Pp
+.Nm
+will only work on service directories that are already active,
+i.e. have a
+.Xr s6-supervise 1
+process running on them. It will not work on a service directory where
+.Xr s6-supervise 1
+has not been started yet.
+.Sh IMPLEMENTATION NOTES
+.Nm
+spawns a
+.Xr s6-ftrigrd 1
+child to listen to notifications sent by
+.Xr s6-supervise 1 .
+It also checks
+.Pa supervise/status
+files to get the current service states, so it is immune to race conditions.
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success, the wanted state has been reached.
+.It 99
+Timed out.
+.It 100
+Wrong usage.
+.It 102
+The
+.Xr s6-supervise 1
+process monitoring the service died.
+.It 111
+System call failed.
+.It Em n
+Services were expected to come up, but
+.Em n
+of them reported permanent failure.
+.Sh SEE ALSO
+.Xr s6-svscan 1 ,
+.Xr s6-svscanctl 1 ,
+.Xr s6-supervise 1 ,
+.Xr s6-svc 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svstat 1 ,
+.Xr s6-svlisten1 1 ,
+.Xr s6-svlisten 1 ,
+.Xr s6-notifyoncheck 1 ,
+.Xr s6-svdt 1 ,
+.Xr s6-svdt-clear 1 ,
+.Xr s6-permafailon 1
+.Pp
+This man page is ported from the authoritative documentation at
+.Lk http://skarnet.org/software/s6/ .
+.Sh AUTHORS
+.An Laurent Bercot
