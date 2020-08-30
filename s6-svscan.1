@@ -1,4 +1,4 @@
-.Dd August 19, 2020
+.Dd August 30, 2020
 .Dt S6-SVSCAN 1
 .Os
 .Sh NAME
@@ -76,81 +76,7 @@ If that execution fails,
 falls back on a
 .Pa .s6-svscan/crash
 execution.
-.Sh OPTIONS
-.Bl -tag -width -x
-.It Fl S
-Do not divert signals. This is the default for now; it may change in a future version of s6.
-.It Fl s
-Divert signals - see below.
-.It Fl d Ar notif
-Notify readiness on file descriptor
-.Ar notif .
-When
-.Nm
-is ready to accept commands from
-.Xr s6-svscanctl 1 ,
-it will write a newline to
-.Ar notif .
-.Ar notif
-cannot be lesser than 3. By default, no notification is sent. Please
-note that using this option signals shallow readiness:
-.Nm
-being
-.Dq ready
-only means that it is ready to accept commands. It does not mean that
-all the services it launches at start are themselves ready, or even
-started, or even that the relevant
-.Xr s6-supervise 1
-processes have been started. If you need to test for deep readiness,
-meaning that all the services in the supervision tree have been
-started and are ready, you cannot rely on this option.
-.It Fl X Ar consoleholder
-Assume the output console is available on descriptor
-.Ar consoleholder .
-If this option is given, and a s6-svscan-log service exists, the
-.Xr s6-supervise 1
-process for that service will be run with
-.Ar consoleholder
-as its standard error. This is mainly useful for a setup done via
-s6-linux-init, where all error messages go to the s6-svscan-log
-catch-all logger service by default, except messages from this service
-itself, which fall back to
-.Ar consoleholder .
-If you're not sure what to use this option for, or how, you don't need it.
-.It Fl c Ar max
-Maintain services for up to max service directories. Default is
-500. Lower limit is 2. There is no upper limit, but:
-.Bl -bullet -width x
-.It
-The higher
-.Ar max
-is, the more stack memory
-.Nm
-will use, approximately 50 bytes per service.
-.It
-.Nm
-uses 2 file descriptors per logged service.
-.El
-.Pp
-It is the admin's responsibility to make sure that
-.Nm
-has enough available descriptors to function properly and does not
-exceed its stack limit. The default of 500 is safe and provides enough
-room for every reasonable system.
-.It Fl t Ar rescan
-perform a scan every
-.Ar rescan
-milliseconds. If
-.Ar rescan
-is 0 (the default), automatic scans are never performed after the first one and
-.Nm
-will only detect new services when told to via a
-.Ql s6-svscanctl -a
-command. It is strongly discouraged to set
-.Ar rescan
-to a positive value under 500.
-.El
-.Sh SIGNALS
+.Ss Signals
 .Nm
 always reacts to the following signals:
 .Bl -tag -width x
@@ -247,7 +173,7 @@ script could look like this:
 foreground { shutdown-the-services }
 s6-svscanctl -i .
 .Ed
-.Sh THE REAPER
+.Ss The reaper
 Upon receipt of a SIGCHLD, or a
 .Ql s6-svscanctl -z
 command,
@@ -266,8 +192,9 @@ If the dead child is a
 .Xr s6-supervise 1
 process watched by
 .Nm ,
-and the last scan flagged that process as active, then it is restarted one second later.
-.Sh THE SCANNER
+and the last scan flagged that process as active, then it is restarted
+one second later.
+.Ss The scanner
 Every
 .Ar rescan
 milliseconds, or upon receipt of a SIGALRM or a
@@ -321,7 +248,7 @@ processes (unless the administrator uses
 but inactive
 .Xr s6-supervise 1
 processes will not be restarted if they die.
-.Sh NOTES
+.Ss Notes
 .Bl -bullet -width x
 .It
 .Nm
@@ -332,7 +259,8 @@ situation, something it really cannot handle, it executes into
 .Pa .s6-svscan/crash
 instead of dying; when it is told to exit, it executes into
 .Pa .s6-svscan/finish .
-Administrators should make sure to design appropriate crash and finish routines.
+Administrators should make sure to design appropriate crash and finish
+routines.
 .It
 .Nm
 is a fully asynchronous state machine. It will read and process
@@ -379,6 +307,82 @@ supervision tree when you ^C it, you can obtain this behaviour by
 creating
 .Pa ./nosetsid
 files in every service directory.
+.Sh OPTIONS
+.Bl -tag -width -x
+.It Fl S
+Do not divert signals. This is the default for now; it may change in a
+future version of s6.
+.It Fl s
+Divert signals - see below.
+.It Fl d Ar notif
+Notify readiness on file descriptor
+.Ar notif .
+When
+.Nm
+is ready to accept commands from
+.Xr s6-svscanctl 1 ,
+it will write a newline to
+.Ar notif .
+.Ar notif
+cannot be lesser than 3. By default, no notification is sent. Please
+note that using this option signals shallow readiness:
+.Nm
+being
+.Dq ready
+only means that it is ready to accept commands. It does not mean that
+all the services it launches at start are themselves ready, or even
+started, or even that the relevant
+.Xr s6-supervise 1
+processes have been started. If you need to test for deep readiness,
+meaning that all the services in the supervision tree have been
+started and are ready, you cannot rely on this option.
+.It Fl X Ar consoleholder
+Assume the output console is available on descriptor
+.Ar consoleholder .
+If this option is given, and a s6-svscan-log service exists, the
+.Xr s6-supervise 1
+process for that service will be run with
+.Ar consoleholder
+as its standard error. This is mainly useful for a setup done via
+s6-linux-init, where all error messages go to the s6-svscan-log
+catch-all logger service by default, except messages from this service
+itself, which fall back to
+.Ar consoleholder .
+If you're not sure what to use this option for, or how, you don't need it.
+.It Fl c Ar max
+Maintain services for up to max service directories. Default is
+500. Lower limit is 2. There is no upper limit, but:
+.Bl -bullet -width x
+.It
+The higher
+.Ar max
+is, the more stack memory
+.Nm
+will use, approximately 50 bytes per service.
+.It
+.Nm
+uses 2 file descriptors per logged service.
+.El
+.Pp
+It is the admin's responsibility to make sure that
+.Nm
+has enough available descriptors to function properly and does not
+exceed its stack limit. The default of 500 is safe and provides enough
+room for every reasonable system.
+.It Fl t Ar rescan
+perform a scan every
+.Ar rescan
+milliseconds. If
+.Ar rescan
+is 0 (the default), automatic scans are never performed after the
+first one and
+.Nm
+will only detect new services when told to via a
+.Ql s6-svscanctl -a
+command. It is strongly discouraged to set
+.Ar rescan
+to a positive value under 500.
+.El
 .Sh SEE ALSO
 .Xr s6-svscanctl 1 ,
 .Xr s6-supervise 1 ,
