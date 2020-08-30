@@ -1,4 +1,4 @@
-.Dd August 21, 2020
+.Dd August 30, 2020
 .Dt S6-SVLISTEN1 1
 .Os
 .Sh NAME
@@ -23,6 +23,28 @@ It spawns
 as a child right after getting the initial state of the service.
 .Pp
 It then blocks until the wanted state happens.
+.Pp
+.Nm
+is the service-specific version of
+.Xr s6-ftrig-listen1 1 .
+The point of
+.Nm
+is to use it to spawn a program such as
+.Xr s6-svc 1 ,
+in order to send signals to a service while making sure to catch its
+state changes - thus avoiding the race condition that occurs when
+running
+.Xr s6-svc 1
+then
+.Xr s6-svwait 1
+sequentially.
+.Pp
+The
+.Xr s6-svlisten 1
+program is an extension of
+.Nm .
+It can watch the state of several services at once; however, its
+syntax makes it best used in execline scripts only.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl u
@@ -75,28 +97,6 @@ will print a message to stderr and exit 99. By default,
 .Ar timeout
 is 0, which means no time limit.
 .El
-.Sh NOTES
-.Nm
-is the service-specific version of
-.Xr s6-ftrig-listen1 1 .
-The point of
-.Nm
-is to use it to spawn a program such as
-.Xr s6-svc 1 ,
-in order to send signals to a service while making sure to catch its
-state changes - thus avoiding the race condition that occurs when
-running
-.Xr s6-svc 1
-then
-.Xr s6-svwait 1
-sequentially.
-.Pp
-The
-.Xr s6-svlisten 1
-program is an extension of
-.Nm .
-It can watch the state of several services at once; however, its
-syntax makes it best used in execline scripts only.
 .Sh EXIT STATUS
 .Bl -tag -width x
 .It 0
