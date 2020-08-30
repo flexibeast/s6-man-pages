@@ -1,4 +1,4 @@
-.Dd August 22, 2020
+.Dd August 30, 2020
 .Dt S6-LOG 1
 .Os
 .Sh NAME
@@ -24,68 +24,7 @@ its best to ensure there is
 .Em never any log loss .
 It exits cleanly when stdin closes or when it receives a SIGTERM or a
 SIGHUP.
-.Sh OPTIONS
-.Bl -tag -width x
-.It Fl d Ar notif
-Readiness notification. With this option,
-.Nm
-writes a newline character to file descriptor
-.Ar notif
-when it is ready, i.e. when it has successfully parsed its logging
-script and initialized all its necessary resources such as the logdirs
-defined in the script, and is now listening to stdin in order to
-process log lines.
-.It Fl b
-Blocking mode. With this option,
-.Nm
-stops reading its standard input while it has unflushed buffers. This
-ensures that every log line has been fully processed before reading
-the next one; this is also multilog's behaviour. By default,
-.Nm
-keeps reading from stdin even if its buffers still contain data.
-.Fl b
-is safer, but may slow down your service; the default is faster, but
-may lead to unbound memory use if you have a lot of output to write to
-a slow file system.
-.It Fl p
-Protect against SIGTERM. Do not exit on receipt of a SIGTERM; only
-exit on a SIGHUP or when reading EOF on stdin. This is useful for a
-logger that you really do not want to lose even if automated
-administration (e.g. the downing of a supervision tree) would kill it.
-.It Fl t
-Timestamp. Prepends every log line that is written to a logging
-directory with a TAI64N timestamp. This option is now deprecated.
-.It Fl e
-Timestamp alerts. Prepends every
-.Dq alert
-line with a TAI64N timestamp. This option is now deprecated.
-.It Fl q | v
-Quiet | verbose. Decreases | increases
-.Nm
-.Ap
-s verbosity, i.e. which messages are sent to stderr. The default
-verbosity is 1. Currently supported verbosity levels:
-.Bl -tag -width x
-.It 0
-Only write alerts and fatal errors.
-.It 1
-Write alerts, warnings and fatal errors.
-.El
-.It Fl l Ar linelimit
-If a log line is longer than
-.Ar linelimit
-bytes, cut it in two by inserting a newline. The newline may appear
-anywhere after
-.Ar linelimit
-or more bytes.
-.Ar linelimit
-cannot be less than 48. Using this option ensures that an
-ill-formatted log stream will not make
-.Nm
-uncontrollably eat memory by trying to read and process an extremely
-long line in one go. The default is 8192 bytes.
-.El
-.Sh LOGDIRS
+.Ss logdirs
 A
 .Em logdir
 .Po
@@ -143,7 +82,9 @@ if they're ending in
 .Pc ,
 in which case they have not been processed.
 .El
-.Sh Rotation
+.Pp
+.Sy Rotation
+.Pp
 In a logdir, selected lines are appended to the
 .Pa current
 file. When
@@ -168,7 +109,9 @@ file.
 You can use this mechanism to ensure that your logs never fill up the
 available disk space, for instance: something that neither syslogd,
 nor syslog-ng, nor rsyslog offers.
-.Sh Processors
+.Pp
+.Sy Processors
+.Pp
 A
 .Em processor
 script can be set for every logdir. When a rotation occurs,
@@ -207,7 +150,7 @@ Processors make
 .Nm
 Turing-complete by allowing you to use any external program to handle
 log files that are going to be archived.
-.Sh LOGGING SCRIPT SYNTAX
+.Ss Logging script syntax
 When starting up,
 .Nm
 reads its arguments one by one; this argument sequence, or directive
@@ -229,7 +172,9 @@ will exit 100 if the script is invalid. If it can process the script
 but the last directive is not an action directive,
 .Nm
 will emit a warning.
-.Ss Selection directives
+.Pp
+.Sy Selection directives
+.Pp
 These directives tell
 .Nm
 whether to select or deselect lines it reads from stdin; actions will only happen on selected lines. By default, every line is selected.
@@ -250,7 +195,9 @@ which must be a POSIX Extended Regular Expression.
 Select exactly lines that have not yet been acted upon (i.e. that were
 always deselected when the script encountered an action directive).
 .El
-.Ss Control directives
+.Pp
+.Sy Control directives
+.Pp
 These directives tune
 .Nm s6-log
 .Ap
@@ -390,7 +337,9 @@ and a
 .Ql T
 directives are given before an action directive, the TAI64N timestamp
 will always appear before the ISO 8601 timestamp.
-.Sh Action directives
+.Pp
+.Ss Action directives
+.Pp
 .Pp
 These directives determine what s6-log actually does with the selected
 lines.
@@ -444,7 +393,7 @@ will log the line into the logdir
 must have the right to write to
 .Ar dir .
 .El
-.Sh SIGNALS
+.Ss Signals
 .Bl -tag -width x
 .It SIGTERM
 If
@@ -461,7 +410,6 @@ Triggers a rotation on every logdir
 is monitoring, as if the
 .Pa current
 file in those logdirs had reached the size limit.
-.Sh NOTES
 .Ss Why use execlineb to interpret the "processor" string ?
 Because it is exactly what execlineb is for.
 .Bl -bullet -width x
@@ -718,6 +666,67 @@ trivial shell script, or execline script, can do that for you.
 .Pp
 Do not insist on using syslogd. It does nothing magical, and nothing
 that can't be done in a simpler way using simpler tools.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl d Ar notif
+Readiness notification. With this option,
+.Nm
+writes a newline character to file descriptor
+.Ar notif
+when it is ready, i.e. when it has successfully parsed its logging
+script and initialized all its necessary resources such as the logdirs
+defined in the script, and is now listening to stdin in order to
+process log lines.
+.It Fl b
+Blocking mode. With this option,
+.Nm
+stops reading its standard input while it has unflushed buffers. This
+ensures that every log line has been fully processed before reading
+the next one; this is also multilog's behaviour. By default,
+.Nm
+keeps reading from stdin even if its buffers still contain data.
+.Fl b
+is safer, but may slow down your service; the default is faster, but
+may lead to unbound memory use if you have a lot of output to write to
+a slow file system.
+.It Fl p
+Protect against SIGTERM. Do not exit on receipt of a SIGTERM; only
+exit on a SIGHUP or when reading EOF on stdin. This is useful for a
+logger that you really do not want to lose even if automated
+administration (e.g. the downing of a supervision tree) would kill it.
+.It Fl t
+Timestamp. Prepends every log line that is written to a logging
+directory with a TAI64N timestamp. This option is now deprecated.
+.It Fl e
+Timestamp alerts. Prepends every
+.Dq alert
+line with a TAI64N timestamp. This option is now deprecated.
+.It Fl q | v
+Quiet | verbose. Decreases | increases
+.Nm
+.Ap
+s verbosity, i.e. which messages are sent to stderr. The default
+verbosity is 1. Currently supported verbosity levels:
+.Bl -tag -width x
+.It 0
+Only write alerts and fatal errors.
+.It 1
+Write alerts, warnings and fatal errors.
+.El
+.It Fl l Ar linelimit
+If a log line is longer than
+.Ar linelimit
+bytes, cut it in two by inserting a newline. The newline may appear
+anywhere after
+.Ar linelimit
+or more bytes.
+.Ar linelimit
+cannot be less than 48. Using this option ensures that an
+ill-formatted log stream will not make
+.Nm
+uncontrollably eat memory by trying to read and process an extremely
+long line in one go. The default is 8192 bytes.
+.El
 .Sh EXAMPLES
 .Pp
 .Dl s6-log -b n20 s1000000 t /var/log/services/stuff
