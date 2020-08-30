@@ -1,4 +1,4 @@
-.Dd August 20, 2020
+.Dd August 30, 2020
 .Dt S6-SVWAIT 1
 .Os
 .Sh NAME
@@ -13,6 +13,20 @@
 .Sh DESCRIPTION
 .Nm
 only waits for notifications; it never polls.
+.Pp
+.Nm
+should be given one or more service directories as arguments, not a
+scan directory. If you need to wait for a whole scan directory, give
+all its contents as arguments to
+.Nm s6-svwait .
+.Pp
+.Nm
+will only work on service directories that are already active,
+i.e. have an
+.Xr s6-supervise 1
+process running on them. It will not work on a service directory where
+.Xr s6-supervise 1
+has not been started yet.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl u
@@ -67,29 +81,16 @@ will print a message to stderr and exit 99. By default,
 .Ar timeout
 is 0, which means no time limit.
 .El
-.Sh NOTES
-.Nm
-should be given one or more service directories as arguments, not a
-scan directory. If you need to wait for a whole scan directory, give
-all its contents as arguments to
-.Nm s6-svwait .
-.Pp
-.Nm
-will only work on service directories that are already active,
-i.e. have a
-.Xr s6-supervise 1
-process running on them. It will not work on a service directory where
-.Xr s6-supervise 1
-has not been started yet.
 .Sh IMPLEMENTATION NOTES
 .Nm
-spawns a
+spawns an
 .Xr s6-ftrigrd 1
 child to listen to notifications sent by
 .Xr s6-supervise 1 .
 It also checks
 .Pa supervise/status
-files to get the current service states, so it is immune to race conditions.
+files to get the current service states, so it is immune to race
+conditions.
 .Sh EXIT STATUS
 .Bl -tag -width x
 .It 0
