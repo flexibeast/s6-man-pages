@@ -1,4 +1,4 @@
-.Dd August 21, 2020
+.Dd August 30, 2020
 .Dt S6-SVDT 1
 .Os
 .Sh NAME
@@ -35,6 +35,18 @@ if the death was a normal exit.
 The name of the signal that caused the death, or the exit code of the
 process.
 .El
+.Pp
+To obtain human-readable local time or GMT time instead of TAI64N
+timestamps, simply pipe
+.Nm
+.Ap
+s output into
+.Xr s6-tai64nlocal 1 .
+.Pp
+Process deaths are recorded up to a default maximum of 100. This
+default can be modified via the
+.Pa max-death-tally
+file in the service directory.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl S 
@@ -47,18 +59,6 @@ Limit the output to at most the latest
 .Ar maxlines
 deaths.
 .El
-.Sh NOTES
-To obtain human-readable local time or GMT time instead of TAI64N
-timestamps, simply pipe
-.Nm
-.Ap
-s output into
-.Xr s6-tai64nlocal 1 .
-.Pp
-Process deaths are recorded up to a default maximum of 100. This
-default can be modified via the
-.Pa max-death-tally
-file in the service directory.
 .Sh EXIT STATUS
 .Bl -tag -width x
 .It 0
