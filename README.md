@@ -4,6 +4,13 @@ This repository aims to provide [mdoc(7)](https://man.openbsd.org/mdoc.7)
 versions of the HTML documentation for the [s6 supervision
 suite](http://skarnet.org/software/s6/).
 
+It is currently a work in progress:
+
+* many pages still need to be linted;
+* some pages do not yet conform to mdoc(7) conventions;
+* some pages need to use more appropriate macros;
+* links to Web pages still need to be added.
+
 Man pages can be produced with [mandoc(1)](https://man.openbsd.org/mandoc.1):
 
 ```
