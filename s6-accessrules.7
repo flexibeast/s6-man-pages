@@ -1,4 +1,4 @@
-.Dd August 29, 2020
+.Dd August 31, 2020
 .Dt S6-ACCESSRULES 7
 .Os
 .Sh NAME
@@ -8,15 +8,16 @@
 The following functions and structures are declared in the
 .Pa s6/accessrules.h
 header, and implemented in
-.Lb libs6.a
+.Pa libs6.a
 or
-.Lb libs6.so .
+.Pa libs6.so .
 .Ss General information
 .Nm
-is an access control library. It looks up a key in a user-specified
-database, then returns a code depending on whether the database allows
-access (in which case additional information can also be returned),
-denies access, or does not contain the key.
+is an access control library.
+It looks up a key in a user-specified database, then returns a code
+depending on whether the database allows access (in which case
+additional information can also be returned), denies access, or does
+not contain the key.
 .Pp
 .Nm
 has been designed to be easily extensible to any database format and
@@ -42,14 +43,16 @@ is a structure containing two strallocs,
 and
 .Em .exec ,
 used to return data contained in the database when a key has been
-allowed. The interpretation of this data is application-defined.
+allowed.
+The interpretation of this data is application-defined.
 .Ss Function types
 .Sy Backend lookups
 .Pp
 An
 .Ft s6_accessrules_backend_func_t
 is the type of a function that takes a single key, looks it up in a
-database, and returns the result. Namely:
+database, and returns the result.
+Namely:
 .Pp
 .Dl s6_accessrules_result_t f (char const *key, size_t keylen, void *handle, s6_accessrules_params_t *params)
 .Pp
@@ -60,9 +63,10 @@ of length
 .Va keylen
 in the database represented by
 .Va handle
-in an implementation-defined way. It returns a number that says the
-key has been allowed, denied or not found, or an error occurred. If
-the key has been allowed,
+in an implementation-defined way.
+It returns a number that says the key has been allowed, denied or not
+found, or an error occurred.
+If the key has been allowed,
 .Va f
 stores additional information from the database into
 .Va *params .
@@ -89,8 +93,8 @@ and looks up
 .Va key
 in the CDB it points to.
 .Va handle
-must already be mapped to a CDB file. Such a file can be built with
-the
+must already be mapped to a CDB file.
+Such a file can be built with the
 .Xr s6-accessrules-cdb-from-fs 1
 utility.
 .El
@@ -102,7 +106,8 @@ An
 is the type of a function that takes a user-level key, makes a list of
 corresponding backend-level keys and calls a
 .Ft s6_accessrules_backend_func_t
-function until it finds a match. Namely:
+function until it finds a match.
+Namely:
 .Pp
 .Dl s6_accessrules_result_t f (void const *key, void *handle, s6_accessrules_params_t *params, s6_accessrules_backend_func_t *backend)
 .Pp
@@ -175,7 +180,8 @@ match.
 .Fn s6_accessrules_keycheck_reversedns
 interprets
 .Va key
-as a string containing an FQDN. Then for each suffix
+as a string containing an FQDN.
+Then for each suffix
 .Va k
 of
 .Va key ,
@@ -193,7 +199,8 @@ The final dot is excluded from
 .Va k .
 If no match can be found, the function checks
 .Pa reversedns/@
-and returns the result. For instance, if
+and returns the result.
+For instance, if
 .Va key
 is
 .Dq foo.bar.com ,
@@ -212,8 +219,8 @@ reversedns/@
 .Fn s6_accessrules_keycheck_ip4
 interprets
 .Va key
-as 4 network-byte-order characters containing an IPv4 address. Then
-for each netmask
+as 4 network-byte-order characters containing an IPv4 address.
+Then for each netmask
 .Va mask
 from 32 to 0, it constructs the IPv4 network prefix
 .Va addr
@@ -262,8 +269,8 @@ string is a catch-all key that matches everything.
 .Fn s6_accessrules_keycheck_ip6
 interprets
 .Va key
-as 16 network-byte-order characters containing an IPv6
-address. Then for each netmask
+as 16 network-byte-order characters containing an IPv6 address.
+Then for each netmask
 .Va mask
 from 128 to 0, it constructs the IPv6 network prefix
 .Va addr
@@ -367,7 +374,8 @@ These functions are mostly macros; they're built by associating a
 frontend function with a backend function.
 .Bl -bullet -width x
 .It
-.Fn s6_accessrules_result_t s6_accessrules_uidgid_cdb (uid_t u, gid_t g, struct cdb *c, s6_accessrules_params_t *params)
+.Ft s6_accessrules_result_t
+.Fn s6_accessrules_uidgid_cdb "uid_t u" "gid_t g" "struct cdb *c" "s6_accessrules_params_t *params"
 .Pp
 Checks the
 .Va *c
@@ -380,7 +388,8 @@ If the result is
 additional information may be stored into
 .Va params .
 .It
-.Fn s6_accessrules_result_t s6_accessrules_uidgid_fs (uid_t u, gid_t g, char const *dir, s6_accessrules_params_t *params)
+.Ft s6_accessrules_result_t
+.Fn s6_accessrules_uidgid_fs "uid_t u" "gid_t g" "char const *dir" "s6_accessrules_params_t *params"
 .Pp
 Checks the
 .Va dir
@@ -393,102 +402,118 @@ If the result is
 additional information may be stored into
 .Va params .
 .It
-.Fn s6_accessrules_result_t s6_accessrules_reversedns_cdb (char const *name, struct cdb *c, s6_accessrules_params_t *params)
+.Ft s6_accessrules_result_t
+.Fn s6_accessrules_reversedns_cdb "char const *name" "struct cdb *c" "s6_accessrules_params_t *params"
 .Pp
 Checks the
 .Va *c
 CDB database for an authorization for the
 .Va name
-FQDN. If the result is
+FQDN.
+If the result is
 .Dv S6_ACCESSRULES_ALLOW ,
 additional information may be stored into
 .Va params .
 .It
-.Fn s6_accessrules_result_t s6_accessrules_reversedns_fs (char const *name, char const *dir, s6_accessrules_params_t *params)
+.Ft s6_accessrules_result_t
+.Fn s6_accessrules_reversedns_fs "char const *name" "char const *dir" "s6_accessrules_params_t *params"
 .Pp
 Checks the
 .Va dir
 base directory for an authorization for the
 .Va name
-FQDN. If the result is
+FQDN.
+If the result is
 .Dv S6_ACCESSRULES_ALLOW ,
 additional information may be stored into
 .Va params .
 .It
-.Fn s6_accessrules_result_t s6_accessrules_ip4_cdb (char const *ip4, struct cdb *c, s6_accessrules_params_t *params)
+.Ft s6_accessrules_result_t
+.Fn s6_accessrules_ip4_cdb "char const *ip4" "struct cdb *c" "s6_accessrules_params_t *params"
 .Pp
 Checks the
 .Va *c
 CDB database for an authorization for the
 .Va ip4
-IPv4 address (4 network byte order characters). If the result is
+IPv4 address (4 network byte order characters).
+If the result is
 .Dv S6_ACCESSRULES_ALLOW ,
 additional information may be stored into
 .Va params .
 .It
-.Fn s6_accessrules_result_t s6_accessrules_ip4_fs (char const *ip4, char const *dir, s6_accessrules_params_t *params)
+.Ft s6_accessrules_result_t
+.Fn s6_accessrules_ip4_fs "char const *ip4" "char const *dir" "s6_accessrules_params_t *params"
 .Pp
 Checks the
 .Va dir
 base directory for an authorization for the
 .Va ip4
-IPv4 address (4 network byte order characters). If the result is
+IPv4 address (4 network byte order characters).
+If the result is
 .Dv S6_ACCESSRULES_ALLOW ,
 additional information may be stored into
 .Va params .
 .It
-.Fn s6_accessrules_result_t s6_accessrules_ip6_cdb (char const *ip6, struct cdb *c, s6_accessrules_params_t *params)
+.Ft s6_accessrules_result_t
+.Fn s6_accessrules_ip6_cdb "char const *ip6" "struct cdb *c" "s6_accessrules_params_t *params"
 .Pp
 Checks the
 .Va *c
 CDB database for an authorization for the
 .Va ip6
-IPv6 address (16 network byte order characters). If the result is
+IPv6 address (16 network byte order characters).
+If the result is
 .Dv S6_ACCESSRULES_ALLOW ,
 additional information may be stored into
 .Va params .
 .It
-.Fn s6_accessrules_result_t s6_accessrules_ip6_fs (char const *ip6, char const *dir, s6_accessrules_params_t *params)
+.Ft s6_accessrules_result_t
+.Fn s6_accessrules_ip6_fs "char const *ip6" "char const *dir" "s6_accessrules_params_t *params"
 .Pp
 Checks the
 .Va dir
 base directory for an authorization for the
 .Va ip6
-IPv6 address (16 network byte order characters). If the result is
+IPv6 address (16 network byte order characters).
+If the result is
 .Dv S6_ACCESSRULES_ALLOW ,
 additional information may be stored into
-.Va params.
+.Va params .
 .It
-.Fn s6_accessrules_result_t s6_accessrules_ip46_cdb (ip46_t *ip, struct cdb *c, s6_accessrules_params_t *params)
+.Ft s6_accessrules_result_t
+.Fn s6_accessrules_ip46_cdb "ip46_t *ip" "struct cdb *c" "s6_accessrules_params_t *params"
 .Pp
 Checks the
 .Va *c
 CDB database for an authorization for the
 .Va ip
-IP address. If the result is
+IP address.
+If the result is
 .Dv S6_ACCESSRULES_ALLOW ,
 additional information may be stored into
-.Va params.
+.Va params .
 .It
-.Fn s6_accessrules_result_t s6_accessrules_ip46_fs (ip46_t const *ip, char const *dir, s6_accessrules_params_t *params)
+.Ft s6_accessrules_result_t
+.Fn s6_accessrules_ip46_fs "ip46_t const *ip" "char const *dir" "s6_accessrules_params_t *params"
 .Pp
 Checks the
 .Va dir
 base directory for an authorization for the
 .Va ip
-IP address. If the result is
+IP address.
+If the result is
 .Dv S6_ACCESSRULES_ALLOW ,
 additional information may be stored into
 .Va params .
 .El
 .Sh SEE ALSO
-.Xr s6-libs6 7 ,
-.Xr s6-ftrigw 7 ,
+.Xr s6-fdholder 7 ,
 .Xr s6-ftrigr 7 ,
-.Xr s6-s6lock 7 ,
-.Xr s6-fdholder 7
+.Xr s6-ftrigw 7 ,
+.Xr s6-libs6 7 ,
+.Xr s6-s6lock 7
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/libs6/accessrules.html
 .Sh AUTHORS
 .An Laurent Bercot
