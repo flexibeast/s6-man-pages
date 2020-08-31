@@ -1,4 +1,4 @@
-.Dd August 23, 2020
+.Dd August 31, 2020
 .Dt S6-ENVUIDGID 1
 .Os
 .Sh NAME
@@ -9,11 +9,13 @@
 and
 .Ev GIDLIST
 environment variables according to the options and arguments it is
-given, then execute into another program.
+given, then execute into another program
 .Sh SYNOPSIS
 .Nm
 .Op Fl u | g | B
 .Op Fl n
+.\" '-T lint' reports "WARNING: skipping no-space macro",
+.\" but the rendered output is correct.
 .Op Fl i | D Ar uid Ns : Ns Ar gid Ns : Ns Ar gidlist
 .Ar account
 .Ar prog...
@@ -52,13 +54,14 @@ doesn't exist, and it also exports supplementary groups.
 .Pp
 .Nm
 is useful when running a program that must start as root but can drop
-its privileges later. Such a program can read its new uid/gid/groups
-info from the
+its privileges later.
+Such a program can read its new uid/gid/groups info from the
 .Ev UID ,
 .Ev GID
 and
 .Ev GIDLIST
-environment variables. Superservers such as
+environment variables.
+Superservers such as
 .Xr s6-tcpserver4 1
 make use of this.
 .Sh OPTIONS
@@ -95,13 +98,15 @@ will be interpreted as
 .Sm on
 The
 .Ev GIDLIST
-variable will not be touched. If
+variable will not be touched.
+If
 .Em user
 does not exist, the
 .Ev UID
 variable will be set to 0 unless a better default is provided with the
 .Fl D
-option. if
+option.
+If
 .Em group
 does not exist, the
 .Ev GID
@@ -109,10 +114,12 @@ variable will be set to 0 unless a better default is provided with the
 .Fl D
 option.
 .It Fl n
-Numerical fallback. If
+Numerical fallback.
+If
 .Ar account
 cannot be found in the user or group database, try to interpret the
-given values literally. For instance,
+given values literally.
+For instance,
 .Ql s6-envuidgid -B root:42
 will fail if there's no group named
 .Ql 42
@@ -124,9 +131,13 @@ to 0 and
 .Ev GID
 to 42.
 .It Fl i
-Insist. If
+Insist.
+If
 .Ar account
-is unknown, exit 1 with an error message. This is the default.
+is unknown, exit 1 with an error message.
+This is the default.
+.\" '-T lint' reports "WARNING: skipping no-space macro",
+.\" but the rendered output is correct.
 .It Fl D Ar uid Ns : Ns Ar gid Ns : Ns Ar gidlist
 If
 .Ar account
@@ -143,16 +154,16 @@ and
 .Ev GIDLIST .
 .El
 .Sh SEE ALSO
+.Xr s6-applyuidgid 1 ,
 .Xr s6-envdir 1 ,
 .Xr s6-fghack 1 ,
 .Xr s6-setsid 1 ,
 .Xr s6-setuidgid 1 ,
-.Xr s6-applyuidgid 1 ,
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64n 1 ,
 .Xr s6-tai64nlocal 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-envuidgid.html
 .Sh AUTHORS
 .An Laurent Bercot
