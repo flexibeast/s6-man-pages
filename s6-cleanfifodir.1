@@ -1,10 +1,10 @@
-.Dd August 24, 2020
+.Dd August 31, 2020
 .Dt S6-CLEANFIFODIR 1
 .Os
 .Sh NAME
 .Nm s6-cleanfifodir
 .Nd clean up an
-.Xr s6-fifodir 7 .
+.Xr s6-fifodir 7
 .Sh SYNOPSIS
 .Nm
 .Ar fifodir
@@ -12,8 +12,8 @@
 .Nm
 cleans up
 .Ar fifodir ,
-that must belong to the current user. That means it removes all stale
-FIFOs in
+that must belong to the current user.
+That means it removes all stale FIFOs in
 .Ar fifodir .
 .Pp
 In normal use, it is not necessary to call
@@ -23,14 +23,14 @@ However, stale FIFOs can be left by
 processes that were violently killed, so it's good practice to
 regularly clean up fifodirs.
 .Sh SEE ALSO
-.Xr s6-mkfifodir 1 ,
+.Xr s6-ftrig-listen 1 ,
+.Xr s6-ftrig-listen1 1 ,
 .Xr s6-ftrig-notify 1 ,
 .Xr s6-ftrig-wait 1 ,
-.Xr s6-ftrig-listen1 1 ,
-.Xr s6-ftrig-listen 1 ,
-.Xr s6-ftrigrd 1
+.Xr s6-ftrigrd 1 ,
+.Xr s6-mkfifodir 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-cleanfifodir.html
 .Sh AUTHORS
 .An Laurent Bercot
