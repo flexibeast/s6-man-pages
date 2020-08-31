@@ -1,4 +1,4 @@
-.Dd August 25, 2020
+.Dd August 31, 2020
 .Dt S6-ACCESSRULES-CDB-FROM-FS 1
 .Os
 .Sh NAME
@@ -7,7 +7,7 @@
 .Xr s6-ipcserver-access 1
 or
 .Xr s6-tcpserver-access 1
-into a CDB file.
+into a CDB file
 .Sh SYNOPSIS
 .Nm
 .Ar cdbfile
@@ -58,21 +58,22 @@ only uses the first three, and
 .Xr s6-ipcserver-access 1
 only uses the last two.
 .Pp
-Each of those directories contains a set of rules. A rule is a
-subdirectory named after the set of keys it matches, and containing
-actions that will be executed if the rule is the first matching rule
-for the tested key.
+Each of those directories contains a set of rules.
+A rule is a subdirectory named after the set of keys it matches, and
+containing actions that will be executed if the rule is the first
+matching rule for the tested key.
 .Pp
 The syntax for the rule name is dependent on the nature of keys, and
-fully documented in the page for
-.Lb accessrules .
+fully documented in
+.Xr s6-accessrules 7 .
 For instance, a subdirectory named 192.168.0.0_27 in the
 .Pa ip4
 directory will match every IPv4 address in the 192.168.0.0/27 network
 that does not match a more precise rule.
 .Pp
 The syntax for the actions, however, is the same for every type of
-key. A rule subdirectory can contain the following elements:
+key.
+A rule subdirectory can contain the following elements:
 .Bl -bullet -width x
 .It
 A file (that can be empty) named
@@ -125,13 +126,14 @@ so make sure it is not larger than that.
 can exist prior to, and during, the compilation, which actually works
 in a temporary file in the same directory as
 .Ar cdbfile
-and performs an atomic replacement when it is done. So it is not
-necessary to interrupt a running service during the compilation.
+and performs an atomic replacement when it is done.
+So it is not necessary to interrupt a running service during the
+compilation.
 .Pp
 If
 .Nm
-fails at some point, the temporary file is removed. However, this
-doesn't happen if
+fails at some point, the temporary file is removed.
+However, this doesn't happen if
 .Nm
 is interrupted by a signal.
 .Pp
@@ -154,16 +156,16 @@ can be decompiled by the
 .Xr s6-accessrules-fs-from-cdb 1
 program.
 .Sh SEE ALSO
+.Xr s6-accessrules-fs-from-cdb 1 ,
+.Xr s6-connlimit 1 ,
+.Xr s6-ioconnect 1 ,
 .Xr s6-ipcclient 1 ,
 .Xr s6-ipcserver 1 ,
-.Xr s6-ipcserver-socketbinder 1 ,
-.Xr s6-ipcserverd 1 ,
-.Xr s6-ioconnect 1 ,
 .Xr s6-ipcserver-access 1 ,
-.Xr s6-connlimit 1 ,
-.Xr s6-accessrules-fs-from-cdb 1
+.Xr s6-ipcserver-socketbinder 1 ,
+.Xr s6-ipcserverd 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-accessrules-cdb-from-fs.html
 .Sh AUTHORS
 .An Laurent Bercot
