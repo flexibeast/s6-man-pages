@@ -1,9 +1,9 @@
-.Dd August 23, 2020
+.Dd August 31, 2020
 .Dt S6-ENVDIR 1
 .Os
 .Sh NAME
 .Nm s6-envdir
-.Nd change environment, then execute into another program.
+.Nd change environment, then execute into another program
 .Sh SYNOPSIS
 .Nm
 .Op Fl I | i
@@ -37,9 +37,9 @@ to the environment (or replace
 .Ev f
 if it already exists) with the first line of the contents of file
 .Pa f
-as value. Spaces and tabs at the end of this line are removed; null
-characters in this line are changed to newlines in the environment
-variable.
+as value.
+Spaces and tabs at the end of this line are removed; null characters
+in this line are changed to newlines in the environment variable.
 .El
 .Pp
 .Nm
@@ -47,25 +47,32 @@ without options behaves exactly like envdir.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl i
-Strict. If
+Strict.
+If
 .Ar dir
-does not exist, exit 111 with an error message. This is the default.
+does not exist, exit 111 with an error message.
+This is the default.
 .It Fl I
-Loose. If
+Loose.
+If
 .Ar dir
 does not exist, exec into
 .Ar prog
 without modifying the environment first.
 .It Fl f
-Verbatim mode. All the file is given as the value of the environment
-variable, including newlines (except the last one if the
+Verbatim mode.
+All the file is given as the value of the environment variable,
+including newlines (except the last one if the
 .Fl n
-option is not given). Null characters are still translated.
+option is not given).
+Null characters are still translated.
 .It Fl n
-Do not chomp. If the
+Do not chomp.
+If the
 .Fl f
 option is given and the file ends with a newline, keep that last
-newline in the value. If the
+newline in the value.
+If the
 .Fl f
 option is not given, keep the trailing blanks at the end of the first
 line (but not the ending newline).
@@ -75,16 +82,16 @@ Replace null characters with the first character of
 instead of a newline.
 .El
 .Sh SEE ALSO
+.Xr s6-applyuidgid 1 ,
 .Xr s6-envuidgid 1 ,
 .Xr s6-fghack 1 ,
 .Xr s6-setsid 1 ,
 .Xr s6-setuidgid 1 ,
-.Xr s6-applyuidgid 1 ,
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64n 1 ,
 .Xr s6-tai64nlocal 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-envdir.html
 .Sh AUTHORS
 .An Laurent Bercot
