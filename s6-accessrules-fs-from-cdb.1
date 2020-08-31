@@ -1,4 +1,4 @@
-.Dd August 25, 2020
+.Dd August 31, 2020
 .Dt S6-ACCESSRULES-FS-FROM-CDB 1
 .Os
 .Sh NAME
@@ -8,7 +8,7 @@
 or
 .Xr s6-tcpserver-access 1
 and that has been compiled with
-.Xr s6-accessrules-cdb-from-fs 1 .
+.Xr s6-accessrules-cdb-from-fs 1
 .Sh SYNOPSIS
 .Nm
 .Ar dir
@@ -27,7 +27,8 @@ must not exist prior to the decompilation.
 .Ar dir
 must be considered a work in progress as long as
 .Nm
-is running. It is only safe to use
+is running.
+It is only safe to use
 .Ar dir
 as a ruleset once the program has exited.
 .Pp
@@ -35,7 +36,8 @@ If
 .Nm
 fails at some point, the partial arborescence at
 .Ar dir
-is removed. However, this doesn't happen if
+is removed.
+However, this doesn't happen if
 .Nm
 is interrupted by a signal.
 .Pp
@@ -53,16 +55,16 @@ will be a suitable candidate for the
 .Fl i
 option of the same program, implementing the same ruleset.
 .Sh SEE ALSO
+.Xr s6-accessrules-cdb-from-fs 1 ,
+.Xr s6-connlimit 1 ,
+.Xr s6-ioconnect 1 ,
 .Xr s6-ipcclient 1 ,
 .Xr s6-ipcserver 1 ,
-.Xr s6-ipcserver-socketbinder 1 ,
-.Xr s6-ipcserverd 1 ,
-.Xr s6-ioconnect 1 ,
 .Xr s6-ipcserver-access 1 ,
-.Xr s6-connlimit 1 ,
-.Xr s6-accessrules-cdb-from-fs 1
+.Xr s6-ipcserver-socketbinder 1 ,
+.Xr s6-ipcserverd 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-accessrules-fs-from-cdb.html
 .Sh AUTHORS
 .An Laurent Bercot
