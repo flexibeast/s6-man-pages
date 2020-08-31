@@ -1,9 +1,9 @@
-.Dd August 23, 2020
+.Dd August 31, 2020
 .Dt S6-APPLYUIDGID 1
 .Os
 .Sh NAME
 .Nm s6-applyuidgid
-.Nd execute a program with reduced privileges.
+.Nd execute a program with reduced privileges
 .Sh SYNOPSIS
 .Nm
 .Op Fl z
@@ -18,8 +18,8 @@ sets its uid, gid and supplementary group list to the values given,
 then executes into
 .Ar prog .
 .Nm
-can only be run as root. Its main use is to drop root privileges
-before starting a daemon.
+can only be run as root.
+Its main use is to drop root privileges before starting a daemon.
 .Nm
 is a more generic version of
 .Xr s6-setuidgid 1 .
@@ -46,7 +46,8 @@ values of the
 .Ev GID
 and
 .Ev GIDLIST
-environment variables. If a
+environment variables.
+If a
 .Fl u ,
 .Fl g
 or
@@ -55,7 +56,8 @@ option is given after
 .Fl U ,
 the command line value overrides the environment variable.
 .It Fl z
-Unexport. The
+Unexport.
+The
 .Ev UID ,
 .Ev GID
 and
@@ -72,7 +74,7 @@ variables will be removed from the process environment.
 .Xr s6-tai64n 1 ,
 .Xr s6-tai64nlocal 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-applyuidgid.html
 .Sh AUTHORS
 .An Laurent Bercot
