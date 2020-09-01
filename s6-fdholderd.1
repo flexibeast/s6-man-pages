@@ -1,11 +1,11 @@
-.Dd August 26, 2020
+.Dd September 1, 2020
 .Dt S6-FDHOLDERD 1
 .Os
 .Sh NAME
 .Nm s6-fdholderd
 .Nd serving part of the
 .Xr s6-fdholder-daemon 1
-fd-holding server.
+fd-holding server
 .Sh SYNOPSIS
 .Nm
 .Op Fl 1
@@ -34,8 +34,8 @@ is killed, all the fds it is currently holding are lost; if they need
 to be preserved, the admin should make sure to transfer them
 beforehand.
 .Pp
-Client connections are short-lived. Clients generally perform one
-operation, then disconnect.
+Client connections are short-lived.
+Clients generally perform one operation, then disconnect.
 .Pp
 Possible operations include:
 .Bl -bullet -width x
@@ -62,7 +62,8 @@ file descriptors to the already existing state:
 .Pp
 .Nm
 is meant to be execve'd into by a program that gets the listening
-socket. That program is normally
+socket.
+That program is normally
 .Xr s6-ipcserver-socketbinder 1 ,
 which creates the socket itself; but it can be a different one if the
 socket is to be obtained by another means, for instance if it has been
@@ -70,19 +71,20 @@ retrieved from another fd-holding daemon.
 .Pp
 .Nm
 will store any open file descriptor, without discriminating on its
-type. However, it makes more sense to store certain file descriptor
-types than others: for instance, Unix domain or INET domain sockets,
-or named pipes, are good candidates for fd-holding. On the other hand,
-it makes little sense to fd-hold regular files, and if done anyway,
-the results can be surprising, because the read/write file offset is
-stored with the descriptor, and no automatic rewind is performed by
-the daemon.
+type.
+However, it makes more sense to store certain file descriptor types
+than others: for instance, Unix domain or INET domain sockets, or
+named pipes, are good candidates for fd-holding.
+On the other hand, it makes little sense to fd-hold regular files, and
+if done anyway, the results can be surprising, because the read/write
+file offset is stored with the descriptor, and no automatic rewind is
+performed by the daemon.
 .Pp
 Despite there being access control for listing, the security of the
 system should not depend on a client not knowing what identifier a
-certain descriptor is stored under. If you need to hold descriptors
-that only a few programs are supposed to access, you can always run a
-separate
+certain descriptor is stored under.
+If you need to hold descriptors that only a few programs are supposed
+to access, you can always run a separate
 .Nm
 instance in a private directory with a configuration tailored to your
 needs - and you can even make the name of the listening socket
@@ -92,10 +94,11 @@ is lightweight; you can start as many instances as you need, and you
 can run them as long as you need, then kill them with SIGTERM.
 .Pp
 .Nm
-pre-allocates its storage at start, in the stack. It uses a small
-amount of heap memory for communication with a client, but frees it as
-soon as the client disconnects. It should never run out of memory in
-normal usage, even if used intensively.
+pre-allocates its storage at start, in the stack.
+It uses a small amount of heap memory for communication with a client,
+but frees it as soon as the client disconnects.
+It should never run out of memory in normal usage, even if used
+intensively.
 .Ss Signals
 .Bl -tag -width x
 .It SIGTERM
@@ -106,8 +109,9 @@ Reopen
 if
 .Nm
 has been run with the
-.F x
-option. It is not necessary to send
+.Fl x
+option.
+It is not necessary to send
 .Nm
 a SIGHUP when the
 .Fl i
@@ -119,18 +123,21 @@ Every file descriptor is stored in the
 .Nm
 daemon via the
 .Xr s6-fdholder-store 1
-program, with an identifier. That identifier is a zero-terminated
-character string, containing 1 to 255 characters.
+program, with an identifier.
+That identifier is a zero-terminated character string, containing 1 to
+255 characters.
 .Pp
-Any non-null character can be used in an identifier. Non-printable or
-special characters will be quoted when printed by
+Any non-null character can be used in an identifier.
+Non-printable or special characters will be quoted when printed by
 .Xr s6-fdholder-list 1 .
 However, it is recommended to only use reasonable characters in
 identifiers: clients should be able to know at a glance what file
-descriptor is represented by an identifier. Identifiers have no
-special meaning to the server.
+descriptor is represented by an identifier.
+Identifiers have no special meaning to the server.
 .Pp
 A good convention is to use
+.\" '-T lint' reports "WARNING: skipping no-space macro",
+.\" but the rendered output is correct.
 .Ql unix: Ns Em path Ns / Ns Em to Ns / Ns Em socket
 for Unix domain sockets and
 .Ql Em protocol Ns : Ns Em ip Ns : Ns Em port
@@ -140,12 +147,13 @@ An identifier is chosen by the storing client, within the limits of
 what the server authorizes it to use.
 .Pp
 The retrieving client must know the exact identifier corresponding to
-a descriptor to be able to retrieve that descriptor. It must also be
-authorized by the server.
+a descriptor to be able to retrieve that descriptor.
+It must also be authorized by the server.
 .Pp
 When an identifier is in use, it cannot be used again to store another
-descriptor. However, once the descriptor has been deleted or has
-expired, it is possible to reuse the same identifier.
+descriptor.
+However, once the descriptor has been deleted or has expired, it is
+possible to reuse the same identifier.
 .Ss Configuration
 Before running
 .Nm
@@ -153,7 +161,8 @@ Before running
 or its wrapper
 .Xr s6-fdholder-daemon 1
 .Pc ,
-it is necessary to configure it. This is done by a series of rules, or
+it is necessary to configure it.
+This is done by a series of rules, or
 .Em ruleset ,
 stored in either a
 .Em rulesfile
@@ -179,30 +188,34 @@ conversion tools.
 .Ss Rules format
 The rules file, or rules directory, follows the
 .Xr s6-accessrules 7
-format for uid and gid checking. For every connecting client,
+format for uid and gid checking.
+For every connecting client,
 .Nm s6-fdholderd
 matches the uid and gid of the client against the provided ruleset,
 and determines what the client is authorized to do.
 .Pp
 By default, no client is allowed to do anything - not even connect to
-the server. Even
+the server.
+Even
 .Ql root ,
-the super-user, will be denied access. That is why it is essential to
-create a sensible ruleset prior to running the server in order to do
-anything useful.
+the super-user, will be denied access.
+That is why it is essential to create a sensible ruleset prior to
+running the server in order to do anything useful.
 .Pp
 The various rights that a client can have are the following (using a
 rulesdir as an example, but a rulesfile works the same way):
 .Bl -bullet -width x
 .It
-Connect to the server. This is a prerequisite for doing anything. It
-will allow a client to perform
+Connect to the server.
+This is a prerequisite for doing anything.
+It will allow a client to perform
 .Dq public
 operations, ones that do not require specific access rights other than
-connecting. (There are no such operations for now, but it could change
-in the future; for now, when you allow a client to connect to the
-server, make sure to give him other rights too.) This right is given
-if an
+connecting.
+(There are no such operations for now, but it could change in the
+future; for now, when you allow a client to connect to the server,
+make sure to give him other rights too.)
+This right is given if an
 .Pa allow
 file is found in one of the subdirectories checked by
 .Fn s6_accessrules_keycheck_uidgid .
@@ -215,9 +228,10 @@ The other rights are defined in the
 part of the ruleset:
 .Bl -bullet -width x
 .It
-File descriptor storage rights. This will be checked for storage and
-deletion of individual file descriptors. This right is given if a
-non-empty file named
+File descriptor storage rights.
+This will be checked for storage and deletion of individual file
+descriptors.
+This right is given if a non-empty file named
 .Pa S6_FDHOLDER_STORE_REGEX
 is found is the
 .Pa env/
@@ -227,15 +241,17 @@ This file should contain a single line, which will be interpreted as
 an extended regular expression by
 .Nm ;
 the regular expression describes the set of identifiers that the
-client is allowed to use to store file descriptors. For instance,
+client is allowed to use to store file descriptors.
+For instance,
 .Ql ^unix:/tmp/
 indicates that a client that matches this rule will be allowed to
 store or delete file descriptors using any identifier starting with
 .Ql unix:/tmp/ .
 .It
-File descriptor retrieval rights. This will be checked for retrieval
-of individual file descriptors. This right is given if a non-empty
-file named
+File descriptor retrieval rights.
+This will be checked for retrieval of individual file
+descriptors.
+This right is given if a non-empty file named
 .Pa S6_FDHOLDER_RETRIEVE_REGEX
 is found is the
 .Pa env/
@@ -245,24 +261,27 @@ This file should contain a single line, which will be interpreted as
 an extended regular expression by
 .Nm ;
 the regular expression describes the set of identifiers that the
-client is allowed to use to retrieve file descriptors. For instance,
+client is allowed to use to retrieve file descriptors.
+For instance,
 .Ql ^unix:/tmp/
 indicates that a client that matches this rule will be allowed to
 retrieve file descriptors that are identified by strings starting with
 .Ql unix:/tmp/ .
 .It
-Listing rights. This will be checked for clients wanting to list the
-identifiers of the descriptors currently stored in the server. This
-right is given if a non-empty file named
+Listing rights.
+This will be checked for clients wanting to list the identifiers of
+the descriptors currently stored in the server.
+This right is given if a non-empty file named
 .Pa S6_FDHOLDER_LIST
 is found in the
 .Pa env/
 subdirectory of one of the subdirectories checked by
 .Fn s6_accessrules_keycheck_uidgid .
 .It
-Dump reading rights. This will be checked for clients wanting to copy
-the whole state of the server. This right is given if a non-empty file
-named
+Dump reading rights.
+This will be checked for clients wanting to copy the whole state of
+the server.
+This right is given if a non-empty file named
 .Pa S6_FDHOLDER_GETDUMP
 is found is the
 .Pa env/
@@ -272,9 +291,10 @@ This is very powerful: you should only give this right to
 .Ql root ,
 or to a dedicated uid that is only used to perform dump transfers.
 .It
-Dump writing rights. This will be checked for clients wanting to copy
-an entire set of file descriptors into the server. This right is given
-if a non-empty file named
+Dump writing rights.
+This will be checked for clients wanting to copy an entire set of file
+descriptors into the server.
+This right is given if a non-empty file named
 .Pa S6_FDHOLDER_SETDUMP
 is found is the
 .Pa env/
@@ -288,9 +308,10 @@ or to a dedicated uid that is only used to perform dump transfers.
 .Bl -tag -width x
 .It Fl 1
 Write a newline to stdout, and close stdout, right before entering the
-client-accepting loop. If stdout is suitably redirected, this can be
-used by monitoring programs to check when the server is accepting
-connections. See
+client-accepting loop.
+If stdout is suitably redirected, this can be used by monitoring
+programs to check when the server is accepting connections.
+See
 .Xr s6-notifywhenup 7
 for more information on readiness notification.
 .It Fl v Ar verbosity
@@ -300,22 +321,27 @@ can be 0 (quiet), 1 (normal), or 2 or more (verbose).
 .It Fl c Ar maxconn
 Accept at most
 .Ar maxconn
-concurrent connections. Default is 16. It is impossible to set it
-higher than the value of the
+concurrent connections.
+Default is 16.
+It is impossible to set it higher than the value of the
 .Dv S6_FDHOLDER_MAX
-macro, i.e. 256. Client connections to this server are short-lived, so
-this number needs not be too high. Every client connection eats up one
-available file descriptor, so it is best for
+macro, i.e. 256.
+Client connections to this server are short-lived, so this number
+needs not be too high.
+Every client connection eats up one available file descriptor, so it
+is best for
 .Ar maxconn
 to be as small as possible.
 .It Fl n Ar maxfds
 Store at most
 .Ar maxfds
-file descriptors. Default is 1000. It is impossible to set it higher
-than the number of files that can be opened by the
+file descriptors.
+Default is 1000.
+It is impossible to set it higher than the number of files that can be
+opened by the
 .Nm
-process, minus a few descriptors needed for correct operation. Before
-running
+process, minus a few descriptors needed for correct operation.
+Before running
 .Nm ,
 make sure to use
 .Xr s6-softlimit 1
@@ -325,14 +351,16 @@ process.
 Disconnect a client if it's in the middle of an operation and it has
 not written or read any data in
 .Ar clienttimeout
-milliseconds. By default,
+milliseconds.
+By default,
 .Ar clienttimeout
 is 0, which means infinite.
 .It Fl t Ar lameducktimeout
 Give clients
 .Ar lameducktimeout
 milliseconds to finish their current operation before exiting after
-receiving a SIGTERM. By default,
+receiving a SIGTERM.
+By default,
 .Ar lameducktimeout
 is 0, which means infinite.
 .It Fl x Ar rulesfile
@@ -359,7 +387,8 @@ cd /service/fdholder/rules
 mkdir uid gid
 .Ed
 .It
-Allow a few users, or everyone, to connect. To allow root to connect:
+Allow a few users, or everyone, to connect.
+To allow root to connect:
 .Bd -literal -offset indent
 mkdir uid/0
 touch uid/0/allow
@@ -373,7 +402,8 @@ touch uid/default/allow
 .El
 .Pp
 Depending on your policy, you should now give certain rights to
-certain users or groups. For instance:
+certain users or groups.
+For instance:
 .Bl -bullet -width x
 .It
 To allow user number 50 to perform dump transfers from and to this
@@ -390,7 +420,7 @@ To allow user number 72 to store a descriptor under the name
 and
 .Em only
 this name:
-.Bd -literal -offset width x
+.Bd -literal -offset indent
 mkdir -p uid/72/env
 touch uid/72/allow
 echo '^foobar$' > uid/72/env/S6_FDHOLDER_STORE_REGEX
@@ -425,15 +455,15 @@ echo > uid/default/env/S6_FDHOLDER_SETDUMP
 .El
 .Sh SEE ALSO
 .Xr s6-fdholder-daemon 1 ,
-.Xr s6-fdholder-store 1 ,
-.Xr s6-fdholder-retrieve 1 ,
 .Xr s6-fdholder-delete 1 ,
-.Xr s6-fdholder-list 1 ,
 .Xr s6-fdholder-getdump 1 ,
+.Xr s6-fdholder-list 1 ,
+.Xr s6-fdholder-retrieve 1 ,
 .Xr s6-fdholder-setdump 1 ,
+.Xr s6-fdholder-store 1 ,
 .Xr s6-fdholder-transferdump 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-fdholderd.html
 .Sh AUTHORS
 .An Laurent Bercot
