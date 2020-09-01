@@ -1,4 +1,4 @@
-.Dd August 28, 2020
+.Dd September 1, 2020
 .Dt S6-FDHOLDER-GETDUMP 1
 .Os
 .Sh NAME
@@ -6,7 +6,7 @@
 .Nd connect to an
 .Xr s6-fdholderd 1
 daemon listening on a Unix domain socket, and retrieves its entire
-state: file descriptors with their identifiers and expiration dates.
+state: file descriptors with their identifiers and expiration dates
 .Sh SYNOPSIS
 .Nm
 .Op Fl t Ar timeout
@@ -29,8 +29,8 @@ variables.
 .Pp
 Getting the whole state of an
 .Xr s6-fdholderd 1
-daemon requires specific privileges. Make sure you properly configure
-the
+daemon requires specific privileges.
+Make sure you properly configure the
 .Xr s6-fdholderd 1
 access rights so your client can perform that operation.
 .Sh OPTIONS
@@ -38,10 +38,11 @@ access rights so your client can perform that operation.
 .It Fl t Ar timeout
 If the operation cannot be processed in
 .Ar timeout
-milliseconds, then fail with an error message. Communications with the
-server should be near-instant, so this option is only here to protect
-users against programming errors (connecting to the wrong socket, for
-instance).
+milliseconds, then fail with an error message.
+Communications with the server should be near-instant, so this option
+is only here to protect users against programming errors (connecting
+to the wrong socket, for instance).
+.El
 .Sh ENVIRONMENT
 .Ar prog...
 is executed with the following environment variables set:
@@ -69,8 +70,9 @@ open file descriptor.
 .It Ev S6_FDLIMIT_ Ns Va i
 Contains the expiration date of the
 .Va i Ns th
-open file descriptor, if applicable. That date is stored in external
-TAI64N format. If the file descriptor is not supposed to expire, that
+open file descriptor, if applicable.
+That date is stored in external TAI64N format.
+If the file descriptor is not supposed to expire, that
 environment variable is not defined.
 .El
 .El
@@ -79,8 +81,8 @@ On success, the program doesn't exit; instead, it execs into
 .Ar prog... .
 .Bl -tag -width x
 .It 1
-The server denied the operation. The meaning of the error messages are
-explained in
+The server denied the operation.
+The meaning of the error messages are explained in
 .Xr s6-fdholder-error-codes 7 .
 .It 100
 Wrong usage.
@@ -91,7 +93,6 @@ nonexistent socket, or one where no
 daemon is listening.
 .El
 .Sh EXAMPLES
-.Pp
 .Dl s6-fdholder-getdump /service/fdholderd/s s6-fdholder-setdump /service/fdholderd-2/s
 .Pp
 will get the state of the
@@ -102,20 +103,21 @@ socket, and transmit it to the other
 .Xr s6-fdholderd 1
 daemon listening on the
 .Pa /service/fdholderd-2/s
-socket. Note that in this precise case, the
+socket.
+Note that in this precise case, the
 .Xr s6-fdholder-transferdump 1
 program does the same thing more efficiently.
 .Sh SEE ALSO
 .Xr s6-fdholder-daemon 1 ,
-.Xr s6-fdholderd 1 ,
-.Xr s6-fdholder-store 1 ,
-.Xr s6-fdholder-retrieve 1 ,
 .Xr s6-fdholder-delete 1 ,
 .Xr s6-fdholder-list 1 ,
+.Xr s6-fdholder-retrieve 1 ,
 .Xr s6-fdholder-setdump 1 ,
-.Xr s6-fdholder-transferdump 1
+.Xr s6-fdholder-store 1 ,
+.Xr s6-fdholder-transferdump 1 ,
+.Xr s6-fdholderd 1 ,
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-fdholder-getdump.html
 .Sh AUTHORS
 .An Laurent Bercot
