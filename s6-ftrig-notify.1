@@ -1,10 +1,10 @@
-.Dd August 24, 2020
+.Dd September 2, 2020
 .Dt S6-FTRIG-NOTIFY 1
 .Os
 .Sh NAME
 .Nm s6-ftrig-notify
 .Nd send a series of events to an
-.Xr s6-fifodir 7 .
+.Xr s6-fifodir 7
 .Sh SYNOPSIS
 .Nm
 .Ar fifodir
@@ -17,18 +17,18 @@ with all the characters in
 .Ar message .
 .Pp
 .Nm
-cannot be used to send the null character (event 0x00). If you need to
-send the null character, use the C API:
+cannot be used to send the null character (event 0x00).
+If you need to send the null character, use the C API:
 .Fn ftrigw_notify .
 .Sh SEE ALSO
-.Xr s6-mkfifodir 1 ,
 .Xr s6-cleanfifodir 1 ,
-.Xr s6-ftrig-wait 1 ,
-.Xr s6-ftrig-listen1 1 ,
 .Xr s6-ftrig-listen 1 ,
-.Xr s6-ftrigrd 1
+.Xr s6-ftrig-listen1 1 ,
+.Xr s6-ftrig-wait 1 ,
+.Xr s6-ftrigrd 1 ,
+.Xr s6-mkfifodir 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-ftrig-notify.html
 .Sh AUTHORS
 .An Laurent Bercot
