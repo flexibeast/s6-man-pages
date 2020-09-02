@@ -1,11 +1,11 @@
-.Dd August 24, 2020
+.Dd September 2, 2020
 .Dt S6-FTRIG-WAIT 1
 .Os
 .Sh NAME
 .Nm s6-ftrig-wait
 .Nd subscribe to an
 .Xr s6-fifodir 7
-and wait for a pattern of events to occur on this fifodir.
+and wait for a pattern of events to occur on this fifodir
 .Sh SYNOPSIS
 .Nm
 .Op Fl t Ar timeout
@@ -36,19 +36,20 @@ have not matched
 .Ar regexp
 after
 .Ar timeout
-milliseconds, print an error message on stderr and exit 1. By default,
+milliseconds, print an error message on stderr and exit 1.
+By default,
 .Nm
 waits indefinitely for a matching series of events.
 .El
 .Sh SEE ALSO
-.Xr s6-mkfifodir 1 ,
 .Xr s6-cleanfifodir 1 ,
-.Xr s6-ftrig-notify 1 ,
-.Xr s6-ftrig-listen1 1 ,
 .Xr s6-ftrig-listen 1 ,
-.Xr s6-ftrigrd 1
+.Xr s6-ftrig-listen1 1 ,
+.Xr s6-ftrig-notify 1 ,
+.Xr s6-ftrigrd 1 ,
+.Xr s6-mkfifodir 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-ftrig-wait.html
 .Sh AUTHORS
 .An Laurent Bercot
