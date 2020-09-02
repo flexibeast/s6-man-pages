@@ -1,29 +1,32 @@
-.Dd August 29, 2020
+.Dd September 2, 2020
 .Dt S6-FTRIGR 7
 .Os
 .Sh NAME
 .Nm s6-ftrigr
 .Nd API for listeners, i.e. programs that want to subscribe to
 .Xr s6-fifodir 7 Ns
-s and be instantly notified when the proper sequence of events happens.
+s and be instantly notified when the proper sequence of events happens
 .Sh DESCRIPTION
 Check the
 .Pa s6/ftrigr.h
 header for the exact function prototypes.
 .Pp
 Make sure your application is not disturbed by children it doesn't
-know it has. This means paying some attention to the SIGCHLD handler,
-if any, and to the way you perform
+know it has.
+This means paying some attention to the SIGCHLD handler, if any, and
+to the way you perform
 .Xr waitpid 2 Ns
-s. The best practice is to use a self-pipe to handle SIGCHLD (as well
-as other signals the application needs to trap), and to always use
+s.
+The best practice is to use a self-pipe to handle SIGCHLD (as well as
+other signals the application needs to trap), and to always use
 .Fn wait_nohang
 to reap children, simply ignoring pids you don't know.
 .Pp
 If your application has trouble handling unknown children, consider
 using an
 .Xr s6-ftrigrd 1
-service. (And fix your application!)
+service.
+(And fix your application!)
 .Ss A programming example
 The
 .Pa src/pipe-tools/s6-ftrig-listen1.c
@@ -37,12 +40,13 @@ Synchronous functions take a
 .Ql tain_t const * Po Va deadline Pc
 parameter and a
 .Ql tain_t * Po Va stamp Pc
-parameter. Those are pointers to
+parameter.
+Those are pointers to
 .Vt tain_t
 structures containing absolute times; the former represents a deadline
 (in most cases, this time will be in the future) and the latter must
-be an accurate enough timestamp. These structures can be filled using
-the
+be an accurate enough timestamp.
+These structures can be filled using the
 .Ql tain_
 primitives declared in
 .Pa skalibs/tai.h .
@@ -62,8 +66,9 @@ It's a good policy to always update
 .Va stamp
 right after a (potentially) blocking system call like
 .Xr select 2
-returns. And unless the application is extremely CPU-intensive (think
-calculus for physicists or astronomers) updating
+returns.
+And unless the application is extremely CPU-intensive (think calculus
+for physicists or astronomers) updating
 .Va stamp
 more frequently is unnecessary.
 .Pc
@@ -84,7 +89,8 @@ If any waiting occurred, the
 .Va stamp
 structure is automatically updated by the called function, so it
 always represents an accurate enough estimation of the current
-time. This allows the programmer to call several such functions in a
+time.
+This allows the programmer to call several such functions in a
 sequence without modifying the
 .Va deadline
 and
@@ -94,11 +100,11 @@ parameters: then the whole sequence is bound in execution time.
 This is a general safety mechanism implemented in libunixonacid: in
 interprocess communication, purely synchronous primitives are
 dangerous because they make the calling process rely on proper
-behaviour of the called process. Giving synchronous primitives the
-ability to timeout allows developers to write reliable programs even
-when interacting with software they have no control over.
+behaviour of the called process.
+Giving synchronous primitives the ability to timeout allows developers
+to write reliable programs even when interacting with software they
+have no control over.
 .Ss Starting and ending a session
-.Pp
 .Bd -literal -offset indent
 ftrigr_t a = FTRIGR_ZERO ;
 tain_t deadline, stamp ;
@@ -140,7 +146,8 @@ returns 0 with errno set to
 .Dv ETIMEDOUT .
 Only local interprocess communications are involved; unless your
 system is heavily overloaded, the function should return
-near-instantly. One or two seconds of delay between
+near-instantly.
+One or two seconds of delay between
 .Va stamp
 and
 .Va deadline
@@ -156,8 +163,9 @@ structures and calling
 or
 .Fn ftrigr_start
 .Pc
-more than once. However, this is useless, since one single session can
-handle virtually as many concurrent
+more than once.
+However, this is useless, since one single session can handle
+virtually as many concurrent
 .Xr s6-fifodir 7 Ns
 s as your application needs.
 .Bd -literal -offset indent
@@ -165,7 +173,8 @@ ftrigr_end(&a) ;
 .Ed
 .Pp
 .Fn ftrigr_end
-frees all the resources used by the session. The
+frees all the resources used by the session.
+The
 .Va a
 structure is then
 reusable for another session.
@@ -197,7 +206,8 @@ If it is 0, the daemon will automatically unsubscribe from
 .Va path
 once
 .Va re
-has been matched by a series of events. If it is
+has been matched by a series of events.
+If it is
 .Dv FTRIGR_REPEAT ,
 it will remain subscribed until told otherwise.
 .Pp
@@ -234,8 +244,9 @@ waits for all the
 .Xr s6-fifodir 7 Ns s
 whose ids are listed in
 .Va list
-to receive an event. It returns -1 in case of error or timeout, or a
-non-negative integer in case of success.
+to receive an event.
+It returns -1 in case of error or timeout, or a non-negative integer
+in case of success.
 .Pp
 .Fn ftrigr_wait_or
 waits for one of the
@@ -243,8 +254,9 @@ waits for one of the
 .Xr s6-fifodir 7 Ns s
 whose ids are listed in
 .Va list
-to receive an event. It returns -1 in case of error or timeout; if it
-succeeds, the return value is the position in
+to receive an event.
+It returns -1 in case of error or timeout; if it succeeds, the return
+value is the position in
 .Va list ,
 starting at 0, of the identifier that received an event; and
 .Va trigger
@@ -257,7 +269,8 @@ used in the subscription.
 .Bl -tag -width x
 .It Ql int ftrigr_fd (ftrigr_t const *a)
 .Pp
-Returns a file descriptor to select on for reading. Do not
+Returns a file descriptor to select on for reading.
+Do not
 .Xr read 2
 it though.
 .It Ql int ftrigr_updateb (ftrigr_t *a)
@@ -267,8 +280,9 @@ Call this function whenever the fd checks readability: it will update
 .Ap
 s internal structures with information from the
 .Xr s6-ftrigrd 1
-daemon. It returns -1 if an error occurs; in case of success, it
-returns the number of identifiers for which something happened.
+daemon.
+It returns -1 if an error occurs; in case of success, it returns the
+number of identifiers for which something happened.
 .Pp
 When
 .Fn ftrigr_updateb
@@ -276,8 +290,8 @@ returns,
 .Ql genalloc_s(uint16_t, &a->list)
 points to an array of
 .Ql genalloc_len(uint16_t, &a->list)
-16-bit unsigned integers. Those integers are ids waiting to be passed
-to
+16-bit unsigned integers.
+Those integers are ids waiting to be passed to
 .Fn ftrigr_check
 or
 .Fn ftrigr_checksa .
@@ -293,8 +307,8 @@ Use after a call to
 .Fn ftrigr_updateb .
 .Bl -bullet -width x
 .It
-If an error occurred, returns -1 and sets errno. The error number may
-have been transmitted from
+If an error occurred, returns -1 and sets errno.
+The error number may have been transmitted from
 .Xr s6-ftrigrd 1 .
 .It
 If no notification happened yet, returns 0.
@@ -316,8 +330,8 @@ as an alternative to
 .Fn ftrigr_check .
 .Bl -bullet -width x
 .It
-If an error occurred, returns -1 and sets errno. The error number may
-have been transmitted from
+If an error occurred, returns -1 and sets errno.
+The error number may have been transmitted from
 .Xr s6-ftrigrd 1 .
 .It
 If no notification happened yet, returns 0.
@@ -327,8 +341,8 @@ If something happened, appends one character to the end of the
 stralloc for every time a notification was triggered since the last
 call to
 .Fn ftrigr_check .
-Each character is the one that triggered a notification. The function
-then returns 1.
+Each character is the one that triggered a notification.
+The function then returns 1.
 .El
 .It Ql int ftrigr_ack (ftrigr_t *a, size_t n)
 .Pp
@@ -340,14 +354,15 @@ ids from the id list updated by
 .Pp
 Acknowledges all the pending ids (i.e. clears the stored id list) then calls
 .Fn ftrigr_updateb .
+.El
 .Sh SEE ALSO
-.Xr s6-libs6 7 ,
-.Xr s6-ftrigw 7 ,
-.Xr s6-s6lock 7 ,
 .Xr s6-accessrules 7 ,
-.Xr s6-fdholder 7
+.Xr s6-fdholder 7 ,
+.Xr s6-ftrigw 7 ,
+.Xr s6-libs6 7 ,
+.Xr s6-s6lock 7
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/libs6/ftrigr.html
 .Sh AUTHORS
 .An Laurent Bercot
