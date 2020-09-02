@@ -1,14 +1,15 @@
-.Dd August 20, 2020
+.Dd September 2, 2020
 .Dt S6-FIFODIR 7
 .Os
 .Sh NAME
 .Nm s6-fifodir
-.Nd rendez-vous point between the notifier of certain events and its listeners. 
+.Nd rendez-vous point between the notifier of certain events and its listeners
 .Sh DESCRIPTION
 An
 .Nm
-is implemented via a directory in the filesystem. No data is stored;
-it is appropriate to create fifodirs in a RAM filesystem.
+is implemented via a directory in the filesystem.
+No data is stored; it is appropriate to create fifodirs in a RAM
+filesystem.
 .Ss C API
 For the notifier:
 .Bl -bullet -width x
@@ -16,22 +17,21 @@ For the notifier:
 You can create fifodirs via the
 .Fn ftrigw_fifodir_create
 function in
-.Lb libftrig .
+.Xr s6-ftrigw 7 .
 .It
 You can send an event to a fifodir via the
 .Fn ftrigw_notify
-function in the notifier part of the
-.Lb libftrig .
+function in the notifier part of
+.Xr s6-ftrigw 7 .
 .It
 You can clean up a fifodir via the
 .Fn ftrigw_clean
 function in
-.Lb libftrig .
+.Xr s6-ftrigw 7 .
 .It
 You can destroy fifodirs via the
 .Fn rm_rf
-function in
-.Lb libstddjb .
+function in libstddjb.
 .El
 .Pp
 For a listener:
@@ -40,10 +40,10 @@ For a listener:
 You can subscribe to a fifodir via the
 .Fn ftrigr_subscribe
 function in the listener part of the
-.Lb libftrig .
+.Xr s6-ftrigr 7 .
 .It
-Other functions in the
-.Lb libftrig
+Other functions in
+.Xr s6-ftrigr 7
 allow you to receive and handle events synchronously or
 asynchronously.
 .El
@@ -81,41 +81,44 @@ an event, with the
 .Xr s6-ftrig-listen1 1
 and
 .Xr s6-ftrig-listen 1
-commands. This makes it possible to only send a notification after
-you're sure a notifier is actually listening, in order to prevent race
-conditions.
+commands.
+This makes it possible to only send a notification after you're sure a
+notifier is actually listening, in order to prevent race conditions.
 .El
 .Sh IMPLEMENTATION NOTES
 .Bl -bullet -width x
 .It
 Notifiers and listeners agree on a fifodir.
 .It
-The fifodir directory is created by the notifier. It must be writable by listeners.
+The fifodir directory is created by the notifier.
+It must be writable by listeners.
 .It
 To subscribe, a listener atomically creates a named pipe (FIFO) in
-this directory and listens to the reading end. This named pipe must be
-writable by the notifier.
+this directory and listens to the reading end.
+This named pipe must be writable by the notifier.
 .It
 To send an event to listeners, the notifier writes the event byte to
-all the named pipes in the directory. Credit for this idea goes to
-Stefan Karrmann.
+all the named pipes in the directory.
+Credit for this idea goes to Stefan Karrmann.
 .It
 To unsubscribe, a listener unlinks his named pipe from the directory.
-.El 
+.El
 .Pp
 Note that in the s6 implementation of fifodirs, there are a few
 additional details: for instance, the named pipes created in a fifodir
 by a listener follow a strict naming convention, for efficiency and
-safety reasons. If you are using fifodirs, it is recommended that you
-use the provided C library functions or the
+safety reasons.
+If you are using fifodirs, it is recommended that you use the provided
+C library functions or the
 .Ql s6-ftrig-*
 command line utilities instead of directly hacking into the fifodir
 internals.
 .Pp
 Fifodirs are created by, so they always originally have the same uid
-and gid as, their notifier. A notifier must be able to make his
-fifodir either publicly accessible (anyone can subscribe) or
-restricted (only a given group can subscribe).
+and gid as, their notifier.
+A notifier must be able to make his fifodir either publicly accessible
+(anyone can subscribe) or restricted (only a given group can
+subscribe).
 .Pp
 A publicly accessible fifodir must have rights 1733:
 .Bl -bullet -width x
@@ -130,9 +133,9 @@ A notifier can delete any fifo for cleaning purposes.
 .El
 .Pp
 A restricted fifodir must have the gid g of the group of allowed
-listeners and have rights 3730. Unless the notifier is root, it must
-be in the group of allowed listeners to be able to create such a
-fifodir.
+listeners and have rights 3730.
+Unless the notifier is root, it must be in the group of allowed
+listeners to be able to create such a fifodir.
 .Bl -bullet -width x
 .It
 Only members of g can create a fifo in that fifodir.
@@ -156,9 +159,9 @@ Anyone who has reading rights on the fifodir (i.e. only the notifier)
 can write to the fifo.
 .El
 .Pp
-The libftrig interface takes care of all the subtleties. 
+The libftrig interface takes care of all the subtleties.
 .Sh SEE ALSO
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/fifodir.html
 .Sh AUTHORS
 .An Laurent Bercot
