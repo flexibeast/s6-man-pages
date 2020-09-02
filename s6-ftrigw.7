@@ -1,14 +1,15 @@
-.Dd August 29, 2020
+.Dd September 2, 2020
 .Dt S6-FTRIGW 7
 .Os
 .Sh NAME
 .Nm s6-ftrigw
-.Nd API for notifiers, i.e. programs that want to regularly announce what they're doing.
+.Nd API for notifiers, i.e. programs that want to regularly announce what they're doing
 .Sh DESCRIPTION
 Notifiers should create an
 .Xr s6-fifodir 7
 in a hardcoded place in the filesystem, and document its
-location. Listeners will then be able to subscribe to that
+location.
+Listeners will then be able to subscribe to that
 .Xr s6-fifodir 7 ,
 and receive the events.
 .Pp
@@ -28,8 +29,9 @@ creates an
 .Xr s6-fifodir 7
 at the
 .Va path
-location. It returns 0, and sets errno, if an error occurs. It returns
-1 if it succeeds.
+location.
+It returns 0, and sets errno, if an error occurs.
+It returns 1 if it succeeds.
 .Pp
 If an
 .Xr s6-fifodir 7 ,
@@ -39,7 +41,8 @@ and
 .Va forceperms
 is zero, then
 .Fn ftrigw_fifodir_make
-immediately returns success. If
+immediately returns success.
+If
 .Va forceperms
 is nonzero, then it tries to adjust
 .Va path
@@ -101,16 +104,16 @@ r = ftrigw_clean(path) ;
 .Fn ftrigw_clean
 cleans
 .Va path .
-It returns 0, and sets errno, if it encounters an error. It returns 1
-if it succeeds.
+It returns 0, and sets errno, if it encounters an error.
+It returns 1 if it succeeds.
 .Sh SEE ALSO
-.Xr s6-libs6 7 ,
-.Xr s6-ftrigr 7 ,
-.Xr s6-s6lock 7 ,
 .Xr s6-accessrules 7 ,
-.Xr s6-fdholder 7
+.Xr s6-fdholder 7 ,
+.Xr s6-ftrigr 7 ,
+.Xr s6-libs6 7 ,
+.Xr s6-s6lock 7
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/libs6/ftrigw.html
 .Sh AUTHORS
 .An Laurent Bercot
