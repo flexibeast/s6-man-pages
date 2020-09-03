@@ -1,9 +1,9 @@
-.Dd August 25, 2020
+.Dd September 3, 2020
 .Dt S6-IPCCLIENT 1
 .Os
 .Sh NAME
 .Nm s6-ipcclient
-.Nd UCSPI client tool for Unix domain sockets: connect to a socket, then execute into a program.
+.Nd UCSPI client tool for Unix domain sockets: connect to a socket, then execute into a program
 .Sh SYNOPSIS
 .Nm
 .Op Fl q | Q | v
@@ -23,7 +23,8 @@ it.
 .Pp
 .Nm
 is mostly used to connect a client to a local service without having
-to implement networking in the client. For instance, the
+to implement networking in the client.
+For instance, the
 .Xr s6-sudo 1
 program does this.
 .Sh OPTIONS
@@ -31,7 +32,8 @@ program does this.
 .It Fl q
 Be quiet.
 .It Fl Q
-Be normally verbose. This is the default.
+Be normally verbose.
+This is the default.
 .It Fl v
 Be verbose.
 .It Fl p Ar localpath
@@ -53,20 +55,20 @@ is run with the following variables set:
 .It PROTO
 Always set to IPC.
 .It IPCLOCALPATH
-Set to the path associated with the local socket, if any. Be aware
-that it may contain arbitrary characters.
+Set to the path associated with the local socket, if any.
+Be aware that it may contain arbitrary characters.
 .El
 .Sh SEE ALSO
-.Xr s6-ipcserver 1 ,
-.Xr s6-ipcserver-socketbinder 1 ,
-.Xr s6-ipcserverd 1 ,
-.Xr s6-ioconnect 1 ,
-.Xr s6-ipcserver-access 1 ,
-.Xr s6-connlimit 1 ,
 .Xr s6-accessrules-cdb-from-fs 1 ,
-.Xr s6-accessrules-fs-from-cdb 1
+.Xr s6-accessrules-fs-from-cdb 1 ,
+.Xr s6-connlimit 1 ,
+.Xr s6-ioconnect 1 ,
+.Xr s6-ipcserver 1 ,
+.Xr s6-ipcserver-access 1 ,
+.Xr s6-ipcserver-socketbinder 1 ,
+.Xr s6-ipcserverd 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-ipcclient.html
 .Sh AUTHORS
 .An Laurent Bercot
