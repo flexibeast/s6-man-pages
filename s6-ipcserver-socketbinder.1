@@ -1,9 +1,9 @@
-.Dd August 25, 2020
+.Dd September 3, 2020
 .Dt S6-IPCSERVER-SOCKETBINDER 1
 .Os
 .Sh NAME
 .Nm s6-ipcserver-socketbinder
-.Nd bind a Unix domain socket, then execute a program.
+.Nd bind a Unix domain socket, then execute a program
 .Sh SYNOPSIS
 .Nm
 .Op Fl d | D
@@ -29,8 +29,9 @@ The socket is provided
 .Pp
 .Nm
 is part of a set of basic blocks used to build a flexible Unix
-super-server. It normally should be given a command line crafted to
-make it execute into
+super-server.
+It normally should be given a command line crafted to make it execute
+into
 .Xr s6-ipcserverd 1
 to accept connections from clients, or into a program such as
 .Xr s6-applyuidgid 1
@@ -38,8 +39,9 @@ to drop privileges before doing so.
 .Pp
 The
 .Xr s6-ipcserver 1
-program does exactly this. It implements a full Unix super-server by
-building a command line starting with
+program does exactly this.
+It implements a full Unix super-server by building a command line
+starting with
 .Nm
 and ending with
 .Xr s6-ipcserverd 1
@@ -52,8 +54,9 @@ long ago - this is the
 .Dv SO_REUSEADDR
 flag to
 .Xr setsockopt 2
-and is generally used with server programs. This is the default. Note
-that
+and is generally used with server programs.
+This is the default.
+Note that
 .Ar path
 will be deleted if it already exists at program start time.
 .It Fl D
@@ -62,10 +65,11 @@ Disallow instant rebinding to the same path.
 Set a maximum of
 .Ar backlog
 backlog connections on the socket - extra connection attempts will
-rejected by the kernel. The default is
+rejected by the kernel.
+The default is
 .Dv SOMAXCONN ,
-i.e. the maximum number allowed by the system. If backlog is 0, then
-the socket will be created, but it
+i.e. the maximum number allowed by the system.
+If backlog is 0, then the socket will be created, but it
 .Sy will not be listening .
 .It Fl M
 The type of the socket will be
@@ -87,25 +91,26 @@ along with
 .It Fl a Ar perms
 Create the socket with permissions
 .Ar perms ,
-which is an octal number from 0000 to 0777. Default is 0777, meaning
-everyone can connect to it. 0700 means only processes having the same
-uid as the
+which is an octal number from 0000 to 0777.
+Default is 0777, meaning everyone can connect to it.
+0700 means only processes having the same uid as the
 .Nm
 process can connect to it.
 .It Fl B
-The socket will be blocking. The default is nonblocking.
+The socket will be blocking.
+The default is nonblocking.
 .El
 .Sh SEE ALSO
+.Xr s6-accessrules-cdb-from-fs 1 ,
+.Xr s6-accessrules-fs-from-cdb 1 ,
+.Xr s6-connlimit 1 ,
+.Xr s6-ioconnect 1 ,
 .Xr s6-ipcclient 1 ,
 .Xr s6-ipcserver 1 ,
-.Xr s6-ipcserverd 1 ,
-.Xr s6-ioconnect 1 ,
 .Xr s6-ipcserver-access 1 ,
-.Xr s6-connlimit 1 ,
-.Xr s6-accessrules-cdb-from-fs 1 ,
-.Xr s6-accessrules-fs-from-cdb 1
+.Xr s6-ipcserverd 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-ipcserver-socketbinder.html
 .Sh AUTHORS
 .An Laurent Bercot
