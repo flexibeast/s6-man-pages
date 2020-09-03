@@ -1,11 +1,11 @@
-.Dd August 25, 2020
+.Dd September 3, 2020
 .Dt S6-IPCSERVER-ACCESS 1
 .Os
 .Sh NAME
 .Nm s6-ipcserver-access
 .Nd control tool for Unix domain sockets on systems where the
-.Xr getpeereid 2
-system call can be implemented.
+.Fn getpeereid
+system call can be implemented
 .Sh SYNOPSIS
 .Nm
 .Op Fl v Ar verbosity
@@ -42,23 +42,25 @@ instructions to override
 .Ar prog... .
 .Ss Access rule checking
 .Nm
-checks its client connection against a ruleset. This ruleset can be
-implemented:
+checks its client connection against a ruleset.
+This ruleset can be implemented:
 .Bl -bullet -width x
 .It
 either in the filesystem as an arborescence of directories and files,
 if the
 .Fl i
-option has been given. This option is the most flexible one: the
-directory format is simple enough for scripts to understand and modify
-it, and the ruleset can be changed dynamically. This is practical, for
-instance, for roaming users.
+option has been given.
+This option is the most flexible one: the directory format is simple
+enough for scripts to understand and modify it, and the ruleset can be
+changed dynamically.
+This is practical, for instance, for roaming users.
 .It
 or in a CDB file, if the
 .Fl x
-option has been given. This option is the most efficient one if the
-ruleset is static enough: a lot less system calls are needed to
-perform searches in a CDB than in the filesystem.
+option has been given.
+This option is the most efficient one if the ruleset is static enough:
+a lot less system calls are needed to perform searches in a CDB than
+in the filesystem.
 .El
 .Pp
 The exact format of the ruleset is described in the
@@ -76,7 +78,8 @@ and
 .Ev ${PROTO}REMOTEEGID
 environment variables, and checks them with the
 .Fn s6_accessrules_keycheck_uidgid
-function. In other words, it tries to match:
+function.
+In other words, it tries to match:
 .Bl -bullet -width x
 .It
 (if the client's effective uid is the same as
@@ -108,7 +111,8 @@ effective gid)
 .Pa uid/default
 .El
 .Pp
-in that order. If no
+in that order.
+If no
 .Dv S6_ACCESSRULES_ALLOW
 result can be obtained, the connection is denied.
 .Ss Environment and executable modifications
@@ -141,15 +145,17 @@ completely bypasses the rest of
 .Nm
 .Ap
 .Sm on
-command line. After environment modifications, if any,
+command line.
+After environment modifications, if any,
 .Nm
 execs into
 .Ql execlineb -c newprog .
 Please be aware that the
 .Pa exec
 file functionality is only supported when s6 has been built with
-execline support. Otherwise, a warning message is printed and
-executable diversion is not performed.
+execline support.
+Otherwise, a warning message is printed and executable diversion is
+not performed.
 .El
 .Sh OPTIONS
 .Bl -tag -width x
@@ -159,19 +165,21 @@ Be more or less verbose, i.e. print more or less information to stderr:
 .It 0
 Only log error messages.
 .It 1
-Only log error and warning messages, and accepted connections. This is
-the default.
+Only log error and warning messages, and accepted connections.
+This is the default.
 .It 2
 Also log rejected connections and more warning messages.
 .El
 .It Fl E
-No environment. All environment variables potentially set by
+No environment.
+All environment variables potentially set by
 .Nm ,
 as well as those set by
 .Xr s6-ipcserver 1 ,
 will be unset instead.
 .It Fl e
-Set up environment variables normally. This is the default.
+Set up environment variables normally.
+This is the default.
 .It Fl l Ar localname
 Use
 .Ar localname
@@ -190,9 +198,9 @@ file.
 .Fl i
 and
 .Fl x
-are mutually exclusive. If none of those options is given, no
-credential checking will be performed, and a warning will be emitted
-on every connection if
+are mutually exclusive.
+If none of those options is given, no credential checking will be
+performed, and a warning will be emitted on every connection if
 .Ar verbosity
 is 2 or more.
 .El
@@ -224,16 +232,16 @@ Also, the access rules database can instruct
 to set up, or unset, more environment variables, depending on the
 client address.
 .Sh SEE ALSO
+.Xr s6-accessrules-cdb-from-fs 1 ,
+.Xr s6-accessrules-fs-from-cdb 1 ,
+.Xr s6-connlimit 1 ,
+.Xr s6-ioconnect 1 ,
 .Xr s6-ipcclient 1 ,
 .Xr s6-ipcserver 1 ,
 .Xr s6-ipcserver-socketbinder 1 ,
-.Xr s6-ipcserverd 1 ,
-.Xr s6-ioconnect 1 ,
-.Xr s6-connlimit 1 ,
-.Xr s6-accessrules-cdb-from-fs 1 ,
-.Xr s6-accessrules-fs-from-cdb 1
+.Xr s6-ipcserverd 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-ipcserver-access.html
 .Sh AUTHORS
 .An Laurent Bercot
