@@ -1,9 +1,9 @@
-.Dd August 25, 2020
+.Dd September 3, 2020
 .Dt S6-IOCONNECT 1
 .Os
 .Sh NAME
 .Nm s6-ioconnect
-.Nd perform full-duplex data transmission between two sets of open file descriptors.
+.Nd perform full-duplex data transmission between two sets of open file descriptors
 .Sh SYNOPSIS
 .Nm
 .Op Fl t Ar millisecs
@@ -25,28 +25,29 @@ When both sides have transmitted EOF and
 .Nm
 has flushed its buffers, it exits 0.
 .Pp
-Transmitting EOF across full-duplex sockets is ugly. The right thing
-in every case cannot be automatically determined, so it is up to the
-user to mention that a socket must be shut down. Most of the time,
-though, shutting down sockets after EOF is the right thing to do, so
+Transmitting EOF across full-duplex sockets is ugly.
+The right thing in every case cannot be automatically determined, so
+it is up to the user to mention that a socket must be shut down.
+Most of the time, though, shutting down sockets after EOF is the right
+thing to do, so
 .Ql s6-ioconnect -67
 should be the common use case.
 .Pp
 The point of
 .Nm
 is to be used together with
-.Xr s6-tcpclient 1
+s6-tcpclient
 or
 .Xr s6-ipcclient 1
 to establish a full-duplex connection between the client and the
 server, for instance for testing purposes.
 .Nm
 is to
-.Xr s6-tcpclient 1
+s6-tcpclient
 as
 .Xr cat 1
 is to
-.Xr s6-tcpserver 1 :
+s6-tcpserver:
 a program that will just echo what it gets.
 .Pp
 On modern Linux systems,
@@ -58,9 +59,9 @@ system call.
 The
 .Nm
 utility was once part of the s6-networking suite, which is why the
-examples here involve TCP. Nevertheless, it can be used with
-connections across Unix domain sockets as well, and has its place in
-the s6 package.
+examples here involve TCP.
+Nevertheless, it can be used with connections across Unix domain
+sockets as well, and has its place in the s6 package.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl t Ar millisecs
@@ -68,7 +69,8 @@ If no activity on either side happens for
 .Ar millisecs
 milliseconds,
 .Nm
-closes the connection on both ends and exits 1. By default,
+closes the connection on both ends and exits 1.
+By default,
 .Ar millisecs
 is 0, which means no such timeout.
 .It Fl r Ar fdr
@@ -97,16 +99,16 @@ Assume the remote writing fd is a socket and needs to be shut down for
 writing to correctly transmit an EOF.
 .El
 .Sh SEE ALSO
+.Xr s6-accessrules-cdb-from-fs 1 ,
+.Xr s6-accessrules-fs-from-cdb 1 ,
+.Xr s6-connlimit 1 ,
 .Xr s6-ipcclient 1 ,
 .Xr s6-ipcserver 1 ,
-.Xr s6-ipcserver-socketbinder 1 ,
-.Xr s6-ipcserverd 1 ,
 .Xr s6-ipcserver-access 1 ,
-.Xr s6-connlimit 1 ,
-.Xr s6-accessrules-cdb-from-fs 1 ,
-.Xr s6-accessrules-fs-from-cdb 1
+.Xr s6-ipcserver-socketbinder 1 ,
+.Xr s6-ipcserverd 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-ioconnect.html
 .Sh AUTHORS
 .An Laurent Bercot
