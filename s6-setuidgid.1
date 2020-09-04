@@ -1,9 +1,9 @@
-.Dd August 23, 2020
+.Dd September 4, 2020
 .Dt S6-SETUIDGID 1
 .Os
 .Sh NAME
 .Nm s6-setuidgid
-.Nd execute a program as another user.
+.Nd execute a program as another user
 .Sh SYNOPSIS
 .Nm
 .Ar account
@@ -37,19 +37,19 @@ Then it executes into
 .Ar prog... .
 .Pp
 .Nm
-can only be run as root. Its main use is to drop root privileges
-before starting a daemon.
+can only be run as root.
+Its main use is to drop root privileges before starting a daemon.
 .Sh SEE ALSO
+.Xr s6-applyuidgid 1 ,
 .Xr s6-envdir 1 ,
 .Xr s6-envuidgid 1 ,
 .Xr s6-fghack 1 ,
 .Xr s6-setsid 1 ,
-.Xr s6-applyuidgid 1 ,
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64n 1 ,
 .Xr s6-tai64nlocal 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-setuidgid.html
 .Sh AUTHORS
 .An Laurent Bercot
