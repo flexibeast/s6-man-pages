@@ -1,4 +1,4 @@
-.Dd August 20, 2020
+.Dd September 4, 2020
 .Dt S6-NOTIFYWHENUP 7
 .Os
 .Sh NAME
@@ -7,23 +7,27 @@
 .Sh DESCRIPTION
 It is easy for a process supervision suite to know when a service that
 was up is now down: the long-lived process implementing the service is
-dead. The supervisor, running as the daemon's parent, is instantly
-notified via a SIGCHLD. When it happens,
+dead.
+The supervisor, running as the daemon's parent, is instantly notified
+via a SIGCHLD.
+When it happens,
 .Xr s6-supervise 1
 sends a
 .Sq d
 event to its
 .Pa ./event
 .Xr s6-fifodir 7 ,
-so every subscriber knows that the service is down. All is well.
+so every subscriber knows that the service is down.
+All is well.
 .Pp
 It is much trickier for a process supervision suite to know when a
-service that was down is now up. The supervisor forks and execs the
-daemon, and knows when the exec has succeeded; but after that point,
-it's all up to the daemon itself. Some daemons do a lot of
-initialization work before they're actually ready to serve, and it is
-impossible for the supervisor to know exactly when the service is
-really ready.
+service that was down is now up.
+The supervisor forks and execs the daemon, and knows when the exec has
+succeeded; but after that point, it's all up to the daemon
+itself.
+Some daemons do a lot of initialization work before they're actually
+ready to serve, and it is impossible for the supervisor to know
+exactly when the service is really ready.
 .Xr s6-supervise 1
 sends a
 .Sq u
@@ -35,10 +39,14 @@ when it successfully spawns the daemon, but any subscriber reacting to
 is subject to a race condition - the service provided by the daemon
 may not be ready yet.
 .Pp
-Reliable startup notifications need support from the daemons themselves. Daemons should do two things to signal the outside world that they are ready:
+Reliable startup notifications need support from the daemons
+themselves.
+Daemons should do two things to signal the outside world that they are
+ready:
 .Bl -enum -width -x
 .It
-Update a state file, so other processes can get a snapshot of the daemon's state.
+Update a state file, so other processes can get a snapshot of the
+daemon's state.
 .It
 Send an event to processes waiting for a state change.
 .El
@@ -47,8 +55,8 @@ This is complex to implement in every single daemon, so s6 provides
 tools to make it easier for daemon authors, without any need to link
 against the s6 library or use any s6-specific construct: daemons can
 simply write a line to a file descriptor of their choice, then close
-that file descriptor, when they're ready to serve. This is a generic
-mechanism that some daemons already implement.
+that file descriptor, when they're ready to serve.
+This is a generic mechanism that some daemons already implement.
 .Pp
 s6 supports that mechanism natively: when the service directory for
 the daemon contains a valid
@@ -66,37 +74,38 @@ then notify all the subscribers with a
 event, meaning that the service is now up and ready.
 .Pp
 This method should really be implemented in every long-running program
-providing a service. When it is not the case, it's impossible to
-provide reliable startup notifications, and subscribers should then be
-content with the unreliable
+providing a service.
+When it is not the case, it's impossible to provide reliable startup
+notifications, and subscribers should then be content with the
+unreliable
 .Sq u
 events provided by
 .Xr s6-supervise 1 .
 .Pp
 Unfortunately, a lot of long-running programs do not offer that
 functionality; instead, they provide a way to poll them, an external
-program that runs and checks whether the service is ready. This is a
-bad mechanism, for several reasons. Nevertheless, until all daemons
-are patched to notify their own readiness, s6 provides a way to run
-such a check program to poll for readiness, and route its result into
-the s6 notification system:
+program that runs and checks whether the service is ready.
+This is a bad mechanism, for several reasons.
+Nevertheless, until all daemons are patched to notify their own
+readiness, s6 provides a way to run such a check program to poll for
+readiness, and route its result into the s6 notification system:
 .Xr s6-notifyoncheck 1 .
 .Sh SEE ALSO
-.Xr s6-svscan 1 ,
-.Xr s6-svscanctl 1 ,
+.Xr s6-notifyoncheck 1 ,
+.Xr s6-permafailon 1 ,
 .Xr s6-supervise 1 ,
 .Xr s6-svc 1 ,
-.Xr s6-svok 1 ,
-.Xr s6-svstat 1 ,
-.Xr s6-svwait 1 ,
-.Xr s6-svlisten1 1 ,
-.Xr s6-svlisten 1 ,
-.Xr s6-notifyoncheck 1 ,
 .Xr s6-svdt 1 ,
 .Xr s6-svdt-clear 1 ,
-.Xr s6-permafailon 1
+.Xr s6-svlisten 1 ,
+.Xr s6-svlisten1 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svscan 1 ,
+.Xr s6-svscanctl 1 ,
+.Xr s6-svstat 1 ,
+.Xr s6-svwait 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/notifywhenup.html
 .Sh AUTHORS
 .An Laurent Bercot
