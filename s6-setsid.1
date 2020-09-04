@@ -1,9 +1,9 @@
-.Dd August 23, 2020
+.Dd September 4, 2020
 .Dt S6-SETSID 1
 .Os
 .Sh NAME
 .Nm s6-setsid
-.Nd run a program as a new session leader, or in a new foreground or background process group.
+.Nd run a program as a new session leader, or in a new foreground or background process group
 .Sh SYNOPSIS
 .Nm
 .Op Fl s | b | f | g
@@ -27,7 +27,8 @@ Session.
 .Nm
 will try and execute
 .Ar prog
-as a session leader. This is the default.
+as a session leader.
+This is the default.
 .It Fl b
 Background process group.
 .Nm
@@ -44,8 +45,8 @@ before executing
 .Ar prog .
 However, the new process group will likely be stopped, waiting for the
 former foreground process group to relinquish the controlling
-terminal, and will need to be sent a SIGCONT to resume. To avoid that,
-use the next option.
+terminal, and will need to be sent a SIGCONT to resume.
+To avoid that, use the next option.
 .It Fl g
 Grab terminal.
 .Nm
@@ -58,17 +59,20 @@ foreground process group: a process belonging to that former
 foreground process group will be stopped if it attempts to read from
 or write to that terminal.
 .It Fl i
-Strict. If
+Strict.
+If
 .Nm
 cannot perform the operations it needs, it will exit 111 with an error
 message.
 .It Fl I
-Loose. If
+Loose.
+If
 .Nm
 cannot perform the operations, it will print a warning message, but
 exec into
 .Ar prog
-nonetheless. This is the default.
+nonetheless.
+This is the default.
 .It Fl q
 Silent.
 .Nm
@@ -78,24 +82,25 @@ even if it cannot perform the operations.
 .It Fl d Ar ctty
 Assume file descriptor number
 .Ar ctty
-is the controlling terminal for the current session. Default is
-0. This is only useful when used with the
+is the controlling terminal for the current session.
+Default is 0.
+This is only useful when used with the
 .Fl f
 or
 .Fl g
 options.
 .El
 .Sh SEE ALSO
+.Xr s6-applyuidgid 1 ,
 .Xr s6-envdir 1 ,
 .Xr s6-envuidgid 1 ,
 .Xr s6-fghack 1 ,
 .Xr s6-setuidgid 1 ,
-.Xr s6-applyuidgid 1 ,
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64n 1 ,
 .Xr s6-tai64nlocal 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-setsid.html
 .Sh AUTHORS
 .An Laurent Bercot
