@@ -1,18 +1,19 @@
-.Dd August 30, 2020
+.Dd September 4, 2020
 .Dt S6-S6LOCKD 1
 .Os
 .Sh NAME
 .Nm s6-s6lockd
 .Nd
-.Xr s6lock 7
+.Xr s6-s6lock 7
 daemon which manages a set of lock files in a given directory, and
-associated timeouts.
+associated timeouts
 .Sh DESCRIPTION
 .Nm
 does not fork, does not background itself automatically, and does not
-use syslog. It is not meant to be run directly by the user: it will be
-spawned by the
-.Xr s6lock 7
+use syslog.
+It is not meant to be run directly by the user: it will be spawned by
+the
+.Xr s6-s6lock 7
 client library.
 .Pp
 There are two ways to use
@@ -21,13 +22,14 @@ There are two ways to use
 .It
 Use the
 .Fn s6lock_startf
-library call. An
+library call.
+An
 .Nm
 child will then be spawned from your calling process, and
 automatically reaped when you call
 .Fn s6lock_end .
-It requires care with applications that trap SIGCHLD. It also requires
-care with lock file permissions: an
+It requires care with applications that trap SIGCHLD.
+It also requires care with lock file permissions: an
 .Nm
 instance might not be able to open a lock file created by a former
 instance run by another client with different permissions.
@@ -36,7 +38,8 @@ Use the
 .Fn s6lock_start
 library call, together with an
 .Nm
-service. For once,
+service.
+For once,
 .Em this is the recommended setup :
 .Nm
 creates empty lock files, and having all
@@ -56,16 +59,17 @@ follows the UCSPI interface; it can be directly executed from the
 superserver.
 .Pp
 Unix does not natively provide a way to stop blocking on a lock
-acquisition after a timeout. To emulate such behaviour,
+acquisition after a timeout.
+To emulate such behaviour,
 .Nm
 actually spawns an
 .Xr s6lockd-helper 1
 child per requested lock.
 .Sh SEE ALSO
 .Xr s6-setlock 1 ,
-.Xr s6lockd-helper
+.Xr s6lockd-helper 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/libs6/s6lockd.html
 .Sh AUTHORS
 .An Laurent Bercot
