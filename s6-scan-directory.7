@@ -1,19 +1,20 @@
-.Dd August 19, 2020
+.Dd September 4, 2020
 .Dt S6-SCAN-DIRECTORY 7
 .Os
 .Sh NAME
 .Nm s6-scan-directory
-.Nd directory containing a list of service directories, or symbolic links pointing to service directories.
+.Nd directory containing a list of service directories, or symbolic links pointing to service directories
 .Sh DESCRIPTION
 A
 .Em scan directory
 represents a list of services that are supposed to be
-supervised. Running
+supervised.
+Running
 .Xr s6-svscan 1
 on this scan directory launches a
 .Em supervision tree :
 every service listed in the scan directory will be supervised.
-.PP
+.Pp
 There is normally only one scan directory per system, although nothing
 prevents a system administrator from having more. daemontools
 traditionally uses
@@ -22,7 +23,8 @@ and runit traditionally uses
 .Pa /etc/service .
 s6 does not care where your scan directory is, but I would advise
 .Pa /service
-for compatibility with daemontools. Depending on your installation,
+for compatibility with daemontools.
+Depending on your installation,
 .Pa /service
 could be a symbolic link and point to a place either in a RAM
 filesystem or in
@@ -35,17 +37,19 @@ service directories (your
 .Dq service repository )
 should not be used as a scan directory - for a simple reason: you
 might want to have service directories for more services than what you
-want to start at any given time. In other words, your scan directory
-will be a subset of your service repository, so you cannot just run
+want to start at any given time.
+In other words, your scan directory will be a subset of your service
+repository, so you cannot just run
 .Xr s6-svscan 1
-on every service you have a service directory for. So, the first thing
-is to separate your service repository, which is just a storage place
-for all the services you might want to manage someday, and your scan
-directory, which is a directory representing all the services that you
-are currently managing.
+on every service you have a service directory for.
+So, the first thing is to separate your service repository, which is
+just a storage place for all the services you might want to manage
+someday, and your scan directory, which is a directory representing
+all the services that you are currently managing.
 .Ss SERVICE REPOSITORY
 Where to store your service repository is purely a matter of personal
-preference. You just have to be aware that
+preference.
+You just have to be aware that
 .Xr s6-supervise 1
 needs writable
 .Pa supervise
@@ -58,34 +62,36 @@ boot system - and on your personal preference too.
 .Pp
 Standard daemontools and runit installations like to have a fixed scan
 directory containing symlinks to service directories located in the
-service repository. In other words, the service repository contains
-the real working copies of the service directories. This works, as
-long as:
+service repository.
+In other words, the service repository contains the real working
+copies of the service directories.
+This works, as long as:
 .Bl -bullet -width x
 .It
 It is possible to create writable
 .Pa supervise
 and
 .Pa event
-subdirectories in every managed service directory. This can be
-achieved for instance via symlinks, or by having the service
-repository stored on a writable filesystem.
+subdirectories in every managed service directory.
+This can be achieved for instance via symlinks, or by having the
+service repository stored on a writable filesystem.
 .It
 The scan program
 .Po
 .Xr s6-svscan 1 ,
-.Xr svscan 1 ,
-.Xr runsvdir 1 ...
+svscan,
+.Xr runsvdir 8 ...
 .Pc
 is started late enough for all the necessary filesystems to be mounted.
 .El
 .Pp
 My own recommendation would be to have working copies of the service
-directories entirely separate from the service repository. The service
-repository can be safely stored on the root filesystem, and the needed
-directories copied to a RAM filesystem at boot time. The scan
-directory can be either the place where the working copies are
-written, or another directory containing symlinks to those working
+directories entirely separate from the service repository.
+The service repository can be safely stored on the root filesystem,
+and the needed directories copied to a RAM filesystem at boot
+time.
+The scan directory can be either the place where the working copies
+are written, or another directory containing symlinks to those working
 copies. (The latter is useful if you are using the
 .Fl t
 option to
@@ -118,8 +124,8 @@ Have
 .Xr s6-svscan 1
 run on
 .Pa /tmp/service ,
-as early as possible in your boot sequence. This is possible whether
-you want to run
+as early as possible in your boot sequence.
+This is possible whether you want to run
 .Xr s6-svscan 1
 as process 1 or not.
 .It
@@ -148,10 +154,10 @@ s6-svscanctl -a /tmp/service
 .Ed
 .El
 .Sh SEE ALSO
-.Xr s6-service-directory 7 ,
-.Xr s6-fifodir 7
+.Xr s6-fifodir 7 ,
+.Xr s6-service-directory 7
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/scandir.html
 .Sh AUTHORS
 .An Laurent Bercot
