@@ -1,10 +1,10 @@
-.Dd August 24, 2020
+.Dd September 4, 2020
 .Dt S6-MKFIFODIR 1
 .Os
 .Sh NAME
 .Nm s6-mkfifodir
 .Nd create an
-.Xr s6-fifodir 7 .
+.Xr s6-fifodir 7
 .Sh SYNOPSIS
 .Nm
 .Op Fl f
@@ -18,11 +18,13 @@ belonging to the current user.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl f
-Force permissions. If
+Force permissions.
+If
 .Ar fifodir
 already exists, change its permissions according to the
-.F g
-options. By default, if
+.Fl g
+options.
+By default, if
 .Ar fifodir
 exists,
 .Nm
@@ -38,13 +40,13 @@ is made publically listenable.
 .El
 .Sh SEE ALSO
 .Xr s6-cleanfifodir 1 ,
+.Xr s6-ftrig-listen 1 ,
+.Xr s6-ftrig-listen1 1 ,
 .Xr s6-ftrig-notify 1 ,
 .Xr s6-ftrig-wait 1 ,
-.Xr s6-ftrig-listen1 1 ,
-.Xr s6-ftrig-listen 1 ,
 .Xr s6-ftrigrd 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-mkfifodir.html
 .Sh AUTHORS
 .An Laurent Bercot
