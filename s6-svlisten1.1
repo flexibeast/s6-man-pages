@@ -1,9 +1,9 @@
-.Dd August 30, 2020
+.Dd September 5, 2020
 .Dt S6-SVLISTEN1 1
 .Os
 .Sh NAME
 .Nm s6-svlisten1
-.Nd run a program while listening on notifications from a supervised service, and block until said service goes up, or down.
+.Nd run a program while listening on notifications from a supervised service, and block until said service goes up, or down
 .Sh SYNOPSIS
 .Nm
 .Op Fl U | u | D | d | r | R
@@ -53,17 +53,20 @@ Up.
 will wait until the service is up, as reported by
 .Xr s6-supervise 1 .
 This is the default; it is not reliable, but it does not depend on
-specific support in the service programs. See
+specific support in the service programs.
+See
 .Xr s6-notifywhenup 7
 for details.
 .It Fl U
 Really up.
 .Nm
 will wait until the service is up and ready as reported by the daemon
-itself. This requires specific support in the service programs, and
-the use of the
+itself.
+This requires specific support in the service programs, and the use of
+the
 .Pa notification-fd
-file in the service directory. See the explanation in
+file in the service directory.
+See the explanation in
 .Xr s6-notifywhenup 7 .
 .It Fl d
 Down.
@@ -93,7 +96,8 @@ If the requested event has not happened after
 .Ar timeout
 milliseconds,
 .Nm
-will print a message to stderr and exit 99. By default,
+will print a message to stderr and exit 99.
+By default,
 .Ar timeout
 is 0, which means no time limit.
 .El
@@ -115,20 +119,20 @@ process monitoring the service died.
 System call failed
 .El
 .Sh SEE ALSO
-.Xr s6-svscan 1 ,
-.Xr s6-svscanctl 1 ,
+.Xr s6-notifyoncheck 1 ,
+.Xr s6-permafailon 1 ,
 .Xr s6-supervise 1 ,
 .Xr s6-svc 1 ,
-.Xr s6-svok 1 ,
-.Xr s6-svstat 1 ,
-.Xr s6-svwait 1 ,
-.Xr s6-svlisten 1 ,
-.Xr s6-notifyoncheck 1 ,
 .Xr s6-svdt 1 ,
 .Xr s6-svdt-clear 1 ,
-.Xr s6-permafailon 1
+.Xr s6-svlisten 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svscan 1 ,
+.Xr s6-svscanctl 1 ,
+.Xr s6-svstat 1 ,
+.Xr s6-svwait 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-svlisten1.html
 .Sh AUTHORS
 .An Laurent Bercot
