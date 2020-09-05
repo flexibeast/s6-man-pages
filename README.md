@@ -6,7 +6,6 @@ suite](http://skarnet.org/software/s6/).
 
 It is currently a work in progress:
 
-* many pages still need to be linted;
 * some pages do not yet conform to mdoc(7) conventions;
 * some pages need to use more appropriate macros;
 * links to Web pages still need to be added.
