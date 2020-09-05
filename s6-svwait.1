@@ -1,9 +1,9 @@
-.Dd August 30, 2020
+.Dd September 5, 2020
 .Dt S6-SVWAIT 1
 .Os
 .Sh NAME
 .Nm s6-svwait
-.Nd block until a collection of supervised services goes up, or down.
+.Nd block until a collection of supervised services goes up, or down
 .Sh SYNOPSIS
 .Nm
 .Op Fl U | u | D | d
@@ -16,15 +16,17 @@ only waits for notifications; it never polls.
 .Pp
 .Nm
 should be given one or more service directories as arguments, not a
-scan directory. If you need to wait for a whole scan directory, give
-all its contents as arguments to
+scan directory.
+If you need to wait for a whole scan directory, give all its contents
+as arguments to
 .Nm s6-svwait .
 .Pp
 .Nm
 will only work on service directories that are already active,
 i.e. have an
 .Xr s6-supervise 1
-process running on them. It will not work on a service directory where
+process running on them.
+It will not work on a service directory where
 .Xr s6-supervise 1
 has not been started yet.
 .Sh OPTIONS
@@ -35,17 +37,20 @@ Up.
 will wait until the services are up, as reported by
 .Xr s6-supervise 1 .
 This is the default; it is not reliable, but it does not depend on
-specific support in the service programs. See
+specific support in the service programs.
+See
 .Xr s6-notifywhenup 7
 for details.
 .It Fl U
 Really up.
 .Nm
 will wait until the services are up and ready as reported by the
-services themselves. This requires specific support in the service
-programs, and the use of the
+services themselves.
+This requires specific support in the service programs, and the use of
+the
 .Pa notification-fd
-file in the service directory. See the explanation in
+file in the service directory.
+See the explanation in
 .Xr s6-notifywhenup 7 .
 .It Fl d
 Down.
@@ -73,11 +78,13 @@ And.
 .Nm
 will wait until
 .Em all
-of the given services come up or down. This is the default.
+of the given services come up or down.
+This is the default.
 .It Fl t Ar timeout
 If the requested events have not happened after timeout milliseconds,
 .Nm
-will print a message to stderr and exit 99. By default,
+will print a message to stderr and exit 99.
+By default,
 .Ar timeout
 is 0, which means no time limit.
 .El
@@ -109,21 +116,22 @@ System call failed.
 Services were expected to come up, but
 .Em n
 of them reported permanent failure.
+.El
 .Sh SEE ALSO
-.Xr s6-svscan 1 ,
-.Xr s6-svscanctl 1 ,
+.Xr s6-notifyoncheck 1 ,
+.Xr s6-permafailon 1 ,
 .Xr s6-supervise 1 ,
 .Xr s6-svc 1 ,
-.Xr s6-svok 1 ,
-.Xr s6-svstat 1 ,
-.Xr s6-svlisten1 1 ,
-.Xr s6-svlisten 1 ,
-.Xr s6-notifyoncheck 1 ,
 .Xr s6-svdt 1 ,
 .Xr s6-svdt-clear 1 ,
-.Xr s6-permafailon 1
+.Xr s6-svlisten 1 ,
+.Xr s6-svlisten1 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svscan 1 ,
+.Xr s6-svscanctl 1 ,
+.Xr s6-svstat 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-svwait.html
 .Sh AUTHORS
 .An Laurent Bercot
