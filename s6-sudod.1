@@ -1,11 +1,11 @@
-.Dd August 28, 2020
+.Dd September 5, 2020
 .Dt S6-SUDOD 1
 .Os
 .Sh NAME
 .Nm s6-sudod
 .Nd receive command-line arguments, environment variables and standard descriptors from a peer
 .Xr s6-sudoc 1
-program over a Unix socket, then fork another program.
+program over a Unix socket, then fork another program
 .Sh SYNOPSIS
 .Nm
 .Op Fl 0
@@ -17,8 +17,10 @@ program over a Unix socket, then fork another program.
 .Sh DESCRIPTION
 .Nm
 gets 3 file descriptors via fd-passing over a Unix socket that must be
-open on its descriptors 0 and 1. (The received descriptors will be the
-stdin, stdout and stderr of the server program.) It expects an
+open on its descriptors 0 and 1.
+(The received descriptors will be the stdin, stdout and stderr of the
+server program.)
+It expects an
 .Xr s6-sudoc 1
 process to be sending them on the client side.
 .Pp
@@ -33,7 +35,8 @@ The client command line is appended to the server command line.
 .Nm
 waits for its child to exit and transmits its exit code to the peer
 .Xr s6-sudoc 1
-process. It then exits 0.
+process.
+It then exits 0.
 .Pp
 If the
 .Fl d
@@ -45,9 +48,10 @@ is killed (or exits after
 .Ar timeoutrun
 milliseconds) while the server program is still running,
 .Nm
-will send a SIGTERM and a SIGCONT to its child, then exit 1. However,
-sending a SIGTERM to the child does not guarantee that it will die;
-and if it keeps running, it might still read from the file that was
+will send a SIGTERM and a SIGCONT to its child, then exit 1.
+However, sending a SIGTERM to the child does not guarantee that it
+will die; and if it keeps running, it might still read from the file
+that was
 .Xr s6-sudoc 1
 .Ap
 s stdin, or write to the files that were
@@ -63,10 +67,11 @@ handled transparently by the
 .Xr s6-sudoc 1
 +
 .Nm
-mechanism. The mechanism was designed to allow programs to gain
-privileges in specific situations: short-lived, simple, noninteractive
-processes. It was not designed to emulate the full suid functionality
-and will not go out of its way to do so.
+mechanism.
+The mechanism was designed to allow programs to gain privileges in
+specific situations: short-lived, simple, noninteractive processes.
+It was not designed to emulate the full suid functionality and will
+not go out of its way to do so.
 .Pp
 Administrators should also make sure that it's not a problem if
 .Nm
@@ -81,8 +86,9 @@ In particular, they should study what happens if another connection to
 the same service occurs while an instance is still running.
 .Pp
 .Ar sargv
-may be empty. In that case, the client is in complete control of the
-command line executed as
+may be empty.
+In that case, the client is in complete control of the command line
+executed as
 .Va serveruser .
 This setup is permitted by
 .Nm ,
@@ -110,11 +116,14 @@ Do not inherit stderr from
 The child will be run with its stderr being a copy of
 .Nm
 .Ap
-s stderr instead. (This is useful to still log the child's error
-messages without sending them to the client.)
+s stderr instead.
+(This is useful to still log the child's error messages without
+sending them to the client.)
 .It Fl d
-Detach. The child will keep running until it naturally exits, even if
-the client disconnects. Setting this option also enforces
+Detach.
+The child will keep running until it naturally exits, even if the
+client disconnects.
+Setting this option also enforces
 .Fl 0 ,
 .Fl 1
 and
@@ -127,11 +136,12 @@ If
 .Nm
 has not received all the needed data from the client after
 .Ar timeout
-milliseconds, it will exit without spawning a child. By default,
+milliseconds, it will exit without spawning a child.
+By default,
 .Ar timeout
-is 0, meaning infinite. This mechanism exists to protect the server
-from malicious or buggy clients that would uselessly consume
-resources.
+is 0, meaning infinite.
+This mechanism exists to protect the server from malicious or buggy
+clients that would uselessly consume resources.
 .El
 .Sh ENVIRONMENT
 .Nm
@@ -148,7 +158,8 @@ s environment, then its value is overridden by the value given by
 A variable that is already nonempty, or that doesn't exist, in
 .Nm
 .Ap
-s environment, will not be transmitted to the child. In other words:
+s environment, will not be transmitted to the child.
+In other words:
 .Bl -bullet -width x
 .It
 If there's no variable
@@ -212,23 +223,25 @@ s6-envdir env
 s6-sudod
 sargv
 .Ed
-.Pp
 .Bl -bullet -width x
 .It
 execlineb executes the script.
 .It
 fdmove
-makes sure the script's error messages are sent to the service's logger.
+makes sure the script's error messages are sent to the service's
+logger.
 .It
-fdmove redirects the script's stdout to file descriptor 3. This is
-useful if the service directory contains a
+fdmove
+redirects the script's stdout to file descriptor 3. This is useful if
+the service directory contains a
 .Pa notification-fd
 file containing 3, so the daemon can perform readiness notification
 .Po
 cf.
 .Xr s6-notifywhenup 7
 .Pc
-by writing a newline to its stdout. (The
+by writing a newline to its stdout.
+(The
 .Fl 1
 option to
 .Xr s6-ipcserver 1
@@ -249,7 +262,8 @@ binds to
 .Va serversocket ,
 drops its privileges to those of
 .Va serveruser ,
-and announces its readiness. Then, for every client connecting to
+and announces its readiness.
+Then, for every client connecting to
 .Va serversocket :
 .Bl -bullet -width x
 .It
@@ -288,7 +302,8 @@ spawns
 (Actually,
 .Xr s6-ipcserver 1
 does not do this itself: it executes into other programs that each do
-one of the tasks. But for our example, it does not matter.)
+one of the tasks.
+But for our example, it does not matter.)
 .El
 .Pp
 This means that user
@@ -310,7 +325,7 @@ transmitted to
 .Xr s6-sudo 1 ,
 .Xr s6-sudoc 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-sudod.html
 .Sh AUTHORS
 .An Laurent Bercot
