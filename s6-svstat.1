@@ -1,10 +1,10 @@
-.Dd August 20, 2020
+.Dd September 5, 2020
 .Dt S6-SVSTAT 1
 .Os
 .Sh NAME
 .Nm s6-svstat
 .Nd print a short, human-readable or programmatically parsable summary of the state of a process monitored by
-.Xr s6-supervise 1 .
+.Xr s6-supervise 1
 .Sh SYNOPSIS
 .Nm
 .Op Fl uwNrpest | o No up,wantedup,normallyup,ready,paused,pid,exitcode,signal,signum,updownsince,readysince,updownfor,readyfor
@@ -22,11 +22,12 @@ When
 is invoked without options, or with only the
 .Fl n
 option, it prints a human-readable summary of all the available
-information on the service. In this case, the
+information on the service.
+In this case, the
 .Fl n
 option instructs it to print a signal number (instead of a signal
-name) if the supervised process was killed by a signal. The summary
-includes the following data:
+name) if the supervised process was killed by a signal.
+The summary includes the following data:
 .Bl -bullet -width x
 .It
 whether the process is up or down, and if it's up, the number of
@@ -40,9 +41,10 @@ what its default state is, if it is different from its current state.
 the number of seconds since it last changed states.
 .It
 whether the service is ready, as notified by the daemon itself, and if
-it is, the number of seconds that it has been. A service reported as
-down and ready simply means that it is ready to be brought up. A
-service is down and not ready when it is in the cleanup phase,
+it is, the number of seconds that it has been.
+A service reported as down and ready simply means that it is ready to
+be brought up.
+A service is down and not ready when it is in the cleanup phase,
 i.e. the
 .Pa ./finish
 script is still being executed.
@@ -52,16 +54,17 @@ When
 .Nm
 is invoked with one or several options other than
 .Fl n ,
-it outputs programmatically parsable information instead. The output
-is a series of space-separated values, one value per requested
-field. The valid options are as follows.
+it outputs programmatically parsable information instead.
+The output is a series of space-separated values, one value per
+requested field.
+The valid options are as follows.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl o Ar fields
 List fields to print.
 .Ar fields
-is a list of comma-separated field names. The valid field names are
-the following:
+is a list of comma-separated field names.
+The valid field names are the following:
 .Bl -tag -width x
 .It up
 Print
@@ -96,12 +99,13 @@ Print
 .Ql true
 if the service is ready, and
 .Ql false
-if it is not. Note that
+if it is not.
+Note that
 a service can be both down and ready: it simply means that it is ready
 to be started (i.e. no
 .Pa ./finish
-script is currently running). To check for service readiness, you
-should give this option along with
+script is currently running).
+To check for service readiness, you should give this option along with
 .Ql up :
 the service is ready iff
 .Ql s6-svstat -o up,ready
@@ -116,11 +120,11 @@ Print
 .Ql true
 if the service is paused (i.e. the process is currently stopped) and
 .Ql false
-if it is not. It is a rare flag, you shouldn't normally need to use
-this option.
+if it is not.
+It is a rare flag, you shouldn't normally need to use this option.
 .It pid
-Print the pid of the supervised process. If the service is currently
-down,
+Print the pid of the supervised process.
+If the service is currently down,
 .Ql -1
 is printed instead.
 .It exitcode
@@ -134,7 +138,8 @@ is printed instead.
 .It signal
 Print the name of the signal the last
 .Pa ./run
-process was killed with. If the service is currently up, or the last
+process was killed with.
+If the service is currently up, or the last
 .Pa ./run
 process was not killed by a signal,
 .Ql NA
@@ -142,7 +147,8 @@ is printed instead.
 .It signum
 Print the number of the signal the last
 .Pa ./run
-process was killed with. If the service is currently up, or the last
+process was killed with.
+If the service is currently up, or the last
 .Pa ./run
 process was not killed by a signal,
 .Ql -1
@@ -152,7 +158,8 @@ Print a TAI64N label representing the absolute date when the service
 last changed states.
 .It readysince
 Print a TAI64N label representing the absolute date when the service
-last became ready. Note that this can either mean
+last became ready.
+Note that this can either mean
 .Dq service readiness
 (if the service is currently up and ready), or
 .Dq down readiness ,
@@ -166,7 +173,6 @@ Print the number of seconds that have elapsed since the service last
 became ready (or ready to be started if it's currently not up and
 ready).
 .El
-.Pp
 .It Fl u
 Equivalent to
 .Ql -o up .
@@ -206,7 +212,6 @@ Wrong usage.
 System call failed.
 .El
 .Sh EXAMPLES
-.Pp
 .Dl s6-svstat -o up,ready
 .Pp
 or its equivalent,
@@ -244,20 +249,20 @@ was last killed by a SIGTERM - as can happen, for instance, when you
 down the service via a call to
 .Ql s6-svc -d .
 .Sh SEE ALSO
-.Xr s6-svscan 1 ,
-.Xr s6-svscanctl 1 ,
+.Xr s6-notifyoncheck 1 ,
+.Xr s6-permafailon 1 ,
 .Xr s6-supervise 1 ,
 .Xr s6-svc 1 ,
-.Xr s6-svok 1 ,
-.Xr s6-svwait 1 ,
-.Xr s6-svlisten1 1 ,
-.Xr s6-svlisten 1 ,
-.Xr s6-notifyoncheck 1 ,
 .Xr s6-svdt 1 ,
 .Xr s6-svdt-clear 1 ,
-.Xr s6-permafailon 1
+.Xr s6-svlisten 1 ,
+.Xr s6-svlisten1 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svscan 1 ,
+.Xr s6-svscanctl 1 ,
+.Xr s6-svwait 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-svstat.html
 .Sh AUTHORS
 .An Laurent Bercot
