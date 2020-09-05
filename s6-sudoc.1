@@ -1,4 +1,4 @@
-.Dd August 27, 2020
+.Dd September 5, 2020
 .Dt S6-SUDOC 1
 .Os
 .Sh NAME
@@ -6,7 +6,7 @@
 .Nd talk to a peer
 .Xr s6-sudod 1
 program over a Unix socket, passing it command-line arguments,
-environment variables and standard descriptors.
+environment variables and standard descriptors
 .Sh SYNOPSIS
 .Nm
 .Op Fl e
@@ -17,13 +17,15 @@ environment variables and standard descriptors.
 .Nm
 transmits its standard input, standard output and standard error via
 fd-passing over a Unix socket that must be open on its descriptors 6
-and 7. It expects a
+and 7.
+It expects a
 .Xr s6-sudod 1
 process to be receiving them on the other side.
 .Pp
 It also transmits its command-line arguments
 .Ar args... ,
-and also its environment by default. Note that
+and also its environment by default.
+Note that
 .Xr s6-sudod 1
 will not necessarily accept all the environment variables that
 .Nm
@@ -32,8 +34,9 @@ tries to transmit.
 .Nm
 waits for the server program run by
 .Xr s6-sudod 1
-to finish. It exits the same exit code as the server program. If the
-server program is killed by a signal,
+to finish.
+It exits the same exit code as the server program.
+If the server program is killed by a signal,
 .Nm
 kills itself with the same signal.
 .Pp
@@ -44,8 +47,9 @@ is killed, or exits after
 milliseconds, while the server program is still running,
 .Xr s6-sudod 1
 will send a SIGTERM and a SIGCONT to the server program - but this
-does not guarantee that it will die. If the server program keeps
-running, it might still read from the file that was
+does not guarantee that it will die.
+If the server program keeps running, it might still read from the file
+that was
 .Nm
 .Ap
 s stdin, or write to the files that were
@@ -61,10 +65,11 @@ handled transparently by the
 .Nm
 +
 .Xr s6-sudod 1
-mechanism. The mechanism was designed to allow programs to gain
-privileges in specific situations: short-lived, simple, noninteractive
-processes. It was not designed to emulate the full suid functionality
-and will not go out of its way to do so.
+mechanism.
+The mechanism was designed to allow programs to gain privileges in
+specific situations: short-lived, simple, noninteractive processes.
+It was not designed to emulate the full suid functionality and will
+not go out of its way to do so.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl e
@@ -76,26 +81,29 @@ If
 has not managed to process the given information and start the server
 program after
 .Ar timeoutconn
-milliseconds, give up. By default,
+milliseconds, give up.
+By default,
 .Ar timeoutconn
-is 0, meaning infinite. Note that there is no reason to set up a
-nonzero
+is 0, meaning infinite.
+Note that there is no reason to set up a nonzero
 .Ar timeoutconn
 with a large value:
 .Xr s6-sudod 1
-is not supposed to block. The option is only there to protect against
-ill-written services.
+is not supposed to block.
+The option is only there to protect against ill-written services.
 .It Fl T Ar timeoutrun
 If the server program has not exited after
 .Ar timeoutrun
-milliseconds, give up. By default,
+milliseconds, give up.
+By default,
 .Ar timeoutrun
 is 0, meaning infinite.
+.El
 .Sh SEE ALSO
 .Xr s6-sudo 1 ,
 .Xr s6-sudod 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-sudoc.html
 .Sh AUTHORS
 .An Laurent Bercot
