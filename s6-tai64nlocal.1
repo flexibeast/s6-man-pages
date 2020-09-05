@@ -1,15 +1,16 @@
-.Dd August 24, 2020
+.Dd September 5, 2020
 .Dt S6-TAI64NLOCAL 1
 .Os
 .Sh NAME
 .Nm s6-tai64nlocal
-.Nd read from stdin and write to stdout, replacing every line beginning with a TAI64N timestamp with a human-readable local date and time.
+.Nd read from stdin and write to stdout, replacing every line beginning with a TAI64N timestamp with a human-readable local date and time
 .Sh SYNOPSIS
 .Nm
 .Op Fl g
 .Sh DESCRIPTION
 .Nm
-exits 0 when it sees the end of stdin. If there's an unfinished line,
+exits 0 when it sees the end of stdin.
+If there's an unfinished line,
 .Nm
 processes it and writes it before exiting.
 .Pp
@@ -21,7 +22,9 @@ or log files that have been produced by
 .Xr s6-log 1
 with the
 .Fl t
-option. For instance, to read the latest httpd logs with human-readable timestamps,
+option.
+For instance, to read the latest httpd logs with human-readable
+timestamps,
 .Ql s6-tai64nlocal < /var/log/httpd/current | less
 is a possible command.
 .Pp
@@ -41,14 +44,15 @@ does not appear to give the correct local time:
 Check the compilation options that were used for the skalibs libraries
 your
 .Nm s6-tai64nlocal
-program was linked against. In particular, check whether the
+program was linked against.
+In particular, check whether the
 .Ql --enable-tai-clock
 or
 .Ql --enable-right-tz
 configure options have been given.
 .It
-Compare these flags and their meanings with your current timezone. In
-particular, check
+Compare these flags and their meanings with your current timezone.
+In particular, check
 .Pa /etc/localtime ,
 .Pa /etc/timezone ,
 .Pa /etc/TZ ,
@@ -62,16 +66,16 @@ environment variable.
 Print GMT time instead of local time.
 .El
 .Sh SEE ALSO
+.Xr s6-applyuidgid 1 ,
 .Xr s6-envdir 1 ,
 .Xr s6-envuidgid 1 ,
 .Xr s6-fghack 1 ,
 .Xr s6-setsid 1 ,
 .Xr s6-setuidgid 1 ,
-.Xr s6-applyuidgid 1 ,
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64n 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-tai64nlocal.html
 .Sh AUTHORS
 .An Laurent Bercot
