@@ -1,11 +1,11 @@
-.Dd August 19, 2020
+.Dd September 5, 2020
 .Dt S6-SUPERVISE 1
 .Os
 .Sh NAME
 .Nm s6-supervise
 .Nd monitor a long-lived process (or service), making sure it stays
 alive, sending notifications to registered processes when it dies, and
-providing an interface to control its state.
+providing an interface to control its state
 .Sh SYNOPSIS
 .Nm
 .Ar servicedir
@@ -32,7 +32,8 @@ file in the service directory.
 .It
 .Pa ./run
 should be a long-lived process: it can chain load (i.e. exec into
-other binaries), but should not die. It's the daemon that
+other binaries), but should not die.
+It's the daemon that
 .Nm
 monitors and manages.
 .It
@@ -42,8 +43,9 @@ dies,
 .Nm
 spawns
 .Pa ./finish ,
-if it exists. This script should be short-lived: it's meant to clean
-up application state, if necessary, that has not been cleaned up by
+if it exists.
+This script should be short-lived: it's meant to clean up application
+state, if necessary, that has not been cleaned up by
 .Pa ./run
 itself before dying.
 .It
@@ -58,13 +60,15 @@ again.
 .Nm
 operation can be controlled by the
 .Xr s6-svc 1
-program. It can be sent commands like
+program.
+It can be sent commands like
 .Dq restart the service ,
 .Dq bring the service down ,
 etc.
 .It
 .Nm
-normally runs forever. If told to exit by
+normally runs forever.
+If told to exit by
 .Xr s6-svc 1 ,
 it waits for the service to go down one last time, then exits 0.
 .El
@@ -93,7 +97,8 @@ If the service directory contains a valid
 file when the service is started, or restarted,
 .Nm
 creates and listens to an additional pipe from the service for
-readiness notification. When the notification occurs,
+readiness notification.
+When the notification occurs,
 .Nm
 updates the
 .Pa ./supervise/status
@@ -108,15 +113,16 @@ subdirectory that is also a service directory, and the
 .Nm
 process has been launched by that is also
 .Xr s6-svscan 1 ,
-then by default the service's stdout goes into the logging pipe. If
-you set
+then by default the service's stdout goes into the logging pipe.
+If you set
 .Pa notification-fd
 to 1, the logging pipe will be overwritten by the notification pipe,
-which is probably not what you want. Instead, if your daemon writes a
-notification message to its stdout, you should set
+which is probably not what you want.
+Instead, if your daemon writes a notification message to its stdout,
+you should set
 .Pa notification-fd
-to (for instance) 3, and redirect outputs in your run script. For
-instance, to redirect stderr to the logger and stdout to a
+to (for instance) 3, and redirect outputs in your run script.
+For instance, to redirect stderr to the logger and stdout to a
 .Pa notification-fd
 set to 3, you would start your daemon as
 .Ql fdmove -c 2 1 fdmove 1 3 prog...
@@ -164,7 +170,8 @@ fifodir does not exist,
 creates it and allows subscriptions to it from processes having the
 same effective group id as the
 .Nm
-process. If it already exists, it uses it as is, without modifying the
+process.
+If it already exists, it uses it as is, without modifying the
 subscription rights.
 .It
 It sends a
@@ -177,7 +184,7 @@ If the default service state is up (i.e. there is no
 file),
 .Nm
 spawns
-.Pa ./run.
+.Pa ./run .
 .It
 .Nm
 sends a
@@ -235,9 +242,11 @@ was not signaled.
 .It
 By default,
 .Pa ./finish
-must exit in less than 5 seconds. If it takes more than that,
+must exit in less than 5 seconds.
+If it takes more than that,
 .Nm
-kills it with a SIGKILL. This can be configured via the
+kills it with a SIGKILL.
+This can be configured via the
 .Pa ./timeout-finish
 file, see the description in the service directory page.
 .It
@@ -265,8 +274,8 @@ before the
 .Sq D ,
 and it does not restart the service, as if
 .Ql s6-svc -O
-had been called. This can be used to signify permanent failure to
-start the service.
+had been called.
+This can be used to signify permanent failure to start the service.
 .It
 There is a minimum 1-second delay between two
 .Pa ./run
@@ -292,16 +301,18 @@ s behaviour in any way.
 .Bl -bullet -width x
 .It
 .Nm
-is a long-lived process. It normally runs forever, from the system's
-boot scripts, until shutdown time; it should not be killed or told to
-exit. If you have no use for a service, just turn it off; the
+is a long-lived process.
+It normally runs forever, from the system's boot scripts, until
+shutdown time; it should not be killed or told to exit.
+If you have no use for a service, just turn it off; the
 .Nm
 process does not hurt.
 .It
 Even in boot scripts,
 .Nm
-should normally not be run directly. It's better to have a collection
-of service directories in a single scan directory, and just run
+should normally not be run directly.
+It's better to have a collection of service directories in a single
+scan directory, and just run
 .Xr s6-svscan 1
 on that scan directory.
 .Xr s6-svscan 1
@@ -313,16 +324,18 @@ processes, and will also take care of logged services.
 is not supposed to have a controlling terminal: it's generally
 launched by a
 .Xr s6-svscan 1
-process that itself does not have a controlling terminal. If you run
+process that itself does not have a controlling terminal.
+If you run
 .Nm
 from an interactive shell, be warned that typing ^C in the controlling
 terminal (which sends a SIGINT to all processes in the foreground
 process group in the terminal) will terminate
 .Nm ,
 but not the supervised processes - so, the daemon will keep running as
-an orphan. This is by design: supervised processes should be as
-resilient as possible, even when their supervisors die. However, if
-you want to launch
+an orphan.
+This is by design: supervised processes should be as resilient as
+possible, even when their supervisors die.
+However, if you want to launch
 .Nm
 from an interactive shell and need your service to die when you ^C it,
 you can obtain this behaviour by creating a
@@ -369,8 +382,10 @@ need to be read-write.
 .It
 .Nm
 tries its best to stay alive and running despite possible system call
-failures. It will write to its standard error everytime it encounters
-a problem. However, unlike
+failures.
+It will write to its standard error everytime it encounters a
+problem.
+However, unlike
 .Xr s6-svscan 1 ,
 it will not go out of its way to stay alive; if it encounters an
 unsolvable situation, it will just die.
@@ -379,14 +394,15 @@ Unlike other
 .Dq supervise
 implementations,
 .Nm
-is a fully asynchronous state machine. That means that it can read and
-process commands at any time, even when the machine is in trouble
-(full process table, for instance).
+is a fully asynchronous state machine.
+That means that it can read and process commands at any time, even
+when the machine is in trouble (full process table, for instance).
 .It
 .Nm
 does not use
 .Xr malloc 3 .
-That means it will never leak memory. However,
+That means it will never leak memory.
+However,
 .Nm s6-supervise
 uses
 .Xr opendir 3 ,
@@ -399,25 +415,26 @@ does not use heap memory at all.
 .It
 .Nm
 has been carefully designed so every instance maintains as little data
-as possible, so it uses a very small amount of non-sharable memory. It
-is not a problem to have several dozens of
+as possible, so it uses a very small amount of non-sharable memory.
+It is not a problem to have several dozens of
 .Nm
 processes, even on constrained systems: resource consumption will be negligible.
+.El
 .Sh SEE ALSO
-.Xr s6-svscan 1 ,
-.Xr s6-svscanctl 1 ,
-.Xr s6-svc 1 ,
-.Xr s6-svok 1 ,
-.Xr s6-svstat 1 ,
-.Xr s6-svwait 1 ,
-.Xr s6-svlisten1 1 ,
-.Xr s6-svlisten 1 ,
 .Xr s6-notifyoncheck 1 ,
+.Xr s6-permafailon 1 ,
+.Xr s6-svc 1 ,
 .Xr s6-svdt 1 ,
 .Xr s6-svdt-clear 1 ,
-.Xr s6-permafailon 1
+.Xr s6-svlisten 1 ,
+.Xr s6-svlisten1 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svscan 1 ,
+.Xr s6-svscanctl 1 ,
+.Xr s6-svstat 1 ,
+.Xr s6-svwait 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-supervise.html
 .Sh AUTHORS
 .An Laurent Bercot
