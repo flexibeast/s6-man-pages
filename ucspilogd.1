@@ -1,17 +1,17 @@
-.Dd August 22, 2020
-.Dt ucspilogd 1
+.Dd September 5, 2020
+.Dt UCSPILOGD 1
 .Os
 .Sh NAME
 .Nm ucspilogd
-.Nd convert syslog facility numbers and alert levels into names.
+.Nd convert syslog facility numbers and alert levels into names
 .Sh SYNOPSIS
 .Nm
 .Op Fl d Ar undef
 .Op Ar var ...
 .Sh DESCRIPTION
 .Nm
-reads a stream of syslog-like messages on stdin. Those messages can be
-newline-terminated or null-terminated.
+reads a stream of syslog-like messages on stdin.
+Those messages can be newline-terminated or null-terminated.
 .Pp
 For every line it reads: if it has been given
 .Ar var
@@ -53,17 +53,18 @@ reliable, than a standard syslogd.
 In the
 .Pa examples/syslogd-linux
 subdirectory of the s6 package, you will find a suitable ucspilogd
-service directory. The run scripts are written in the execline
-language.
+service directory.
+The run scripts are written in the execline language.
 .Pp
 .Sy Using ucspilogd as a klogd replacement
 .Pp
-Certain Unix kernels offer a nice interface to the kernel logs. For
-instance, the Linux kernel provides the
+Certain Unix kernels offer a nice interface to the kernel logs.
+For instance, the Linux kernel provides the
 .Pa /proc/kmsg
 fake file, that can be opened and read like a normal file, excepts
 that it gives the kernel logs when they are available and blocks
-otherwise. You can use
+otherwise.
+You can use
 .Nm
 to process data from those interfaces.
 .Pp
@@ -72,7 +73,7 @@ The
 subdirectory of the s6 package is a service directory providing such a
 klogd service for Linux, using the
 .Pa /proc/kmsg
-interface. 
+interface.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl d Ar undef
@@ -82,14 +83,14 @@ given on the command line is actually undefined at
 .Nm
 execution time, print
 .Ar undef
-in place of what would be the variable's value on every line. Default
-is the string
+in place of what would be the variable's value on every line.
+Default is the string
 .Ql <undefined> .
 .El
 .Sh SEE ALSO
 .Xr s6-log 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/ucspilogd.html
 .Sh AUTHORS
 .An Laurent Bercot
