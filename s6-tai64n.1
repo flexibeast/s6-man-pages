@@ -1,14 +1,15 @@
-.Dd August 24, 2020
+.Dd September 5, 2020
 .Dt S6-TAI64N 1
 .Os
 .Sh NAME
 .Nm s6-tai64n
-.Nd read from stdin and write to stdout, prepending lines with a TAI64N timestamp and a space.
+.Nd read from stdin and write to stdout, prepending lines with a TAI64N timestamp and a space
 .Sh SYNOPSIS
 .Nm
 .Sh DESCRIPTION
 .Nm
-exits 0 when it sees the end of stdin. If there's an unfinished line,
+exits 0 when it sees the end of stdin.
+If there's an unfinished line,
 .Nm
 processes it, adds a newline character to it, and writes it before
 exiting.
@@ -19,20 +20,20 @@ does neither
 nor
 .Dq block buffering .
 It does optimal buffering, i.e. it flushes its output buffer every
-time it risks blocking on input. Every filter should behave this way,
-whether its output is a tty or not: it's simpler and more efficient in
-every case.
+time it risks blocking on input.
+Every filter should behave this way, whether its output is a tty or
+not: it's simpler and more efficient in every case.
 .Sh SEE ALSO
+.Xr s6-applyuidgid 1 ,
 .Xr s6-envdir 1 ,
 .Xr s6-envuidgid 1 ,
 .Xr s6-fghack 1 ,
 .Xr s6-setsid 1 ,
 .Xr s6-setuidgid 1 ,
-.Xr s6-applyuidgid 1 ,
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64nlocal 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk skarnet.org/software/s6/s6-tai64n.html
 .Sh AUTHORS
 .An Laurent Bercot
