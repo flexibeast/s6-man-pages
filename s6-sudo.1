@@ -1,9 +1,9 @@
-.Dd August 27, 2020
+.Dd September 5, 2020
 .Dt S6-SUDO 1
 .Os
 .Sh NAME
 .Nm s6-sudo
-.Nd connect to a Unix domain socket and pass its standard file descriptors, command-line arguments and environment to a program running on the server side, potentially with different privileges. 
+.Nd connect to a Unix domain socket and pass its standard file descriptors, command-line arguments and environment to a program running on the server side, potentially with different privileges
 .Sh SYNOPSIS
 .Nm
 .Op Fl q | Q | v
@@ -21,7 +21,8 @@ executes into
 .Ar path
 .Xr s6-sudoc 1
 .Ar args... .
-It does nothing else: it is just a convenience program. The
+It does nothing else: it is just a convenience program.
+The
 .Xr s6-ipcclient 1
 program connects to a Unix socket at
 .Ar path ,
@@ -62,7 +63,7 @@ over the socket.
 .Xr s6-sudoc 1 ,
 .Xr s6-sudod 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-sudo.html
 .Sh AUTHORS
 .An Laurent Bercot
