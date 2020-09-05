@@ -1,9 +1,9 @@
-.Dd August 30, 2020
+.Dd September 5, 2020
 .Dt S6-SVDT-CLEAR 1
 .Os
 .Sh NAME
 .Nm s6-svdt-clear
-.Nd clear the recorded death tally of a service.
+.Nd clear the recorded death tally of a service
 .Sh SYNOPSIS
 .Nm
 .Ar servicedir
@@ -22,7 +22,8 @@ command.
 .Pp
 It also impacts the behaviour of the
 .Xr s6-permafailon 1
-command. This is the main reason to use
+command.
+This is the main reason to use
 .Nm :
 once a service has failed permanently due to an excessive number of
 deaths in a given time, it can be useful to erase that record of
@@ -38,20 +39,20 @@ Wrong usage.
 System call failed.
 .El
 .Sh SEE ALSO
-.Xr s6-svscan 1 ,
-.Xr s6-svscanctl 1 ,
+.Xr s6-notifyoncheck 1 ,
+.Xr s6-permafailon 1 ,
 .Xr s6-supervise 1 ,
 .Xr s6-svc 1 ,
-.Xr s6-svok 1 ,
-.Xr s6-svstat 1 ,
-.Xr s6-svwait 1 ,
-.Xr s6-svlisten1 1 ,
-.Xr s6-svlisten 1 ,
-.Xr s6-notifyoncheck 1 ,
 .Xr s6-svdt 1 ,
-.Xr s6-permafailon 1
+.Xr s6-svlisten 1 ,
+.Xr s6-svlisten1 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svscan 1 ,
+.Xr s6-svscanctl 1 ,
+.Xr s6-svstat 1 ,
+.Xr s6-svwait 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-svdt-clear.html
 .Sh AUTHORS
 .An Laurent Bercot
