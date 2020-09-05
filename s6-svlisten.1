@@ -1,9 +1,9 @@
-.Dd August 30, 2020
+.Dd September 5, 2020
 .Dt S6-SVLISTEN 1
 .Os
 .Sh NAME
 .Nm s6-svlisten
-.Nd run a program while listening on notifications from a collection of supervised services, and block until they all go up, or down.
+.Nd run a program while listening on notifications from a collection of supervised services, and block until they all go up, or down
 .Sh SYNOPSIS
 .Bl -bullet -width x
 .It
@@ -59,10 +59,11 @@ then
 sequentially.
 .Pp
 .Nm
-needs to handle a variable length list of service directories. For
-that, it uses an encoding provided by execline, so it's best to only
-use it in execline scripts (only the execline syntax is guaranteed not
-to change). There is a variant of
+needs to handle a variable length list of service directories.
+For that, it uses an encoding provided by execline, so it's best to
+only use it in execline scripts (only the execline syntax is
+guaranteed not to change).
+There is a variant of
 .Nm
 that does not use execline syntax, but only handles one service
 directory:
@@ -74,8 +75,8 @@ or
 .Fl r
 options imply the
 .Fl a
-option. It is not possible to wait for one of the listed services to
-restart.
+option.
+It is not possible to wait for one of the listed services to restart.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl u
@@ -84,17 +85,20 @@ Up.
 will wait until the services are up, as reported by
 .Xr s6-supervise 1 .
 This is the default; it is not reliable, but it does not depend on
-specific support in the service programs. See
+specific support in the service programs.
+See
 .Xr s6-notifywhenup 7
 for details.
 .It Fl U
 Really up.
 .Nm
 will wait until the services are up and ready as reported by the
-services themselves. This requires specific support in the service
-programs, and the use of the
+services themselves.
+This requires specific support in the service programs, and the use of
+the
 .Pa notification-fd
-file in the service directory. See the explanation in
+file in the service directory.
+See the explanation in
 .Xr s6-notifywhenup 7 .
 .It Fl d
 Down.
@@ -127,14 +131,15 @@ will wait until one of the given services comes up or down.
 .It Fl a
 And.
 .Nm
-will wait until all of the given services come up or down. This is the
-default.
+will wait until all of the given services come up or down.
+This is the default.
 .It Fl t Ar timeout
 If the requested events have not happened after
 .Ar timeout
 milliseconds,
 .Nm
-will print a message to stderr and exit 99. By default,
+will print a message to stderr and exit 99.
+By default,
 .Ar timeout
 is 0, which means no time limit.
 .El
@@ -158,20 +163,20 @@ Services were expected to come up, but
 of them reported permanent failure.
 .El
 .Sh SEE ALSO
-.Xr s6-svscan 1 ,
-.Xr s6-svscanctl 1 ,
+.Xr s6-notifyoncheck 1 ,
+.Xr s6-permafailon 1 ,
 .Xr s6-supervise 1 ,
 .Xr s6-svc 1 ,
-.Xr s6-svok 1 ,
-.Xr s6-svstat 1 ,
-.Xr s6-svwait 1 ,
-.Xr s6-svlisten1 1 ,
-.Xr s6-notifyoncheck 1 ,
 .Xr s6-svdt 1 ,
 .Xr s6-svdt-clear 1 ,
-.Xr s6-permafailon 1
+.Xr s6-svlisten1 1 ,
+.Xr s6-svok 1 ,
+.Xr s6-svscan 1 ,
+.Xr s6-svscanctl 1 ,
+.Xr s6-svstat 1 ,
+.Xr s6-svwait 1
 .Pp
-This man page is ported from the authoritative documentation at
-.Lk http://skarnet.org/software/s6/ .
+This man page is ported from the authoritative documentation at:
+.Lk http://skarnet.org/software/s6/s6-svlisten.html
 .Sh AUTHORS
 .An Laurent Bercot
