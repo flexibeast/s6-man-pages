@@ -108,8 +108,7 @@ You can use the
 utility in
 .Pa foo/run
 to lose privileges before executing into
-.Em foo
-.Ap
+.Em foo Ap
 s long-lived process; or the
 .Xr s6-envuidgid 1
 utility if your long-lived process needs root privileges at start time
@@ -314,16 +313,14 @@ and
 i.e. everything that
 .Pa foo/run
 writes to its stdout will appear on
-.Pa foo/log/run
-.Ap
+.Pa foo/log/run Ap
 s stdin.
 The
 .Em foo
 service is said to be logged; the
 .Em foo/log
 service is called
-.Em foo
-.Ap
+.Em foo Ap
 s logger.
 A logger service cannot be logged: if
 .Pa foo/log/log

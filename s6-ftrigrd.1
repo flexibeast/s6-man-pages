@@ -22,8 +22,7 @@ If the client program uses
 it spawns an instance of
 .Nm
 as a child.
-.Nm s6-ftrigrd
-.Ap
+.Nm s6-ftrigrd Ap
 s stdin is a pipe reading from the client; its stdout is a pipe
 writing to the client; its stderr is the same as the client's; and
 there's an additional pipe from
@@ -47,8 +46,7 @@ instance is created for the client.
 .It
 When the client uses
 .Fn ftrigr_end , or closes
-.Nm s6-ftrigrd
-.Ap
+.Nm s6-ftrigrd Ap
 s stdin in any way,
 .Nm
 exits 0.

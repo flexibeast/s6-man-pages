@@ -128,11 +128,9 @@ which has then been renamed
 .Pa previous
 .Pc
 is fed to
-.Em processor
-.Ap
+.Em processor Ap
 s stdin, and
-.Em processor
-.Ap
+.Em processor Ap
 s stdout is saved and archived.
 .Em processor
 can also read the
@@ -211,8 +209,7 @@ always deselected when the script encountered an action directive).
 .Sy Control directives
 .Pp
 These directives tune
-.Nm s6-log
-.Ap
+.Nm s6-log Ap
 s behaviour for the next actions.
 .Bl -tag -width x
 .Sm off
@@ -312,8 +309,7 @@ Registers
 as a processor for the next logdirs;
 .Ql execlineb
 must be found in
-.Nm
-.Ap
+.Nm Ap
 s
 .Ev PATH .
 This directive is only supported if s6 has been built with execline
@@ -387,8 +383,7 @@ Forward to stdout.
 will print the selected line to its stdout.
 If any error occurs, e.g. if stdout was a pipe and the reading end
 closed, this directive will be ignored for the rest of
-.Nm
-.Ap
+.Nm Ap
 s lifetime.
 .Sm off
 .It = Ar statusfile
@@ -404,8 +399,7 @@ bytes of the line, and pad it with newlines.
 must have the right to write to
 .Ar statusfile
 and to
-.Ar statusfile
-.Ap
+.Ar statusfile Ap
 s directory.
 .It dir
 logdir.
@@ -772,8 +766,7 @@ This option is now deprecated.
 .It Fl q | v
 Quiet | verbose.
 Decreases | increases
-.Nm
-.Ap
+.Nm Ap
 s verbosity, i.e. which messages are sent to stderr.
 The default verbosity is 1.
 Currently supported verbosity levels:

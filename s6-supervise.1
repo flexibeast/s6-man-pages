@@ -13,8 +13,7 @@ providing an interface to control its state
 .Nm
 is designed to be the last non-leaf branch of a supervision tree, the
 supervised process being a leaf.
-.Nm
-.Ap
+.Nm Ap
 s behaviour is approximately the following:
 .Bl -bullet -width x
 .It
@@ -74,8 +73,7 @@ it waits for the service to go down one last time, then exits 0.
 .El
 .Pp
 For a precise description of
-.Nm
-.Ap
+.Nm Ap
 s behaviour, check the
 .Sx DETAILED OPERATION
 section below, as well as the service directory page:
@@ -88,8 +86,7 @@ does not support options, because it is normally not run manually via
 a command line; it is usually launched by its own supervisor,
 .Xr s6-svscan 1 .
 The way to tune
-.Nm
-.Ap
+.Nm Ap
 s behaviour is via files in the service directory.
 .Sh READINESS NOTIFICATION SUPPORT
 If the service directory contains a valid
@@ -230,8 +227,7 @@ It then spawns
 if it exists.
 .Pa ./finish
 will have
-.Pa ./run
-.Ap
+.Pa ./run Ap
 s exit code as first argument, or 256 if
 .Pa ./run
 was signaled; it will have the number of the signal that killed
@@ -294,8 +290,7 @@ before exiting 0.
 Make sure to also check the service directory documentation page, for
 the full list of files that can be present in a service directory and
 impact
-.Nm
-.Ap
+.Nm Ap
 s behaviour in any way.
 .Sh USAGE NOTES
 .Bl -bullet -width x

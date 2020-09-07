@@ -50,11 +50,9 @@ will send a SIGTERM and a SIGCONT to the server program - but this
 does not guarantee that it will die.
 If the server program keeps running, it might still read from the file
 that was
-.Nm
-.Ap
+.Nm Ap
 s stdin, or write to the files that were
-.Nm
-.Ap
+.Nm Ap
 s stdout or stderr.
 .Sy This is a potential security risk.
 Administrators should audit their server programs to make sure this

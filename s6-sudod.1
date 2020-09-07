@@ -52,11 +52,9 @@ will send a SIGTERM and a SIGCONT to its child, then exit 1.
 However, sending a SIGTERM to the child does not guarantee that it
 will die; and if it keeps running, it might still read from the file
 that was
-.Xr s6-sudoc 1
-.Ap
+.Xr s6-sudoc 1 Ap
 s stdin, or write to the files that were
-.Xr s6-sudoc 1
-.Ap
+.Xr s6-sudoc 1 Ap
 s stdout or stderr.
 .Sy This is a potential security risk.
 Administrators should audit their server programs to make sure this
@@ -74,8 +72,7 @@ It was not designed to emulate the full suid functionality and will
 not go out of its way to do so.
 .Pp
 Administrators should also make sure that it's not a problem if
-.Nm
-.Ap
+.Nm Ap
 s child keeps running after the
 .Xr s6-sudoc 1
 client exits, if they have given the
@@ -114,8 +111,7 @@ instead.
 Do not inherit stderr from
 .Xr s6-sudoc 1 .
 The child will be run with its stderr being a copy of
-.Nm
-.Ap
+.Nm Ap
 s stderr instead.
 (This is useful to still log the child's error messages without
 sending them to the client.)
@@ -151,13 +147,11 @@ by
 filtered in the following manner: for every variable sent by
 .Xr s6-sudoc 1 ,
 if the variable is present but empty in
-.Nm
-.Ap
+.Nm Ap
 s environment, then its value is overridden by the value given by
 .Xr s6-sudoc 1 .
 A variable that is already nonempty, or that doesn't exist, in
-.Nm
-.Ap
+.Nm Ap
 s environment, will not be transmitted to the child.
 In other words:
 .Bl -bullet -width x
@@ -165,8 +159,7 @@ In other words:
 If there's no variable
 .Va X
 in
-.Nm
-.Ap
+.Nm Ap
 s environment, the child will have no variable
 .Va X
 defined.
@@ -174,8 +167,7 @@ defined.
 If there's a non-empty variable
 .Va X
 in
-.Nm
-.Ap
+.Nm Ap
 s environment, the child will inherit that variable, with its value,
 from
 .Nm .
@@ -183,8 +175,7 @@ from
 If there's an empty variable
 .Va X
 in
-.Nm
-.Ap
+.Nm Ap
 s environment, and
 .Xr s6-sudoc 1
 transmits variable
