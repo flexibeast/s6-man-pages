@@ -184,13 +184,13 @@ as a safeguard.
 .Ss Asynchronously waiting for locks
 .Em (From now on, the functions are listed with their prototypes instead of usage examples.)
 .Bl -tag -width x
-.It Ql int s6lock_fd (s6lock_t const *a)
+.It Ft int Fn s6lock_fd "s6lock_t const *a"
 .Pp
 Returns a file descriptor to select on for reading.
 Do not
 .Xr read 2
 it though.
-.It Ql int s6lock_update (s6lock_t *a)
+.It Ft int Fn s6lock_update "s6lock_t *a"
 .Pp
 Call this function whenever the fd checks readability: it will update
 .Va a Ap
@@ -209,7 +209,7 @@ points to an array of
 16-bit unsigned integers.
 Those integers are ids waiting to be passed to
 .Fn s6lock_check .
-.It Ql int s6lock_check (s6lock_t *a, uint16_t id, char *what)
+.It Ft int Fn s6lock_check "s6lock_t *a" "uint16_t id" "char *what"
 .Pp
 Checks whether the lock identified by
 .Va id
@@ -229,7 +229,7 @@ If the lock has been acquired, returns 1.
 .El
 .Sh Synchronously waiting for locks
 .Bl -tag -width x
-.It Ql int s6lock_wait_or_g (s6lock_t *a, uint16_t const *idlist, unsigned int n, tain_t const *deadline)
+.It Ft int Fn s6lock_wait_or_g "s6lock_t *a" "uint16_t const *idlist" "unsigned int n" "tain_t const *deadline"
 .Pp
 Synchronously waits for one of the locks represented by the array
 pointed to by
@@ -245,7 +245,7 @@ If no result has been obtained by
 .Va deadline ,
 the function returns -1
 .Dv ETIMEDOUT .
-.It Ql int s6lock_wait_and_g (s6lock_t *a, uint16_t const *idlist, unsigned int n, tain_t const *deadline)
+.It Ft int Fn s6lock_wait_and_g "s6lock_t *a" "uint16_t const *idlist" "unsigned int n" "tain_t const *deadline"
 .Pp
 Synchronously waits for all of the locks represented by the array
 pointed to by

@@ -37,9 +37,9 @@ files in the s6 package, for instance, illustrate how to use the
 library.
 .Ss Synchronous functions with a specified maximum execution time
 Synchronous functions take a
-.Ql tain_t const * Po Va deadline Pc
+.Ql Vt tain_t const * Po Va deadline Pc
 parameter and a
-.Ql tain_t * Po Va stamp Pc
+.Ql Vt tain_t * Po Va stamp Pc
 parameter.
 Those are pointers to
 .Vt tain_t
@@ -267,13 +267,13 @@ used in the subscription.
 .Ss Asynchronously waiting for events
 .Em (From now on, the functions are listed with their prototypes instead of usage examples.)
 .Bl -tag -width x
-.It Ql int ftrigr_fd (ftrigr_t const *a)
+.It Ft int Fn ftrigr_fd "ftrigr_t const *a"
 .Pp
 Returns a file descriptor to select on for reading.
 Do not
 .Xr read 2
 it though.
-.It Ql int ftrigr_updateb (ftrigr_t *a)
+.It Ft int Fn ftrigr_updateb "ftrigr_t *a"
 .Pp
 Call this function whenever the fd checks readability: it will update
 .Va a Ap
@@ -298,7 +298,7 @@ The number of ids already acknowledged is stored in
 .Ql a->head ,
 so the first unacknowledged id is
 .Ql genalloc_s(uint16_t, &a->list)[a->head] .
-.It Ql int ftrigr_check (ftrigr_t *a, uint16_t id, char *what)
+.It Ft int Fn ftrigr_check "ftrigr_t *a" "uint16_t id" "char *what"
 .Pp
 Checks whether an event happened to
 .Va id .
@@ -319,7 +319,7 @@ and returns the number of times that an event happened to this
 identifier since the last call to
 .Fn ftrigr_check .
 .El
-.It Ql int ftrigr_checksa (ftrigr_t *a, uint16_t id, stralloc *what)
+.It Ft int Fn ftrigr_checksa "ftrigr_t *a" "uint16_t id" "stralloc *what"
 .Pp
 Checks whether an event happened to
 .Va id .
@@ -343,13 +343,13 @@ call to
 Each character is the one that triggered a notification.
 The function then returns 1.
 .El
-.It Ql int ftrigr_ack (ftrigr_t *a, size_t n)
+.It Ft int Fn ftrigr_ack "ftrigr_t *a" "size_t n"
 .Pp
 Acknowledges reading
 .Va n
 ids from the id list updated by
 .Fn ftrigr_updateb .
-.It Ql int ftrigr_update (ftrigr_t *a)
+.It Ft int Fn ftrigr_update "ftrigr_t *a"
 .Pp
 Acknowledges all the pending ids (i.e. clears the stored id list) then calls
 .Fn ftrigr_updateb .

@@ -73,7 +73,8 @@ Alternatively, if your connection to
 has not been created yet, you can use the following functions:
 .Bl -bullet -width x
 .It
-.Ql int s6_fdholder_start (s6_fdholder_t *a, char const *path, tain_t const *deadline, tain_t *stamp)
+.Ft int
+.Fn s6_fdholder_start "s6_fdholder_t *a" "char const *path" "tain_t const *deadline" "tain_t *stamp"
 .Pp
 Starts a session with an
 .Xr s6-fdholderd 1
@@ -90,7 +91,8 @@ can be used as a handle for the next
 function calls.
 On failure, returns 0, and sets errno.
 .It
-.Ql void s6_fdholder_end (s6_fdholder_t *a)
+.Ft void
+.Fn s6_fdholder_end "s6_fdholder_t *a"
 .Pp
 Ends the current session and frees all allocated resources.
 If needed,
