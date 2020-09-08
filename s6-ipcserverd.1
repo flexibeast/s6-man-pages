@@ -1,4 +1,4 @@
-.Dd September 3, 2020
+.Dd September 8, 2020
 .Dt S6-IPCSERVERD 1
 .Os
 .Sh NAME
@@ -58,6 +58,17 @@ from an fd-holding daemon
 some people call this
 .Dq socket activation
 .Pc .
+.Ss Signals
+.Bl -tag -width x
+.It SIGTERM
+Exit.
+.It SIGHUP
+Send a SIGTERM and a SIGCONT to all children.
+.It SIGQUIT
+Send a SIGTERM and a SIGCONT to all children, then exit.
+.It SIGABRT
+Send a SIGKILL to all children, then exit.
+.El
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl 1
@@ -101,17 +112,6 @@ connections from the same user ID.
 Default is 40.
 It is impossible to set it higher than
 .Ar maxconn .
-.El
-.Sh SIGNALS
-.Bl -tag -width x
-.It SIGTERM
-Exit.
-.It SIGHUP
-Send a SIGTERM and a SIGCONT to all children.
-.It SIGQUIT
-Send a SIGTERM and a SIGCONT to all children, then exit.
-.It SIGABRT
-Send a SIGKILL to all children, then exit.
 .El
 .Sh ENVIRONMENT
 For each connection, an instance of
