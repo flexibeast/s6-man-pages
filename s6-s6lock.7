@@ -1,4 +1,4 @@
-.Dd September 4, 2020
+.Dd September 8, 2020
 .Dt S6-S6LOCK 7
 .Os
 .Sh NAME
@@ -227,7 +227,7 @@ If the lock has not been acquired yet, returns 0.
 If the lock has been acquired, returns 1.
 .El
 .El
-.Sh Synchronously waiting for locks
+.Ss Synchronously waiting for locks
 .Bl -tag -width x
 .It Ft int Fn s6lock_wait_or_g "s6lock_t *a" "uint16_t const *idlist" "unsigned int n" "tain_t const *deadline"
 .Pp
