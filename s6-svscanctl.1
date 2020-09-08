@@ -1,4 +1,4 @@
-.Dd September 5, 2020
+.Dd September 8, 2020
 .Dt S6-SVSCANCTL 1
 .Os
 .Sh NAME
@@ -137,6 +137,16 @@ will terminate in
 .Dq other
 mode.
 .El
+.Sh IMPLEMENTATION NOTES
+.Nm
+writes control commands into the
+.Pa svscandir/.s6-svscan/control
+FIFO.
+A
+.Xr s6-svscan 1 process running on
+.Ar svscandir
+will be listening to this FIFO, and will read and interpret those
+commands.
 .Sh EXAMPLES
 .Dl s6-svscanctl -an /service
 .Pp
@@ -158,16 +168,6 @@ will execute into the
 script with the
 .Ql reboot
 argument.
-.Sh INTERNALS
-.Nm
-writes control commands into the
-.Pa svscandir/.s6-svscan/control
-FIFO.
-A
-.Xr s6-svscan 1 process running on
-.Ar svscandir
-will be listening to this FIFO, and will read and interpret those
-commands.
 .Sh SEE ALSO
 .Xr s6-notifyoncheck 1 ,
 .Xr s6-permafailon 1 ,
