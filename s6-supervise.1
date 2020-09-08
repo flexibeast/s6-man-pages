@@ -1,4 +1,4 @@
-.Dd September 5, 2020
+.Dd September 8, 2020
 .Dt S6-SUPERVISE 1
 .Os
 .Sh NAME
@@ -75,20 +75,12 @@ it waits for the service to go down one last time, then exits 0.
 For a precise description of
 .Nm Ap
 s behaviour, check the
-.Sx DETAILED OPERATION
+.Sx Detailed operation
 section below, as well as the service directory page:
 .Nm
 operation can be extensively configured by the presence of certain
 files in the service directory.
-.Sh OPTIONS
-.Nm
-does not support options, because it is normally not run manually via
-a command line; it is usually launched by its own supervisor,
-.Xr s6-svscan 1 .
-The way to tune
-.Nm Ap
-s behaviour is via files in the service directory.
-.Sh READINESS NOTIFICATION SUPPORT
+.Ss Readiness notification support
 If the service directory contains a valid
 .Pa notification-fd
 file when the service is started, or restarted,
@@ -126,7 +118,7 @@ set to 3, you would start your daemon as
 (in execline), or
 .Ql exec 2>&1 1>&3 3<&- prog...
 (in shell).
-.Sh SIGNALS
+.Ss Signals
 .Nm
 reacts to the following signals:
 .Bl -tag -width x
@@ -144,7 +136,7 @@ as if a
 .Ql s6-svc -X
 command had been received.
 .El
-.Sh DETAILED OPERATION
+.Ss Detailed operation
 .Bl -bullet -width x
 .It
 .Nm
@@ -171,7 +163,7 @@ process.
 If it already exists, it uses it as is, without modifying the
 subscription rights.
 .It
-It sends a
+It sends an
 .Sq s
 event to
 .Pa ./event .
@@ -292,9 +284,7 @@ the full list of files that can be present in a service directory and
 impact
 .Nm Ap
 s behaviour in any way.
-.Sh USAGE NOTES
-.Bl -bullet -width x
-.It
+.Pp
 .Nm
 is a long-lived process.
 It normally runs forever, from the system's boot scripts, until
@@ -302,7 +292,7 @@ shutdown time; it should not be killed or told to exit.
 If you have no use for a service, just turn it off; the
 .Nm
 process does not hurt.
-.It
+.Pp
 Even in boot scripts,
 .Nm
 should normally not be run directly.
@@ -314,7 +304,7 @@ on that scan directory.
 will spawn the necessary
 .Nm
 processes, and will also take care of logged services.
-.It
+.Pp
 .Nm
 is not supposed to have a controlling terminal: it's generally
 launched by a
@@ -336,24 +326,24 @@ from an interactive shell and need your service to die when you ^C it,
 you can obtain this behaviour by creating a
 .Pa ./nosetsid
 file in the service directory.
-.It
+.Pp
 You can use
 .Xr s6-svc 1
 to send commands to the
 .Nm
 process; mostly to change the service state and send signals to the
 monitored process.
-.It
+.Pp
 You can use
 .Xr s6-svok 1
 to check whether
 .Nm
 is successfully running.
-.It
+.Pp
 You can use
 .Xr s6-svstat 1
 to check the status of a service.
-.It
+.Pp
 .Nm
 maintains internal information inside the
 .Pa ./supervise
@@ -371,10 +361,15 @@ and
 /event
 .Sm on
 need to be read-write.
-.El
+.Sh OPTIONS
+.Nm
+does not support options, because it is normally not run manually via
+a command line; it is usually launched by its own supervisor,
+.Xr s6-svscan 1 .
+The way to tune
+.Nm Ap
+s behaviour is via files in the service directory.
 .Sh IMPLEMENTATION NOTES
-.Bl -bullet -width x
-.It
 .Nm
 tries its best to stay alive and running despite possible system call
 failures.
@@ -384,7 +379,7 @@ However, unlike
 .Xr s6-svscan 1 ,
 it will not go out of its way to stay alive; if it encounters an
 unsolvable situation, it will just die.
-.It
+.Pp
 Unlike other
 .Dq supervise
 implementations,
@@ -392,7 +387,7 @@ implementations,
 is a fully asynchronous state machine.
 That means that it can read and process commands at any time, even
 when the machine is in trouble (full process table, for instance).
-.It
+.Pp
 .Nm
 does not use
 .Xr malloc 3 .
@@ -407,14 +402,14 @@ implementations internally use heap memory - so unfortunately, it's
 impossible to guarantee that
 .Nm
 does not use heap memory at all.
-.It
+.Pp
 .Nm
 has been carefully designed so every instance maintains as little data
 as possible, so it uses a very small amount of non-sharable memory.
 It is not a problem to have several dozens of
 .Nm
-processes, even on constrained systems: resource consumption will be negligible.
-.El
+processes, even on constrained systems: resource consumption will be
+negligible.
 .Sh SEE ALSO
 .Xr s6-notifyoncheck 1 ,
 .Xr s6-permafailon 1 ,
