@@ -1,4 +1,4 @@
-.Dd September 4, 2020
+.Dd September 8, 2020
 .Dt S6-SERVICE-DIRECTORY 7
 .Os
 .Sh NAME
@@ -23,7 +23,7 @@ However, we still use the terms
 and
 .Em service directory
 for historical and compatibility reasons.
-.Sh DIRECTORY CONTENTS
+.Ss Directory contents
 A service directory foo may contain the following elements:
 .Bl -bullet -width x
 .It
@@ -326,7 +326,9 @@ A logger service cannot be logged: if
 .Pa foo/log/log
 exists, nothing special happens.
 .El
-.Sh STABILITY
+.Pp
+.Sy Stability
+.Pp
 With the evolution of s6, it is possible that
 .Xr s6-supervise 1
 configuration uses more and more files in the service directory.
@@ -354,7 +356,7 @@ no matter the version of s6, you should store that information in the
 or
 .Pa env
 subdirectories of the service directory.
-.Sh WHERE TO STORE MY SERVICE DIRECTORIES?
+.Ss Where should I store my service directories?
 Service directories describe the way services are launched.
 Once they are designed, they have little reason to change on a given
 machine.
