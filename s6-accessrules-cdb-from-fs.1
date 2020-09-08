@@ -6,7 +6,7 @@
 .Nd compile a directory containing a ruleset suitable for
 .Xr s6-ipcserver-access 1
 or
-.Xr s6-tcpserver-access 1
+s6-tcpserver-access
 into a CDB file
 .Sh SYNOPSIS
 .Nm
@@ -24,7 +24,7 @@ To be understood by
 .Nm ,
 .Xr s6-ipcserver-access 1 ,
 or
-.Xr s6-tcpserver-access 1 ,
+s6-tcpserver-access,
 .Ar dir
 must have a specific format.
 .Pp
@@ -53,7 +53,7 @@ Depending on the application, other directories can appear in
 and be compiled into
 .Ar cdbfile ,
 but
-.Xr s6-tcpserver-access 1
+s6-tcpserver-access
 only uses the first three, and
 .Xr s6-ipcserver-access 1
 only uses the last two.
@@ -144,7 +144,7 @@ was a suitable candidate for the
 option of
 .Xr s6-ipcserver-access 1
 or
-.Xr s6-tcpserver-access 1 ,
+s6-tcpserver-access,
 then
 .Ar cdbfile
 will be a suitable candidate for the
