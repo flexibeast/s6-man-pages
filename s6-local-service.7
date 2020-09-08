@@ -1,4 +1,4 @@
-.Dd September 3, 2020
+.Dd September 8, 2020
 .Dt S6-LOCAL-SERVICE 7
 .Os
 .Sh NAME
@@ -28,8 +28,9 @@ system call, the
 function a wrapper around
 .Fn write ,
 and so on.
-.Sh BENEFITS
-.Ss Privileges
+.Ss Benefits
+.Sy Privileges
+.Pp
 The most important benefit of a local service is that it permits
 .Sy controlled privilege gains without using setuid programs .
 The daemon is run as user S; a client running as user C and connecting
@@ -51,7 +52,7 @@ This function allows the server to know the client's credentials: so
 fine-grained access control is possible.
 On those systems,
 .Sy local services can do as much authentication as setuid programs, in a much more controlled environment .
-.Ss Fd-Passing
+.Sy Fd-passing
 The most obvious difference between a local service and a network
 service is that a local service does not serve network clients.
 But local services have another nice perk: while network services
@@ -73,7 +74,7 @@ So, if the server opens a pipe and sends one end of this pipe to a
 client via this mechanism, there is effectively a socket
 .Em and
 a pipe between the client and the server.
-.Sh UCSPI
+.Ss UCSPI
 The UCSPI protocol is an easy way of abstracting clients and servers
 from the network.
 A server written as a UCSPI server, just as it can be run under inetd
@@ -92,7 +93,7 @@ A client written as an UCSPI client, i.e. assuming it has descriptor 6
 (resp. 7) open and reading from (resp. writing to) the server socket,
 can be run under
 .Xr s6-ipcclient 1 .
-.Sh USE IN SKARNET.ORG SOFTWARE
+.Ss Use in skarnet.org software
 skarnet.org libraries often use a separate process to handle
 asynchronicity and background work in a way that's invisible to the
 user.
