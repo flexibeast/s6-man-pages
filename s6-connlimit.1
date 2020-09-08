@@ -1,4 +1,4 @@
-.Dd August 31, 2020
+.Dd September 8, 2020
 .Dt S6-CONNLIMIT 1
 .Os
 .Sh NAME
@@ -37,8 +37,9 @@ without performing any check: no maximum number of connections has
 been defined.
 .Pp
 The
-.Xr s6-tcpserver4 1
-and s6-tcpserver6 1
+s6-tcpserver4
+and
+s6-tcpserver6
 programs define the
 .Ev PROTO
 environment variable to
@@ -48,15 +49,15 @@ and spawn every child server with the
 environment variable set to the number of connections from the same IP
 address.
 The
-.Xr s6-tcpserver-access 1
+s6-tcpserver-access
 program can set environment variables depending on the client's IP
 address.
 If the
-.Xr s6-tcpserver-access 1
+s6-tcpserver-access
 database is configured to set the
 .Ev TCPCONNMAX
 environment variable for a given set of IP addresses, and
-.Xr s6-tcpserver-access 1
+s6-tcpserver-access
 execs into
 .Nm ,
 then
