@@ -1,4 +1,4 @@
-.Dd September 3, 2020
+.Dd September 10, 2020
 .Dt S6-IPCCLIENT 1
 .Os
 .Sh NAME
@@ -69,6 +69,7 @@ Be aware that it may contain arbitrary characters.
 .Xr s6-ipcserverd 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk http://skarnet.org/software/s6/s6-ipcclient.html
+.Lk https://skarnet.org/software/s6/s6-ipcclient.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

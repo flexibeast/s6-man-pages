@@ -1,4 +1,4 @@
-.Dd September 2, 2020
+.Dd September 10, 2020
 .Dt S6-FTRIG-LISTEN1 1
 .Os
 .Sh NAME
@@ -93,7 +93,8 @@ s6-ftrig-listen1 /tmp/toto "message" s6-ftrig-notify /tmp/toto message
 .Xr s6-mkfifodir 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk skarnet.org/software/s6/s6-ftrig-listen1.html
+.Lk https://skarnet.org/software/s6/s6-ftrig-listen1.html
 .Sh AUTHORS
 .An Laurent Bercot
 b
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

@@ -1,4 +1,4 @@
-.Dd September 5, 2020
+.Dd September 10, 2020
 .Dt S6-FTRIGRD 1
 .Os
 .Sh NAME
@@ -93,6 +93,7 @@ reasonable system.
 .Xr s6-mkfifodir 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk http://skarnet.org/software/s6/libs6/s6-ftrigrd.html
+.Lk https://skarnet.org/software/s6/libs6/s6-ftrigrd.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

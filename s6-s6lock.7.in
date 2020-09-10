@@ -1,4 +1,4 @@
-.Dd September 8, 2020
+.Dd September 10, 2020
 .Dt S6-S6LOCK 7
 .Os
 .Sh NAME
@@ -267,6 +267,7 @@ the function returns -1
 .Xr s6-libs6 7
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk http://skarnet.org/software/s6/libs6/s6lock.html
+.Lk https://skarnet.org/software/s6/libs6/s6lock.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

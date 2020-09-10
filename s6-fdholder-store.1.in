@@ -1,4 +1,4 @@
-.Dd September 1, 2020
+.Dd September 10, 2020
 .Dt S6-FDHOLDER-STORE 1
 .Os
 .Sh NAME
@@ -91,6 +91,7 @@ Another program will be able to retrieve the socket later, using
 .Xr s6-fdholderd 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk skarnet.org/software/s6/s6-fdholder-store.html
+.Lk https://skarnet.org/software/s6/s6-fdholder-store.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

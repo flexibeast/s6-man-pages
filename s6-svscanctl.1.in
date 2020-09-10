@@ -1,4 +1,4 @@
-.Dd September 8, 2020
+.Dd September 10, 2020
 .Dt S6-SVSCANCTL 1
 .Os
 .Sh NAME
@@ -183,6 +183,7 @@ argument.
 .Xr s6-svwait 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk skarnet.org/software/s6/s6-svscanctl.html
+.Lk https://skarnet.org/software/s6/s6-svscanctl.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

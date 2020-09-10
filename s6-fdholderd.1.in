@@ -1,4 +1,4 @@
-.Dd September 1, 2020
+.Dd September 10, 2020
 .Dt S6-FDHOLDERD 1
 .Os
 .Sh NAME
@@ -464,6 +464,7 @@ echo > uid/default/env/S6_FDHOLDER_SETDUMP
 .Xr s6-fdholder-transferdump 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk skarnet.org/software/s6/s6-fdholderd.html
+.Lk https://skarnet.org/software/s6/s6-fdholderd.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

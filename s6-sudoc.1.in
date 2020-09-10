@@ -1,4 +1,4 @@
-.Dd September 5, 2020
+.Dd September 10, 2020
 .Dt S6-SUDOC 1
 .Os
 .Sh NAME
@@ -102,6 +102,7 @@ is 0, meaning infinite.
 .Xr s6-sudod 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk skarnet.org/software/s6/s6-sudoc.html
+.Lk https://skarnet.org/software/s6/s6-sudoc.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

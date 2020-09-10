@@ -1,4 +1,4 @@
-.Dd September 5, 2020
+.Dd September 10, 2020
 .Dt S6-TAI64NLOCAL 1
 .Os
 .Sh NAME
@@ -76,6 +76,7 @@ Print GMT time instead of local time.
 .Xr s6-tai64n 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk skarnet.org/software/s6/s6-tai64nlocal.html
+.Lk https://skarnet.org/software/s6/s6-tai64nlocal.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

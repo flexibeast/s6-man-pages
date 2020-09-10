@@ -1,4 +1,4 @@
-.Dd September 4, 2020
+.Dd September 10, 2020
 .Dt S6-NOTIFYWHENUP 7
 .Os
 .Sh NAME
@@ -106,6 +106,7 @@ readiness, and route its result into the s6 notification system:
 .Xr s6-svwait 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk http://skarnet.org/software/s6/notifywhenup.html
+.Lk https://skarnet.org/software/s6/notifywhenup.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

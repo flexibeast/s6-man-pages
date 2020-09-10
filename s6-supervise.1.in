@@ -1,4 +1,4 @@
-.Dd September 8, 2020
+.Dd September 10, 2020
 .Dt S6-SUPERVISE 1
 .Os
 .Sh NAME
@@ -425,6 +425,7 @@ negligible.
 .Xr s6-svwait 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk skarnet.org/software/s6/s6-supervise.html
+.Lk https://skarnet.org/software/s6/s6-supervise.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

@@ -1,4 +1,4 @@
-.Dd September 8, 2020
+.Dd September 10, 2020
 .Dt S6-CONNLIMIT 1
 .Os
 .Sh NAME
@@ -117,6 +117,7 @@ instead of the default of 40.
 .Xr s6-ipcserverd 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk http://skarnet.org/software/s6/s6-connlimit.html
+.Lk https://skarnet.org/software/s6/s6-connlimit.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

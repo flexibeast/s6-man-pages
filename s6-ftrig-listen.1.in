@@ -1,4 +1,4 @@
-.Dd September 2, 2020
+.Dd September 10, 2020
 .Dt S6-FTRIG-LISTEN 1
 .Os
 .Sh NAME
@@ -87,6 +87,7 @@ has been notified with events matching its
 .Xr s6-mkfifodir 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk http://skarnet.org/software/s6/s6-ftrig-listen.html
+.Lk https://skarnet.org/software/s6/s6-ftrig-listen.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

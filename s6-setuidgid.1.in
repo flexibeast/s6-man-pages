@@ -1,4 +1,4 @@
-.Dd September 4, 2020
+.Dd September 10, 2020
 .Dt S6-SETUIDGID 1
 .Os
 .Sh NAME
@@ -50,6 +50,7 @@ Its main use is to drop root privileges before starting a daemon.
 .Xr s6-tai64nlocal 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk skarnet.org/software/s6/s6-setuidgid.html
+.Lk https://skarnet.org/software/s6/s6-setuidgid.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

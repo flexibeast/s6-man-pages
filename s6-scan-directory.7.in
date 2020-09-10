@@ -1,4 +1,4 @@
-.Dd September 8, 2020
+.Dd September 10, 2020
 .Dt S6-SCAN-DIRECTORY 7
 .Os
 .Sh NAME
@@ -158,6 +158,7 @@ s6-svscanctl -a /tmp/service
 .Xr s6-service-directory 7
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk http://skarnet.org/software/s6/scandir.html
+.Lk https://skarnet.org/software/s6/scandir.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

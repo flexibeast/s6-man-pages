@@ -1,4 +1,4 @@
-.Dd September 1, 2020
+.Dd September 10, 2020
 .Dt S6-FDHOLDER-DAEMON 1
 .Os
 .Sh NAME
@@ -214,6 +214,7 @@ Read access rights configuration from the filesystem in directory
 .Xr s6-fdholderd 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk http://skarnet.org/software/s6/s6-fdholder-daemon.html
+.Lk https://skarnet.org/software/s6/s6-fdholder-daemon.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

@@ -1,4 +1,4 @@
-.Dd September 5, 2020
+.Dd September 10, 2020
 .Dt S6-S6LOCKD 1
 .Os
 .Sh NAME
@@ -70,6 +70,7 @@ child per requested lock.
 .Xr s6lockd-helper 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk http://skarnet.org/software/s6/libs6/s6lockd.html
+.Lk https://skarnet.org/software/s6/libs6/s6lockd.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

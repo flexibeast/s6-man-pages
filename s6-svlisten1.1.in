@@ -1,4 +1,4 @@
-.Dd September 5, 2020
+.Dd September 10, 2020
 .Dt S6-SVLISTEN1 1
 .Os
 .Sh NAME
@@ -133,6 +133,7 @@ System call failed
 .Xr s6-svwait 1
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk skarnet.org/software/s6/s6-svlisten1.html
+.Lk https://skarnet.org/software/s6/s6-svlisten1.html
 .Sh AUTHORS
 .An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)
