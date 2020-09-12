@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 12, 2020
 .Dt S6-ENVUIDGID 1
 .Os
 .Sh NAME
@@ -46,7 +46,7 @@ Then it executes into
 .Ar prog... .
 .Pp
 .Nm
-without options behaves like envuidgid, except that the exit code is 1 if
+without options behaves like envuidgid[1], except that the exit code is 1 if
 .Ar account
 doesn't exist, and it also exports supplementary groups.
 .Pp
@@ -60,7 +60,7 @@ and
 .Ev GIDLIST
 environment variables.
 Super-servers such as
-s6-tcpserver4
+s6-tcpserver4[2]
 make use of this.
 .Sh OPTIONS
 .Bl -tag -width x
@@ -159,6 +159,11 @@ and
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64n 1 ,
 .Xr s6-tai64nlocal 1
+.Pp
+[1]
+.Lk https://cr.yp.to/daemontools/envuidgid.html
+[2]
+.Lk https://skarnet.org/software/s6-networking/s6-tcpserver4.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-envuidgid.html
