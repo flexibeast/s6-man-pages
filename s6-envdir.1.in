@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 12, 2020
 .Dt S6-ENVDIR 1
 .Os
 .Sh NAME
@@ -43,7 +43,7 @@ in this line are changed to newlines in the environment variable.
 .El
 .Pp
 .Nm
-without options behaves exactly like envdir.
+without options behaves exactly like envdir[1].
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl i
@@ -90,6 +90,9 @@ instead of a newline.
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64n 1 ,
 .Xr s6-tai64nlocal 1
+.Pp
+[1]
+.Lk https://cr.yp.to/daemontools/envdir.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-envdir.html
