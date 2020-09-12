@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 12, 2020
 .Dt S6-FTRIG-NOTIFY 1
 .Os
 .Sh NAME
@@ -19,7 +19,9 @@ with all the characters in
 .Nm
 cannot be used to send the null character (event 0x00).
 If you need to send the null character, use the C API:
-.Fn ftrigw_notify .
+.Fn ftrigw_notify . Refer to
+.Xr s6-ftrigw 7
+for details.
 .Sh SEE ALSO
 .Xr s6-cleanfifodir 1 ,
 .Xr s6-ftrig-listen 1 ,
