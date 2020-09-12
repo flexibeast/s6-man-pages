@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 12, 2020
 .Dt S6-FTRIGRD 1
 .Os
 .Sh NAME
@@ -61,7 +61,7 @@ If the chain of events matches the regexp, it notifies the client.
 .Pp
 The connection management between the client and
 .Nm
-is entirely done by the textclient library from skalibs.
+is entirely done by the textclient library from skalibs[1].
 .Pp
 .Nm
 is entirely asynchronous.
@@ -91,6 +91,9 @@ reasonable system.
 .Xr s6-ftrig-notify 1 ,
 .Xr s6-ftrig-wait 1 ,
 .Xr s6-mkfifodir 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/libs6/s6-ftrigrd.html
