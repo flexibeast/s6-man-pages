@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 12, 2020
 .Dt S6-FTRIG-LISTEN1 1
 .Os
 .Sh NAME
@@ -33,7 +33,7 @@ It waits for the series of events received on
 to match
 .Ar regexp .
 .Ar regexp
-must be an extended regular expression.
+must be an Extended Regular Expression[1].
 .Pp
 When the series of read events matches
 .Ar regexp ,
@@ -91,6 +91,9 @@ s6-ftrig-listen1 /tmp/toto "message" s6-ftrig-notify /tmp/toto message
 .Xr s6-ftrig-wait 1 ,
 .Xr s6-ftrigrd 1 ,
 .Xr s6-mkfifodir 1
+.Pp
+[1]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html#tag_09_04
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-ftrig-listen1.html
