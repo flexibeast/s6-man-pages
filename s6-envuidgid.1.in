@@ -162,6 +162,7 @@ and
 .Pp
 [1]
 .Lk https://cr.yp.to/daemontools/envuidgid.html
+.Pp
 [2]
 .Lk https://skarnet.org/software/s6-networking/s6-tcpserver4.html
 .Pp
