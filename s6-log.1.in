@@ -1,9 +1,9 @@
-.Dd September 10, 2020
+.Dd September 13, 2020
 .Dt S6-LOG 1
 .Os
 .Sh NAME
 .Nm s6-log
-.Nd reliable logging program with automated log rotation, similar to daemontools' multilog, with full POSIX regular expression support
+.Nd reliable logging program with automated log rotation, similar to daemontools' multilog[1], with full POSIX regular expression support
 .Sh SYNOPSIS
 .Nm
 .Op Fl d Ar notif
@@ -105,7 +105,7 @@ s,
 .Sm on
 where
 .Em timestamp ,
-a TAI64N timestamp, is the absolute time of the rotation.
+a TAI64N[2] timestamp, is the absolute time of the rotation.
 If there are too many archived log files in the logdir, the older ones
 are then deleted.
 Logging then resumes, to a brand new
@@ -194,13 +194,13 @@ By default, every line is selected.
 .Sm on
 Select yet-unselected lines that match
 .Ar regexp ,
-which must be a POSIX Extended Regular Expression.
+which must be a POSIX Extended Regular Expression[3].
 .Sm off
 .It - Ar regexp
 .Sm on
 Deselect yet-selected lines that match
 .Ar regexp ,
-which must be a POSIX Extended Regular Expression.
+which must be a POSIX Extended Regular Expression[3].
 .It f
 Select exactly lines that have not yet been acted upon (i.e. that were
 always deselected when the script encountered an action directive).
@@ -331,13 +331,13 @@ directive, except that the processor string is interpreted by
 not execlineb.
 It is useful for people who want to build s6 without execline support.
 .It t
-The logged line will be prepended with a TAI64N timestamp (and a
+The logged line will be prepended with a TAI64N[2] timestamp (and a
 space) before being processed by the next action directive.
 Giving the
 .Ql t
 directive several times before an action directive has no effect.
 .It T
-The selected line will be prepended with a ISO 8601 timestamp for
+The selected line will be prepended with a ISO 8601[4] timestamp for
 combined date and time representing local time according to the
 system's timezone, with a space (not a 'T') between the date and the
 time and two spaces after the time, before being processed by the next
@@ -359,7 +359,7 @@ If both a
 .Ql t
 and a
 .Ql T
-directives are given before an action directive, the TAI64N timestamp
+directives are given before an action directive, the TAI64N[2] timestamp
 will always appear before the ISO 8601 timestamp.
 .Ss Action directives
 These directives determine what
@@ -435,7 +435,7 @@ is monitoring, as if the
 file in those logdirs had reached the size limit.
 .El
 .Ss Why use execlineb to interpret the Do processor Dc string?
-Because it is exactly what execlineb is for.
+Because it is exactly what execlineb[5] is for.
 .Bl -bullet -width x
 .It
 Directly executing
@@ -446,7 +446,7 @@ name and its arguments.
 .It
 We could interpret the processor string via
 .Pa /bin/sh .
-This is what multilog does.
+This is what multilog[1] does.
 However,
 .Pa /bin/sh ,
 despite being the traditional Unix interpreter, is overpowered for
@@ -457,7 +457,7 @@ only need a way to turn a string into an
 .Em argv ,
 i.e. a command line.
 .It
-execlineb was designed just for this: to turn simple strings into
+execlineb[5] was designed just for this: to turn simple strings into
 command lines.
 It is a very fast and lightweight script launcher, that does not do
 any heavy startup initialization like
@@ -466,7 +466,7 @@ does.
 It happens to be the perfect tool for the job.
 .It
 To be perfectly honest: I also did this on purpose so people have a
-reason to use the execline language.
+reason to use the execline[6] language.
 But seriously, it really is the perfect tool for the job.
 .El
 .Ss Why have another logging mechanism?
@@ -476,7 +476,7 @@ I'm not being judgmental; I'm just stating the obvious.
 .Pp
 .Sy The syslog design is flawed from the start
 .Pp
-When asked why he started rsyslog, Rainer Gerhards came up with a lot
+When asked why he started rsyslog[7], Rainer Gerhards came up with a lot
 of hand-waving and not a single word about technical points.
 There is a reason for that: rsyslog is forked from sysklogd!
 So, no matter how many bells and whistles are added to it, it still
@@ -533,7 +533,7 @@ choice here:
 .Em logging and log rotation management must be done
 .Sy by the same tool .
 Only a few non-mainstream implementations of syslogd do this,
-including the Busybox one - and that is a feature added by the Busybox
+including the Busybox[8] one - and that is a feature added by the Busybox
 developers who are aware of the problem but want to maintain
 compatibility with the historical syslogd.
 Neither syslogd (-ng or not) nor rsyslogd manages its log files:
@@ -552,7 +552,7 @@ Who's going to take care of syslogd's error messages ?
 syslog is slow, it's unsafe, and it's incomplete.
 The only reason people use it is because it's historical, it exists,
 and there hasn't been any serious alternative yet, except maybe
-multilog, which
+multilog[1], which
 .Nm
 improves upon.
 .Pp
@@ -582,7 +582,7 @@ Error messages from this logging mechanism naturally go to the machine
 console.
 .It
 Process 1's own error messages can go to the machine console, or dirty
-tricks can be used so they go to the catch-all logging mechanism.
+tricks can be used[9] so they go to the catch-all logging mechanism.
 .It
 Services that are spawned by process 1 should come with their own
 logger service; the supervision mechanism offered by
@@ -678,7 +678,7 @@ powerful as a traditional syslogd.
 .Nm
 can log to a RAM filesystem and thus is suitable as a catch-all
 logger.
-Clever tricks like Upstart's logd or daemontools' readproctitle are
+Clever tricks like Upstart's logd or daemontools' readproctitle[10] are
 just that: tricks.
 .Nm
 gives a unified interface to all of your system's loggers.
@@ -737,7 +737,7 @@ With this option,
 .Nm
 stops reading its standard input while it has unflushed buffers.
 This ensures that every log line has been fully processed before
-reading the next one; this is also multilog's behaviour.
+reading the next one; this is also multilog[1]'s behaviour.
 By default,
 .Nm
 keeps reading from stdin even if its buffers still contain data.
@@ -755,14 +755,14 @@ would kill it.
 .It Fl t
 Timestamp.
 Prepends every log line that is written to a logging directory with a
-TAI64N timestamp.
-This option is now deprecated.
+TAI64N[2] timestamp.
+.Sy This option is now deprecated.
 .It Fl e
 Timestamp alerts.
 Prepends every
 .Dq alert
-line with a TAI64N timestamp.
-This option is now deprecated.
+line with a TAI64N[2] timestamp.
+.Sy This option is now deprecated.
 .It Fl q | v
 Quiet | verbose.
 Decreases | increases
@@ -795,7 +795,7 @@ The default is 8192 bytes.
 .Sh EXAMPLES
 .Dl s6-log -b n20 s1000000 t /var/log/services/stuff
 .Pp
-Logs all of stdin, prepending every line with a TAI64N timestamp, into
+Logs all of stdin, prepending every line with a TAI64N[2] timestamp, into
 the
 .Pa /var/log/services/stuff
 logdir, with a maximum archive of 20 log files of 1 MB each; makes
@@ -825,6 +825,36 @@ and save the result into a timestamped archive file, with a maximum of
 .El
 .Sh SEE ALSO
 .Xr ucspilogd 1
+.Pp
+[1]
+.Lk https://cr.yp.to/daemontools/multilog.html
+.Pp
+[2]
+.Lk https://skarnet.org/software/skalibs/libstddjb/tai.html
+.Pp
+[3]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html#tag_09_04
+.Pp
+[4]
+.Lk https://en.wikipedia.org/wiki/ISO_8601
+.Pp
+[5]
+.Lk https://skarnet.org/software/execline/execlineb.html
+.Pp
+[6]
+.Lk https://skarnet.org/software/execline/
+.Pp
+[7]
+.Lk https://rainer.gerhards.net/2007/08/why-doesworld-need-another-syslogd.html
+.Pp
+[8]
+.Lk https://busybox.net/
+.Pp
+[9]
+.Lk https://skarnet.org/software/s6/s6-svscan-1.html#log
+.Pp
+[10]
+.Lk https://cr.yp.to/daemontools/readproctitle.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-log.html
