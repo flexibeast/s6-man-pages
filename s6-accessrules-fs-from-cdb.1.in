@@ -1,12 +1,12 @@
-.Dd September 10, 2020
+.Dd September 13, 2020
 .Dt S6-ACCESSRULES-FS-FROM-CDB 1
 .Os
 .Sh NAME
 .Nm s6-accessrules-fs-from-cdb
-.Nd decompile a CDB database containing a ruleset suitable for
+.Nd decompile a CDB[1] database containing a ruleset suitable for
 .Xr s6-ipcserver-access 1
 or
-s6-tcpserver-access
+s6-tcpserver-access[2]
 and that has been compiled with
 .Xr s6-accessrules-cdb-from-fs 1
 .Sh SYNOPSIS
@@ -15,7 +15,7 @@ and that has been compiled with
 .Ar cdbfile
 .Sh DESCRIPTION
 .Nm
-decompiles the CDB file
+decompiles the CDB[1] file
 .Ar cdbfile
 into the directory
 .Ar dir ,
@@ -48,7 +48,7 @@ was a suitable candidate for the
 option of
 .Xr s6-ipcserver-access 1
 or
-s6-tcpserver-access,
+s6-tcpserver-access[2],
 then
 .Ar dir
 will be a suitable candidate for the
@@ -63,6 +63,12 @@ option of the same program, implementing the same ruleset.
 .Xr s6-ipcserver-access 1 ,
 .Xr s6-ipcserver-socketbinder 1 ,
 .Xr s6-ipcserverd 1
+.Pp
+[1]
+.Lk https://en.wikipedia.org/wiki/Cdb_(software)
+.Pp
+[2]
+.Lk https://skarnet.org/software/s6-networking/s6-tcpserver-access.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-accessrules-fs-from-cdb.html
