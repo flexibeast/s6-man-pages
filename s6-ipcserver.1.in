@@ -1,9 +1,9 @@
-.Dd September 10, 2020
+.Dd September 13, 2020
 .Dt S6-IPCSERVER 1
 .Os
 .Sh NAME
 .Nm s6-ipcserver
-.Nd UCSPI server tool for Unix domain sockets, i.e. a super-server: accept connections from clients, and fork a program to handle each connection
+.Nd UCSPI server tool[1] for Unix domain sockets, i.e. a super-server: accept connections from clients, and fork a program to handle each connection
 .Sh SYNOPSIS
 .Nm
 .Op Fl 1
@@ -214,6 +214,9 @@ the remainder of the command line.
 .Xr s6-ipcserver-access 1 ,
 .Xr s6-ipcserver-socketbinder 1 ,
 .Xr s6-ipcserverd 1
+.Pp
+[1]
+.Lk https://cr.yp.to/proto/ucspi.txt
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-ipcserver.html
