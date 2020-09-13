@@ -1,9 +1,9 @@
-.Dd September 10, 2020
+.Dd September 13, 2020
 .Dt S6-IPCCLIENT 1
 .Os
 .Sh NAME
 .Nm s6-ipcclient
-.Nd UCSPI client tool for Unix domain sockets: connect to a socket, then execute into a program
+.Nd UCSPI client tool[1] for Unix domain sockets: connect to a socket, then execute into a program
 .Sh SYNOPSIS
 .Nm
 .Op Fl q | Q | v
@@ -22,8 +22,9 @@ with descriptor 6 reading from the socket and descriptor 7 writing to
 it.
 .Pp
 .Nm
-is mostly used to connect a client to a local service without having
-to implement networking in the client.
+is mostly used to connect a client to an
+.Xr s6-local-service 7
+without having to implement networking in the client.
 For instance, the
 .Xr s6-sudo 1
 program does this.
@@ -67,6 +68,9 @@ Be aware that it may contain arbitrary characters.
 .Xr s6-ipcserver-access 1 ,
 .Xr s6-ipcserver-socketbinder 1 ,
 .Xr s6-ipcserverd 1
+.Pp
+[1]
+.Lk https://cr.yp.to/proto/ucspi.txt
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-ipcclient.html
