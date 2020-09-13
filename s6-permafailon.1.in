@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 13, 2020
 .Dt S6-PERMAFAILON 1
 .Os
 .Sh NAME
@@ -81,8 +81,10 @@ service is then marked as failing permanently.
 .Pp
 The
 .Pa ./finish
-script is naturally a chain-loading command line if it is written in
-the execline language.
+script is
+.Em naturally
+a chain-loading command line if it is written in the execline[1]
+language.
 It can also be made into a chain-loading command line from a shell
 script by using
 .Ql exec s6-permafailon secs deathcount events rest-of-chainloading-cmdline...
@@ -125,6 +127,9 @@ command line.
 .Xr s6-svscanctl 1 ,
 .Xr s6-svstat 1 ,
 .Xr s6-svwait 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/execline/
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-permafailon.html
