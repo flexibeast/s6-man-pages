@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 13, 2020
 .Dt S6-IPCSERVER-ACCESS 1
 .Os
 .Sh NAME
@@ -55,7 +55,7 @@ enough for scripts to understand and modify it, and the ruleset can be
 changed dynamically.
 This is practical, for instance, for roaming users.
 .It
-or in a CDB file, if the
+or in a CDB[1] file, if the
 .Fl x
 option has been given.
 This option is the most efficient one if the ruleset is static enough:
@@ -78,7 +78,8 @@ and
 .Ev ${PROTO}REMOTEEGID
 environment variables, and checks them with the
 .Fn s6_accessrules_keycheck_uidgid
-function.
+function - refer to
+.Xr s6-accessrules 7 .
 In other words, it tries to match:
 .Bl -bullet -width x
 .It
@@ -189,7 +190,7 @@ Check client credentials against a filesystem-based database in the
 .Ar rulesdir
 directory.
 .It Fl x Ar rulesfile
-Check client credentials against a CDB database in the
+Check client credentials against a CDB[1] database in the
 .Ar rulesfile
 file.
 .Fl i
@@ -237,6 +238,9 @@ client address.
 .Xr s6-ipcserver 1 ,
 .Xr s6-ipcserver-socketbinder 1 ,
 .Xr s6-ipcserverd 1
+.Pp
+[1]
+.Lk https://en.wikipedia.org/wiki/Cdb_(software)
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-ipcserver-access.html
