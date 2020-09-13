@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 13, 2020
 .Dt S6-IPCSERVERD 1
 .Os
 .Sh NAME
@@ -44,7 +44,8 @@ Those are delegated to the
 program.
 .Pp
 .Nm
-can be used to set up local services.
+can be used to set up
+.Xr s6-local-service 7 Ns s .
 .Pp
 .Nm
 is meant to be execve'd into by a program that gets the listening
