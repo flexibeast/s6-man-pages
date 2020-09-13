@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 13, 2020
 .Dt S6-ACCESSRULES-CDB-FROM-FS 1
 .Os
 .Sh NAME
@@ -6,8 +6,8 @@
 .Nd compile a directory containing a ruleset suitable for
 .Xr s6-ipcserver-access 1
 or
-s6-tcpserver-access
-into a CDB file
+s6-tcpserver-access[1]
+into a CDB[2] file
 .Sh SYNOPSIS
 .Nm
 .Ar cdbfile
@@ -16,7 +16,7 @@ into a CDB file
 .Nm
 compiles the
 .Ar dir
-directory containing a ruleset into a CDB file
+directory containing a ruleset into a CDB[2] file
 .Ar cdbfile
 then exits 0.
 .Ss Ruleset directory format
@@ -24,7 +24,7 @@ To be understood by
 .Nm ,
 .Xr s6-ipcserver-access 1 ,
 or
-s6-tcpserver-access,
+s6-tcpserver-access[1],
 .Ar dir
 must have a specific format.
 .Pp
@@ -53,7 +53,7 @@ Depending on the application, other directories can appear in
 and be compiled into
 .Ar cdbfile ,
 but
-s6-tcpserver-access
+s6-tcpserver-access[1]
 only uses the first three, and
 .Xr s6-ipcserver-access 1
 only uses the last two.
@@ -112,7 +112,7 @@ A file named
 If such a file exists along with an
 .Pa allow
 file, then its contents represent a command line that, interpreted by
-the execlineb launcher, will be executed after accepting the
+the execlineb[3] launcher, will be executed after accepting the
 connection, totally bypassing the original command line.
 .Nm
 truncates the
@@ -144,7 +144,7 @@ was a suitable candidate for the
 option of
 .Xr s6-ipcserver-access 1
 or
-s6-tcpserver-access,
+s6-tcpserver-access[1],
 then
 .Ar cdbfile
 will be a suitable candidate for the
@@ -164,6 +164,15 @@ program.
 .Xr s6-ipcserver-access 1 ,
 .Xr s6-ipcserver-socketbinder 1 ,
 .Xr s6-ipcserverd 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/s6-networking/s6-tcpserver-access.html
+.Pp
+[2]
+.Lk https://en.wikipedia.org/wiki/Cdb_(software)
+.Pp
+[3]
+.Lk https://skarnet.org/software/execline/execlineb.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-accessrules-cdb-from-fs.html
