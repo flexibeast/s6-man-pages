@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-FDHOLDER-DAEMON 1
 .Os
 .Sh NAME
@@ -75,7 +75,8 @@ Every operational detail of
 applies to
 .Nm
 as well; in particular, make sure to properly configure the clients'
-access rights.
+access rights, as described in
+.Xr s6-fdholderd 1 .
 .Pp
 .Nm
 is meant to be used in a s6 run script, as a supervised local
@@ -134,8 +135,9 @@ process minus a few descriptors needed for correct
 operation.
 Before running
 .Nm ,
-make sure to properly adjust the number of openable files of the
-current process.
+make sure to properly adjust, via
+.Xr s6-softlimit 1 ,
+the number of openable files[1] of the current process.
 .It Fl b Ar backlog
 Set a maximum of
 .Ar backlog
@@ -212,6 +214,9 @@ Read access rights configuration from the filesystem in directory
 .Xr s6-fdholder-store 1 ,
 .Xr s6-fdholder-transferdump 1 ,
 .Xr s6-fdholderd 1
+.Pp
+[1]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_resource.h.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-fdholder-daemon.html
