@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-FDHOLDER-GETDUMP 1
 .Os
 .Sh NAME
@@ -30,7 +30,7 @@ variables.
 Getting the whole state of an
 .Xr s6-fdholderd 1
 daemon requires specific privileges.
-Make sure you properly configure the
+Make sure you properly configure
 .Xr s6-fdholderd 1
 access rights so your client can perform that operation.
 .Sh OPTIONS
@@ -71,7 +71,7 @@ open file descriptor.
 Contains the expiration date of the
 .Va i Ns th
 open file descriptor, if applicable.
-That date is stored in external TAI64N format.
+That date is stored in external TAI64N format[1].
 If the file descriptor is not supposed to expire, that
 environment variable is not defined.
 .El
@@ -82,7 +82,7 @@ On success, the program doesn't exit; instead, it execs into
 .Bl -tag -width x
 .It 1
 The server denied the operation.
-The meaning of the error messages are explained in
+The meanings of the error messages are explained in
 .Xr s6-fdholder-error-codes 7 .
 .It 100
 Wrong usage.
@@ -116,6 +116,9 @@ program does the same thing more efficiently.
 .Xr s6-fdholder-store 1 ,
 .Xr s6-fdholder-transferdump 1 ,
 .Xr s6-fdholderd 1 ,
+.Pp
+[1]
+.Lk https://cr.yp.to/libtai/tai64.html#tai64n
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-fdholder-getdump.html
