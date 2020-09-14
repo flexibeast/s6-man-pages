@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-FDHOLDER-SETDUMP 1
 .Os
 .Sh NAME
@@ -34,7 +34,7 @@ The format of the environment is the same as the one set by
 Setting the whole state of an
 .Xr s6-fdholderd 1
 daemon requires specific privileges.
-Make sure you properly configure the
+Make sure you properly configure
 .Xr s6-fdholderd 1
 access rights so your client can perform that operation.
 .Pp
@@ -61,7 +61,7 @@ to the wrong socket, for instance).
 Success.
 .It 1
 The server denied the operation.
-The meaning of the error messages are explained in
+The meanings of the error messages are explained in
 .Xr s6-fdholder-error-codes 7 .
 .It 100
 Wrong usage.
