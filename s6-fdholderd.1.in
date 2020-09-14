@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-FDHOLDERD 1
 .Os
 .Sh NAME
@@ -32,7 +32,8 @@ It runs until killed by a signal (normally SIGTERM). When
 .Nm
 is killed, all the fds it is currently holding are lost; if they need
 to be preserved, the admin should make sure to transfer them
-beforehand.
+beforehand with
+.Xr s6-fdholder-transferdump 1 .
 .Pp
 Client connections are short-lived.
 Clients generally perform one operation, then disconnect.
@@ -166,7 +167,7 @@ This is done by a series of rules, or
 .Em ruleset ,
 stored in either a
 .Em rulesfile
-in the CDB format, or in a
+in the CDB[1] format, or in a
 .Em rulesdir ,
 i.e. a directory in the filesystem following a certain format.
 .Nm
@@ -238,7 +239,7 @@ is found is the
 subdirectory of one of the subdirectories checked by
 .Fn s6_accessrules_keycheck_uidgid .
 This file should contain a single line, which will be interpreted as
-an extended regular expression by
+an Extended Regular Expression[2] by
 .Nm ;
 the regular expression describes the set of identifiers that the
 client is allowed to use to store file descriptors.
@@ -258,7 +259,7 @@ is found is the
 subdirectory of one of the subdirectories checked by
 .Fn s6_accessrules_keycheck_uidgid .
 This file should contain a single line, which will be interpreted as
-an extended regular expression by
+an Extended Regular Expression[2] by
 .Nm ;
 the regular expression describes the set of identifiers that the
 client is allowed to use to retrieve file descriptors.
@@ -345,7 +346,7 @@ Before running
 .Nm ,
 make sure to use
 .Xr s6-softlimit 1
-to properly adjust the number of openable files of the current
+to properly adjust the number of openable files[3] of the current
 process.
 .It Fl t Ar clienttimeout
 Disconnect a client if it's in the middle of an operation and it has
@@ -364,7 +365,7 @@ By default,
 .Ar lameducktimeout
 is 0, which means infinite.
 .It Fl x Ar rulesfile
-Read access rights configuration from CDB file
+Read access rights configuration from CDB[1] file
 .Ar rulesfile .
 .It Fl i Ar rulesdir
 Read access rights configuration from the filesystem in directory
@@ -462,6 +463,15 @@ echo > uid/default/env/S6_FDHOLDER_SETDUMP
 .Xr s6-fdholder-setdump 1 ,
 .Xr s6-fdholder-store 1 ,
 .Xr s6-fdholder-transferdump 1
+.Pp
+[1]
+.Lk https://en.wikipedia.org/wiki/Cdb_%28software%29
+.Pp
+[2]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html#tag_09_04
+.Pp
+[3]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_resource.h.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-fdholderd.html
