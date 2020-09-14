@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-FIFODIR 7
 .Os
 .Sh NAME
@@ -31,7 +31,7 @@ function in
 .It
 You can destroy fifodirs via the
 .Fn rm_rf
-function in libstddjb.
+function in libstddjb[1].
 .El
 .Pp
 For a listener:
@@ -161,6 +161,9 @@ can write to the fifo.
 .Pp
 The libftrig interface takes care of all the subtleties.
 .Sh SEE ALSO
+[1]
+.Lk https://skarnet.org/software/skalibs/doc/libstddjb/djbunix.html
+.Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/fifodir.html
 .Sh AUTHORS
