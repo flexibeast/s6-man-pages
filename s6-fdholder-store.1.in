@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-FDHOLDER-STORE 1
 .Os
 .Sh NAME
@@ -56,7 +56,7 @@ to the wrong socket, for instance).
 Success.
 .It 1
 The server denied the operation.
-The meaning of the error messages are explained in
+The meanings of the error messages are explained in
 .Xr s6-fdholder-error-codes 7 .
 .It 100
 Wrong usage.
