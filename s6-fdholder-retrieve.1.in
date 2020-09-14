@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-FDHOLDER-RETRIEVE 1
 .Os
 .Sh NAME
@@ -44,6 +44,9 @@ Delete the file descriptor from the server's storage after
 retrieval.
 This option requires writing rights over the given identifier as well
 as reading rights: check the server's configuration.
+Refer to
+.Xr s6-fdholder 7
+for details.
 .It Fl t Ar timeout
 If the operation cannot be processed in
 .Ar timeout
@@ -58,7 +61,7 @@ On success, the program doesn't exit; instead, it execs into
 .Bl -tag -width x
 .It 1
 The server denied the operation.
-The meaning of the error messages are explained in
+The meanings of the error messages are explained in
 .Xr s6-fdholder-error-codes 7 .
 .It 100
 Wrong usage.
