@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-LIBS6 7
 .Os
 .Sh NAME
@@ -42,28 +42,38 @@ The
 .Pa s6/accessrules.h
 header provides functions to check credentials against configuration
 files.
+Refer to
+.Xr s6-accessrules 7 .
 .It
 The
 .Pa s6/ftrigr.h
 header provides functions to subscribe to
 .Xr s6-fifodir 7 Ns s
 and be notified of events.
+Refer to
+.Xr s6-ftrigr 7 .
 .It
 The
 .Pa s6/ftrigw.h
 header provides functions to manage
 .Xr s6-fifodir 7 Ns s
 and send notifications to them.
+Refer to
+.Xr s6-ftrigw 7 .
 .It
 The
 .Pa s6/s6lock.h
 header provides functions to acquire locks with a timeout.
+Refer to
+.Xr s6-s6lock 7 .
 .It
 The
 .Pa s6/s6-fdholder.h
 header provides functions to communicate with an
 .Xr s6-fdholderd 1
 server and exchange file descriptors with it.
+Refer to
+.Xr s6-fdholder 7 .
 .El
 .Sh SEE ALSO
 .Xr s6-accessrules 7 ,
