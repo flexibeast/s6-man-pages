@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-FDHOLDER-TRANSFERDUMP 1
 .Os
 .Sh NAME
@@ -37,6 +37,9 @@ Make sure the
 .Xr s6-fdholderd 1
 instances are configured to accept dump-getting and dump-setting
 requests from your client.
+Refer to
+.Xr s6-fdholderd 1
+for details.
 .Pp
 A typical use case of
 .Nm
@@ -72,11 +75,11 @@ to the wrong socket, for instance).
 Success.
 .It 1
 The source server denied the operation.
-The meaning of the error messages are explained in
+The meanings of the error messages are explained in
 .Xr s6-fdholder-error-codes 7 .
 .It 2
 The destination server denied the operation.
-The meaning of the error messages are explained in
+The meanings of the error messages are explained in
 .Xr s6-fdholder-error-codes 7 .
 .It 100
 Wrong usage.
