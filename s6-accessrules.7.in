@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-ACCESSRULES 7
 .Os
 .Sh NAME
@@ -38,7 +38,7 @@ or
 .Pp
 An
 .Vt s6_accessrules_params_t
-is a structure containing two strallocs,
+is a structure containing two strallocs[1],
 .Em .env
 and
 .Em .exec ,
@@ -91,7 +91,7 @@ takes a
 .Va handle
 and looks up
 .Va key
-in the CDB it points to.
+in the CDB[2] it points to.
 .Va handle
 must already be mapped to a CDB file.
 Such a file can be built with the
@@ -358,8 +358,8 @@ string is a catch-all key that matches everything.
 interprets
 .Va key
 as a pointer to an
-.Vt ip46_t ,
-and behaves either as
+.Vt ip46_t Ns
+[3], and behaves either as
 .Fn s6_accessrules_keycheck_ip6
 or
 .Fn s6_accessrules_keycheck_ip4 ,
@@ -510,6 +510,15 @@ additional information may be stored into
 .Xr s6-ftrigw 7 ,
 .Xr s6-libs6 7 ,
 .Xr s6-s6lock 7
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/libstddjb/stralloc.html
+.Pp
+[2]
+.Lk https://cr.yp.to/cdb.html
+.Pp
+[3]
+.Lk https://skarnet.org/software/skalibs/libstddjb/ip46.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/libs6/accessrules.html
