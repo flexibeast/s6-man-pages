@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-FDHOLDER 7
 .Os
 .Sh NAME
@@ -165,7 +165,7 @@ n = s6_fdholder_list_g(&a, &list, &deadline) ;
 .Pp
 .Fn s6_fdholder_list
 gets the list of all identifiers currently held by the server.
-It stores it into the stralloc
+It stores it into the stralloc[1]
 .Va list ,
 as a series of null-terminated strings, one after the other.
 There are
@@ -186,7 +186,7 @@ attempts to retrieve the whole set of descriptors from the server.
 It returns 1 on success, and 0 on failure, with an appropriate errno
 code; refer to
 .Xr s6-fdholder-error-codes 7 .
-The set is stored into the genalloc
+The set is stored into the genalloc[2]
 .Va dump ,
 which is to be interpreted as a stralloc containing an array of
 .Vt s6_fdholder_fd_t .
@@ -223,6 +223,12 @@ appropriate errno code; refer to
 .Xr s6-ftrigw 7 ,
 .Xr s6-libs6 7 ,
 .Xr s6-s6lock 7
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/libstddjb/stralloc.html
+.Pp
+[2]
+.Lk https://skarnet.org/software/skalibs/libstddjb/genalloc.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/libs6/s6-fdholder.html
