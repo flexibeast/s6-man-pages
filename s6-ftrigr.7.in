@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-FTRIGR 7
 .Os
 .Sh NAME
@@ -17,8 +17,10 @@ This means paying some attention to the SIGCHLD handler, if any, and
 to the way you perform
 .Xr waitpid 2 Ns
 s.
-The best practice is to use a self-pipe to handle SIGCHLD (as well as
-other signals the application needs to trap), and to always use
+The best practice is to use a self-pipe[1] to handle SIGCHLD (as well as
+other signals the application needs to trap), and to
+.Em always
+use
 .Fn wait_nohang
 to reap children, simply ignoring pids you don't know.
 .Pp
@@ -49,7 +51,8 @@ be an accurate enough timestamp.
 These structures can be filled using the
 .Ql tain_
 primitives declared in
-.Pa skalibs/tai.h .
+.Pa skalibs/tai.h Ns
+[2].
 .Pp
 .Po
 .Dq Accurate enough
@@ -97,7 +100,7 @@ and
 .Va stamp
 parameters: then the whole sequence is bound in execution time.
 .Pp
-This is a general safety mechanism implemented in libunixonacid: in
+This is a general safety mechanism implemented in libunixonacid[3]: in
 interprocess communication, purely synchronous primitives are
 dangerous because they make the calling process rely on proper
 behaviour of the called process.
@@ -337,7 +340,7 @@ If no notification happened yet, returns 0.
 .It
 If something happened, appends one character to the end of the
 .Va what
-stralloc for every time a notification was triggered since the last
+stralloc[4] for every time a notification was triggered since the last
 call to
 .Fn ftrigr_check .
 Each character is the one that triggered a notification.
@@ -360,6 +363,18 @@ Acknowledges all the pending ids (i.e. clears the stored id list) then calls
 .Xr s6-ftrigw 7 ,
 .Xr s6-libs6 7 ,
 .Xr s6-s6lock 7
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/libstddjb/selfpipe.html
+.Pp
+[2]
+.Lk https://skarnet.org/software/skalibs/libstddjb/tai.html
+.Pp
+[3]
+.Lk https://skarnet.org/software/skalibs/libunixonacid/
+.Pp
+[4]
+.Lk https://skarnet.org/software/skalibs/libstddjb/stralloc.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/libs6/ftrigr.html
