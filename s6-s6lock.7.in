@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-S6LOCK 7
 .Os
 .Sh NAME
@@ -36,7 +36,7 @@ If you're not using an
 make sure your application is not disturbed by children it doesn't
 know it has.
 Using nonblocking waits, ignoring pids you don't know, and using a
-self-pipe if your application is built around an event loop, are good
+self-pipe[1] if your application is built around an event loop, are good
 programming practices.
 .Ss Starting and ending a session
 .Bd -literal -offset indent
@@ -265,6 +265,9 @@ the function returns -1
 .Xr s6-ftrigr 7 ,
 .Xr s6-ftrigw 7 ,
 .Xr s6-libs6 7
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/libstddjb/selfpipe.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/libs6/s6lock.html
