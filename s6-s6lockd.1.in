@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-S6LOCKD 1
 .Os
 .Sh NAME
@@ -38,7 +38,7 @@ Use the
 .Fn s6lock_start
 library call, together with an
 .Nm
-service.
+.Xr s6-local-service 7 .
 For once,
 .Em this is the recommended setup :
 .Nm
@@ -55,7 +55,7 @@ has no
 mode: it is designed to work with a Unix domain super-server, like
 .Xr s6-ipcserver 1 .
 .Nm
-follows the UCSPI interface; it can be directly executed from the
+follows the UCSPI[1] interface; it can be directly executed from the
 super-server.
 .Pp
 Unix does not natively provide a way to stop blocking on a lock
@@ -68,6 +68,9 @@ child per requested lock.
 .Sh SEE ALSO
 .Xr s6-setlock 1 ,
 .Xr s6lockd-helper 1
+.Pp
+[1]
+.Lk https://cr.yp.to/proto/ucspi.txt
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/libs6/s6lockd.html
