@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-LIBFTRIG 7
 .Os
 .Sh NAME
@@ -71,7 +71,7 @@ soon as it's not handling an event, and only wake up when needed.
 Of course, the problem of notification is that it's often more
 difficult to implement.
 Notification frameworks are generally more complex, involving lots of
-asynchronism; polling is widely used because it's easy.
+asynchronism; polling is widely used because it's easy[1].
 .Pp
 .Sy Notifications and Unix
 .Pp
@@ -84,7 +84,7 @@ The simplest Unix notification mechanism.
 Sending events amounts to a
 .Xr kill 2
 call, and receiving events amounts to installing a signal handler
-(preferrably using a self-pipe if mixing signals with an event
+(preferably using a self-pipe[2] if mixing signals with an event
 loop).
 Unfortunately, Unix signals, even the more recent and powerful
 real-time POSIX signals, have important limitations when it's about
@@ -110,7 +110,7 @@ system calls on, in an
 .Em asynchronous event loop .
 This mechanism is very widely used, and rightly so, because it's
 extremely generic and works in every ordinary situation; you have to
-be doing very specific stuff to reach its limits.
+be doing very specific stuff[3] to reach its limits.
 If process A is reading on fd
 .Va f ,
 it is notified every time another process makes
@@ -185,7 +185,7 @@ a bus service to be up; that's its main advantage over a bus.
 If you are not concerned with supervision and can depend on a bus
 service, though, then yes, by all means, use a bus for your
 notification needs.
-There is a skabus project in the making, which aims to be simpler,
+There is a skabus[4] project in the making, which aims to be simpler,
 smaller and more maintainable than D-Bus.
 .Ss How to use Nm
 .Nm
@@ -213,6 +213,18 @@ interface.
 .Xr s6-ftrigw 7 ,
 .Xr s6-libs6 7 ,
 .Xr s6-s6lock 7
+.Pp
+[1]
+.Lk https://lib.store.yahoo.net/lib/demotivators/mediocritydemotivationalposter.jpg
+.Pp
+[2]
+.Lk https://skarnet.org/software/skalibs/libstddjb/selfpipe.html
+.Pp
+[3]
+.Lk http://www.kegel.com/c10k.html
+.Pp
+[4]
+.Lk https://skarnet.org/software/skabus/
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/ftrig.html
