@@ -1,9 +1,12 @@
-.Dd September 10, 2020
+.Dd September 15, 2020
 .Dt S6-SVWAIT 1
 .Os
 .Sh NAME
 .Nm s6-svwait
-.Nd block until a collection of supervised services goes up, or down
+.Nd monitor one or more
+.Xr s6-service-directory 7 Ns s
+given as its arguments, waiting for a state (ready, up or down) to
+happen
 .Sh SYNOPSIS
 .Nm
 .Op Fl U | u | D | d
@@ -15,8 +18,10 @@
 only waits for notifications; it never polls.
 .Pp
 .Nm
-should be given one or more service directories as arguments, not a
-scan directory.
+should be given one or more
+.Em service directories
+as arguments, not an
+.Xr s6-scan-directory 7 .
 If you need to wait for a whole scan directory, give all its contents
 as arguments to
 .Nm s6-svwait .
@@ -49,7 +54,8 @@ services themselves.
 This requires specific support in the service programs, and the use of
 the
 .Pa notification-fd
-file in the service directory.
+file in the
+.Xr s6-service-directory 7 .
 See the explanation in
 .Xr s6-notifywhenup 7 .
 .It Fl d
