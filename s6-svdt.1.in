@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 15, 2020
 .Dt S6-SVDT 1
 .Os
 .Sh NAME
@@ -14,7 +14,8 @@
 prints the contents of the recorded death tally of the service being
 currently supervised at the
 .Ar servicedir
-service directory, then exits 0.
+.Xr s6-service-directory 7 ,
+then exits 0.
 .Pp
 For each recorded death,
 .Nm
@@ -22,10 +23,7 @@ prints one line.
 This line contains the following fields, separated with spaces:
 .Bl -bullet -width x
 .It
-A TAI64N timestamp.
-Refer to
-.Lk https://cr.yp.to/daemontools/tai64n.html
-for details.
+A TAI64N[1] timestamp.
 .It
 The word
 .Sq signal
@@ -46,7 +44,8 @@ s output into
 Process deaths are recorded up to a default maximum of 100.
 This default can be modified via the
 .Pa max-death-tally
-file in the service directory.
+file in the
+.Xr s6-service-directory 7 .
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl S
@@ -83,6 +82,9 @@ System call failed.
 .Xr s6-svscanctl 1 ,
 .Xr s6-svstat 1 ,
 .Xr s6-svwait 1
+.Pp
+[1]
+.Lk https://cr.yp.to/daemontools/tai64n.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-svdt.html
