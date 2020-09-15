@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 14, 2020
 .Dt S6-SCAN-DIRECTORY 7
 .Os
 .Sh NAME
@@ -16,10 +16,10 @@ on this scan directory launches a
 every service listed in the scan directory will be supervised.
 .Pp
 There is normally only one scan directory per system, although nothing
-prevents a system administrator from having more. daemontools
+prevents a system administrator from having more. daemontools[1]
 traditionally uses
 .Pa /service ,
-and runit traditionally uses
+and runit[2] traditionally uses
 .Pa /etc/service .
 s6 does not care where your scan directory is, but I would advise
 .Pa /service
@@ -60,9 +60,9 @@ subdirectories in a service directory it monitors.
 Where and how to build your scan directory depends heavily on your
 boot system - and on your personal preference too.
 .Pp
-Standard daemontools and runit installations like to have a fixed scan
-directory containing symlinks to service directories located in the
-service repository.
+Standard daemontools[1] and runit[2] installations like to have a
+fixed scan directory containing symlinks to service directories
+located in the service repository.
 In other words, the service repository contains the real working
 copies of the service directories.
 This works, as long as:
@@ -127,7 +127,7 @@ run on
 as early as possible in your boot sequence.
 This is possible whether you want to run
 .Xr s6-svscan 1
-as process 1 or not.
+as process 1[3] or not[4].
 .It
 During the boot sequence, populate
 .Pa /tmp/services
@@ -156,6 +156,18 @@ s6-svscanctl -a /tmp/service
 .Sh SEE ALSO
 .Xr s6-fifodir 7 ,
 .Xr s6-service-directory 7
+.Pp
+[1]
+.Lk https://cr.yp.to/daemontools.html
+.Pp
+[2]
+.Lk http://smarden.org/runit/
+.Pp
+[3]
+.Lk https://skarnet.org/software/s6/s6-svscan-1.html
+.Pp
+[4]
+.Lk https://skarnet.org/software/s6/s6-svscan-not-1.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/scandir.html
