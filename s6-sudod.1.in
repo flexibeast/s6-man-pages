@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 15, 2020
 .Dt S6-SUDOD 1
 .Os
 .Sh NAME
@@ -146,7 +146,9 @@ by
 .Xr s6-sudoc 1 ,
 filtered in the following manner: for every variable sent by
 .Xr s6-sudoc 1 ,
-if the variable is present but empty in
+if the variable is
+.Sy present but empty
+in
 .Nm Ap
 s environment, then its value is overridden by the value given by
 .Xr s6-sudoc 1 .
@@ -216,13 +218,13 @@ sargv
 .Ed
 .Bl -bullet -width x
 .It
-execlineb executes the script.
+execlineb[1] executes the script.
 .It
-fdmove
+fdmove[2]
 makes sure the script's error messages are sent to the service's
 logger.
 .It
-fdmove
+fdmove[2]
 redirects the script's stdout to file descriptor 3. This is useful if
 the service directory contains a
 .Pa notification-fd
@@ -263,7 +265,7 @@ checks the client's credentials according to the rules in directory
 .Va rules .
 .It
 .Ql exec -c
-clears the environment.
+[3] clears the environment.
 .It
 .Xr s6-envdir 1
 sets environment variables according to the directory
@@ -315,6 +317,15 @@ transmitted to
 .Sh SEE ALSO
 .Xr s6-sudo 1 ,
 .Xr s6-sudoc 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/execline/execlineb.html
+.Pp
+[2]
+.Lk https://skarnet.org/software/execline/fdmove.html
+.Pp
+[3]
+.Lk https://skarnet.org/software/execline/exec.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-sudod.html
