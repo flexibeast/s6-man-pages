@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 15, 2020
 .Dt S6-SERVICE-DIRECTORY 7
 .Os
 .Sh NAME
@@ -62,22 +62,22 @@ that init system's default log (or
 in the case of sysvinit).
 If
 .Xr s6-svscan 1
-is running as pid 1 via the help of software like s6-linux-init, then
-its stdout and stderr point to a catch-all logger, which catches and
-logs any output of the supervision tree that has not been caught by a
-dedicated logger.
+is running as pid 1 via the help of software like s6-linux-init[1],
+then its stdout and stderr point to a catch-all logger, which catches
+and logs any output of the supervision tree that has not been caught
+by a dedicated logger.
 If the defaults provided by your installation are not suitable for
 your run script, then your run script should perform the proper
 redirections before executing into the final daemon.
 For instance, dedicated logging mechanisms, such as the
 .Pa log
-subdirectory (see below) or the s6-rc pipeline feature, pipe your run
-script's stdout to the logging service, but chances are you want to
-log stderr as well, so the run script should make sure that its stderr
-goes into the log pipe.
+subdirectory (see below) or the s6-rc[2] pipeline feature, pipe your
+run script's stdout to the logging service, but chances are you want
+to log stderr as well, so the run script should make sure that its
+stderr goes into the log pipe.
 This is achieved by
 .Ql fdmove -c 2 1
-in execline, and
+in execline[3], and
 .Ql exec 2>&1
 in shell.
 .It
@@ -206,7 +206,8 @@ session leader.
 An optional regular file named
 .Pa notification-fd .
 If such a file exists, it means that the service supports readiness
-notification.
+notification; refer to
+.Xr s6-notifywhenup 7 .
 The file must only contain an unsigned integer, which is the number of
 the file descriptor that the service writes its readiness notification
 to.
@@ -400,7 +401,7 @@ read-write, which is unacceptable if you are concerned with
 reliability - if you are, for instance, designing an embedded
 platform.
 .It
-Some people like to have their service directories in a read-only
+Some people[4] like to have their service directories in a read-only
 filesystem, with supervise symlinks pointing to various places in
 writable filesystems.
 This setup looks a bit complex to me: it requires careful handling of
@@ -418,7 +419,7 @@ directories in the (possibly read-only) root filesystem, and copy it
 all to a
 .Xr s6-scan-directory 7
 located on a RAM filesystem that is mounted at boot time.
-This is the setup I recommend, and the one used by the s6-rc service
+This is the setup I recommend, and the one used by the s6-rc[2] service
 manager.
 It has several advantages:
 .Bl -bullet -width x
@@ -458,6 +459,18 @@ No stale files can make your system unstable.
 .Sh SEE ALSO
 .Xr s6-fifodir 7 ,
 .Xr s6-scan-directory 7
+.Pp
+[1]
+.Lk https://skarnet.org/software/s6-linux-init/
+.Pp
+[2]
+.Lk https://skarnet.org/software/s6-rc/
+.Pp
+[3]
+.Lk https://skarnet.org/software/execline/
+.Pp
+[4]
+.Lk http://code.dogmap.org/
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/servicedir.html
