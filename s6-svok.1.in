@@ -1,9 +1,11 @@
-.Dd September 10, 2020
+.Dd September 15, 2020
 .Dt S6-SVOK 1
 .Os
 .Sh NAME
 .Nm s6-svok
-.Nd check whether a service directory is currently supervised
+.Nd check whether an
+.Xr s6-service-directory 7
+is currently supervised
 .Sh SYNOPSIS
 .Nm
 .Ar servicedir
