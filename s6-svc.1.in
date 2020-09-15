@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 15, 2020
 .Dt S6-SVC 1
 .Os
 .Sh NAME
@@ -66,7 +66,8 @@ SIGCONT (to make sure even stopped processes receive the signal aimed
 to kill them) and do not restart it.
 The SIGTERM default can be changed by editing the
 .Pa ./down-signal
-file in the service directory.
+file in the
+.Xr s6-service-directory 7 .
 .It Fl u
 Up.
 If the supervised process is down, start it.
@@ -97,10 +98,13 @@ iow: do not restart the supervised process when it dies.
 If it is down when the command is received, do not even start it.
 .It Fl r
 If the service is up, restart it, by sending it a signal to kill it
-and letting s6-supervise start it again.
+and letting
+.Xr s6-supervise 1
+start it again.
 By default, the signal is a SIGTERM; this can be configured via the
 .Pa ./down-signal
-file in the service directory.
+file in the
+.Xr s6-service-directory 7 .
 .It Fl T Ar timeout
 If the
 .Fl wstate
@@ -131,9 +135,17 @@ will not exit until the service is up, i.e. there is a process running the
 executable.
 .It Fl wU
 .Nm
-will not exit until the service is up and ready as notified by the
-daemon itself.
-If the service directory does not contain a
+will not exit until the service is up
+.Em and
+ready
+.Po
+cf.
+.Xr s6-notifywhenup 7
+.Pc
+as notified by the daemon itself.
+If the
+.Xr s6-service-directory 7
+does not contain a
 .Pa notification-fd
 file to tell
 .Xr s6-supervise 1
