@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 15, 2020
 .Dt S6-SVSTAT 1
 .Os
 .Sh NAME
@@ -40,7 +40,12 @@ what its default state is, if it is different from its current state.
 .It
 the number of seconds since it last changed states.
 .It
-whether the service is ready, as notified by the daemon itself, and if
+whether the service is ready
+.Po
+cf.
+.Xr s6-notifywhenup 7
+.Pc
+as notified by the daemon itself, and if
 it is, the number of seconds that it has been.
 A service reported as down and ready simply means that it is ready to
 be brought up.
@@ -154,17 +159,19 @@ process was not killed by a signal,
 .Ql -1
 is printed instead.
 .It updownsince
-Print a TAI64N label representing the absolute date when the service
-last changed states.
+Print a TAI64N[1] label representing the absolute date when the
+service last changed states.
 .It readysince
-Print a TAI64N label representing the absolute date when the service
-last became ready.
+Print a TAI64N[1] label representing the absolute date when the
+service last became ready.
 Note that this can either mean
 .Dq service readiness
 (if the service is currently up and ready), or
 .Dq down readiness ,
 i.e. the last time when the service was down and ready to be started
-(if the service is not currently up and ready).
+(if the service is
+.Em not
+currently up and ready).
 .It updownfor
 Print the number of seconds that have elapsed since the service last
 changed states.
@@ -260,6 +267,9 @@ down the service via a call to
 .Xr s6-svscan 1 ,
 .Xr s6-svscanctl 1 ,
 .Xr s6-svwait 1
+.Pp
+[1]
+.Lk https://cr.yp.to/libtai/tai64.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-svstat.html
