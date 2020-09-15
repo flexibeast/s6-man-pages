@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 15, 2020
 .Dt S6-SVLISTEN1 1
 .Os
 .Sh NAME
@@ -16,7 +16,8 @@ only waits for notifications; it never polls.
 .Nm
 checks the state of the
 .Ar servicedir
-service directory and monitor its state changes.
+.Xr s6-service-directory 7
+and monitors its state changes.
 .Pp
 It spawns
 .Ar prog...
@@ -44,7 +45,7 @@ The
 program is an extension of
 .Nm .
 It can watch the state of several services at once; however, its
-syntax makes it best used in execline scripts only.
+syntax makes it best used in execline[1] scripts only.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl u
@@ -65,7 +66,8 @@ itself.
 This requires specific support in the service programs, and the use of
 the
 .Pa notification-fd
-file in the service directory.
+file in the
+.Xr s6-service-directory 7 .
 See the explanation in
 .Xr s6-notifywhenup 7 .
 .It Fl d
@@ -131,6 +133,9 @@ System call failed
 .Xr s6-svscanctl 1 ,
 .Xr s6-svstat 1 ,
 .Xr s6-svwait 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/execline/
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-svlisten1.html
