@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 15, 2020
 .Dt S6-SVLISTEN 1
 .Os
 .Sh NAME
@@ -7,7 +7,7 @@
 .Sh SYNOPSIS
 .Bl -bullet -width x
 .It
-In an execline script:
+In an execline[1] script:
 .Pp
 .Nm
 .Op Fl U | u | D | d | r | R
@@ -33,8 +33,10 @@ Outside of an execline script:
 only waits for notifications; it never polls.
 .Pp
 .Nm
-checks the state of one or more service directories given as arguments
-in the first block and monitor their state changes.
+checks the state of one or more
+.Xr s6-service-directory 7 Ns s
+given as arguments in the first block and monitors their state
+changes.
 .Pp
 It spawns
 .Ar prog...
@@ -175,6 +177,9 @@ of them reported permanent failure.
 .Xr s6-svscanctl 1 ,
 .Xr s6-svstat 1 ,
 .Xr s6-svwait 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/execline/
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-svlisten.html
