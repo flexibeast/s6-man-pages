@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 15, 2020
 .Dt S6-SVDT-CLEAR 1
 .Os
 .Sh NAME
@@ -12,7 +12,7 @@
 clears the recorded death tally of the service being currently
 supervised at the
 .Ar servicedir
-service directory.
+.Xr s6-service-directory 7 .
 .Pp
 Use of
 .Nm
