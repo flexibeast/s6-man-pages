@@ -1,10 +1,8 @@
 # Summary
 
-This repository aims to provide [mdoc(7)](https://man.openbsd.org/mdoc.7)
-versions of the HTML documentation for the [s6 supervision
+This repository provides [mdoc(7)](https://man.openbsd.org/mdoc.7) versions of
+the HTML documentation for the [s6 supervision
 suite](http://skarnet.org/software/s6/).
-
-It is currently a work in progress.
 
 Individual man pages can be produced with
 [mandoc(1)](https://man.openbsd.org/mandoc.1):
@@ -27,8 +25,8 @@ $ mandoc -T man s6-svscan.1.in > s6-svscan.1.man
 $ mandoc -T html s6-svscan.1.in > s6-svscan.1.html
 ```
 
-To install the man pages, run `make`, followed by the appropriate install command
-for your system:
+To install the man pages, run `make`, followed by the appropriate install
+command for your system:
 
 * `make install-mdoc` for mandoc-based systems;
 * `make install-man` otherwise.
