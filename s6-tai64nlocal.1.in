@@ -1,9 +1,9 @@
-.Dd September 10, 2020
+.Dd September 16, 2020
 .Dt S6-TAI64NLOCAL 1
 .Os
 .Sh NAME
 .Nm s6-tai64nlocal
-.Nd read from stdin and write to stdout, replacing every line beginning with a TAI64N timestamp with a human-readable local date and time
+.Nd read from stdin and write to stdout, replacing every line beginning with a TAI64N timestamp[1] with a human-readable local date and time
 .Sh SYNOPSIS
 .Nm
 .Op Fl g
@@ -41,7 +41,7 @@ If
 does not appear to give the correct local time:
 .Bl -bullet -width x
 .It
-Check the compilation options that were used for the skalibs libraries
+Check the compilation options that were used for the skalibs[2] libraries
 your
 .Nm s6-tai64nlocal
 program was linked against.
@@ -74,6 +74,12 @@ Print GMT time instead of local time.
 .Xr s6-setuidgid 1 ,
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64n 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/libstddjb/tai.html#timestamp
+.Pp
+[2]
+.Lk https://skarnet.org/software/skalibs/
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-tai64nlocal.html
