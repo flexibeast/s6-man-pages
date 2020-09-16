@@ -1,18 +1,24 @@
-.Dd September 10, 2020
+.Dd September 16, 2020
 .Dt S6-SUPERVISE 1
 .Os
 .Sh NAME
 .Nm s6-supervise
-.Nd monitor a long-lived process (or service), making sure it stays
-alive, sending notifications to registered processes when it dies, and
-providing an interface to control its state
+.Nd monitor a long-lived process
+.Po
+or
+.Em service
+.Pc ,
+making sure it stays alive, sending notifications to registered
+processes when it dies, and providing an interface to control its
+state
 .Sh SYNOPSIS
 .Nm
 .Ar servicedir
 .Sh DESCRIPTION
 .Nm
-is designed to be the last non-leaf branch of a supervision tree, the
-supervised process being a leaf.
+is designed to be the last non-leaf branch of a
+.Em supervision tree ,
+the supervised process being a leaf.
 .Nm Ap
 s behaviour is approximately the following:
 .Bl -bullet -width x
@@ -76,17 +82,22 @@ For a precise description of
 .Nm Ap
 s behaviour, check the
 .Sx Detailed operation
-section below, as well as the service directory page:
+section below, as well as the
+.Xr s6-service-directory 7
+page:
 .Nm
 operation can be extensively configured by the presence of certain
 files in the service directory.
 .Ss Readiness notification support
-If the service directory contains a valid
+If the
+.Xr s6-service-directory 7
+contains a valid
 .Pa notification-fd
 file when the service is started, or restarted,
 .Nm
 creates and listens to an additional pipe from the service for
-readiness notification.
+readiness notification; refer to
+.Xr s6-notifywhenup 7 .
 When the notification occurs,
 .Nm
 updates the
@@ -142,7 +153,7 @@ command had been received.
 .Nm
 switches to the
 .Ar servicedir
-service directory.
+.Xr s6-service-directory 7 .
 .It
 It creates a
 .Pa supervise/
@@ -154,7 +165,8 @@ process is already monitoring this service.
 .It
 If the
 .Pa ./event
-fifodir does not exist,
+.Xr s6-fifodir 7
+does not exist,
 .Nm
 creates it and allows subscriptions to it from processes having the
 same effective group id as the
@@ -167,6 +179,10 @@ It sends an
 .Sq s
 event to
 .Pa ./event .
+.Po
+Refer to
+.Xr s6-ftrigw 7
+.Pc
 .It
 If the default service state is up (i.e. there is no
 .Pa ./down
@@ -197,7 +213,8 @@ There are several ways to tell
 that the service is ready:
 .Bl -bullet -width x
 .It
-the daemon may do so itself.
+the daemon may do so itself; refer to
+.Xr s6-notifywhenup 7 .
 .It
 the
 .Pa run
@@ -236,7 +253,8 @@ If it takes more than that,
 kills it with a SIGKILL.
 This can be configured via the
 .Pa ./timeout-finish
-file, see the description in the service directory page.
+file, see the description in
+.Xr s6-service-directory 7 .
 .It
 When
 .Pa ./finish
@@ -260,7 +278,9 @@ event to
 .Pa ./event
 before the
 .Sq D ,
-and it does not restart the service, as if
+and it
+.Sy does not restart the service ,
+as if
 .Ql s6-svc -O
 had been called.
 This can be used to signify permanent failure to start the service.
@@ -279,9 +299,10 @@ event to
 before exiting 0.
 .El
 .Pp
-Make sure to also check the service directory documentation page, for
-the full list of files that can be present in a service directory and
-impact
+Make sure to also check the
+.Xr s6-service-directory 7
+documentation page, for the full list of files that can be present in
+a service directory and impact
 .Nm Ap
 s behaviour in any way.
 .Pp
@@ -296,8 +317,11 @@ process does not hurt.
 Even in boot scripts,
 .Nm
 should normally not be run directly.
-It's better to have a collection of service directories in a single
-scan directory, and just run
+It's better to have a collection of
+.Xr s6-service-directory 7 Ns s
+in a single
+.Xr s6-scan-directory 7 ,
+and just run
 .Xr s6-svscan 1
 on that scan directory.
 .Xr s6-svscan 1
@@ -325,7 +349,8 @@ However, if you want to launch
 from an interactive shell and need your service to die when you ^C it,
 you can obtain this behaviour by creating a
 .Pa ./nosetsid
-file in the service directory.
+file in the
+.Xr s6-service-directory 7 .
 .Pp
 You can use
 .Xr s6-svc 1
@@ -368,7 +393,8 @@ a command line; it is usually launched by its own supervisor,
 .Xr s6-svscan 1 .
 The way to tune
 .Nm Ap
-s behaviour is via files in the service directory.
+s behaviour is via files in the
+.Xr s6-service-directory 7 .
 .Sh IMPLEMENTATION NOTES
 .Nm
 tries its best to stay alive and running despite possible system call
@@ -389,9 +415,10 @@ That means that it can read and process commands at any time, even
 when the machine is in trouble (full process table, for instance).
 .Pp
 .Nm
-does not use
+.Em does not use
 .Xr malloc 3 .
-That means it will never leak memory.
+That means it will
+.Em never leak memory .
 However,
 .Nm s6-supervise
 uses
