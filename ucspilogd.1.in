@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 16, 2020
 .Dt UCSPILOGD 1
 .Os
 .Sh NAME
@@ -53,8 +53,8 @@ reliable, than a standard syslogd.
 In the
 .Pa examples/syslogd-linux
 subdirectory of the s6 package, you will find a suitable ucspilogd
-service directory.
-The run scripts are written in the execline language.
+.Xr s6-service-directory 7 .
+The run scripts are written in the execline[1] language.
 .Pp
 .Sy Using ucspilogd as a klogd replacement
 .Pp
@@ -70,8 +70,9 @@ to process data from those interfaces.
 .Pp
 The
 .Pa examples/klogd-linux
-subdirectory of the s6 package is a service directory providing such a
-klogd service for Linux, using the
+subdirectory of the s6 package is an
+.Xr s6-service-directory 7
+providing such a klogd service for Linux, using the
 .Pa /proc/kmsg
 interface.
 .Sh OPTIONS
@@ -89,6 +90,9 @@ Default is the string
 .El
 .Sh SEE ALSO
 .Xr s6-log 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/execline/
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/ucspilogd.html
