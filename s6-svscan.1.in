@@ -1,4 +1,4 @@
-.Dd September 10, 2020
+.Dd September 16, 2020
 .Dt S6-SVSCAN 1
 .Os
 .Sh NAME
@@ -27,11 +27,13 @@ If given a
 argument,
 .Nm
 switches to it.
-Else it uses its current directory as scan directory.
+Else it uses its current directory as the
+.Xr s6-scan-directory 7 .
 .Pp
 It exits 100 if another
 .Nm s6-svscan
-process is already monitoring this scan directory.
+process is already monitoring this
+.Xr s6-scan-directory 7 .
 .Pp
 If the
 .Pa ./.s6-svscan
@@ -60,10 +62,16 @@ program. (But if that execution fails,
 exits 111.)
 .Pp
 .Nm
-performs an initial scan of its scan directory.
+performs an initial
+.Em scan
+of its scan directory.
 .Pp
 .Nm
-then occasionally runs scans or reaps, see below.
+then occasionally runs
+.Em scans
+or
+.Em reaps ,
+see below.
 .Pp
 .Nm
 runs until it is told to stop via
@@ -185,7 +193,9 @@ Upon receipt of a SIGCHLD, or a
 .Ql s6-svscanctl -z
 command,
 .Nm
-runs a reaper routine.
+runs a
+.Em reaper
+routine.
 .Pp
 The reaper acknowledges (via some
 .Fn wait
@@ -194,7 +204,7 @@ function), without blocking, every terminated child of
 even ones it does not know it has.
 This is especially important when
 .Nm
-is run as process 1.
+is run as process 1[1].
 .Pp
 If the dead child is a
 .Xr s6-supervise 1
@@ -209,7 +219,9 @@ milliseconds, or upon receipt of a SIGALRM or a
 .Ql s6-svscanctl -a
 command,
 .Nm
-runs a scanner routine.
+runs a
+.Em scanner
+routine.
 .Pp
 The scanner scans the current directory for subdirectories (or
 symbolic links to directories), which must be service directories.
@@ -281,9 +293,10 @@ It will read and process commands at any time, even when the computer
 is in trouble.
 .It
 .Nm
-does not use
+.Em does not use
 .Xr malloc 3 .
-That means it will never leak memory.
+That means it will
+.Em never leak memory .
 However,
 .Nm s6-svscan uses
 .Xr opendir 3 ,
@@ -298,7 +311,8 @@ When run with the
 .Fl t0
 option,
 .Nm s6-svscan
-never polls, it only wakes up on notifications, just like
+.Em never polls ,
+it only wakes up on notifications, just like
 .Xr s6-supervise 1 .
 The s6 supervision tree can be used in energy-critical environments.
 .It
@@ -323,7 +337,8 @@ from an interactive shell and need your services to die with the
 supervision tree when you ^C it, you can obtain this behaviour by
 creating
 .Pa ./nosetsid
-files in every service directory.
+files in every
+.Xr s6-service-directory 7 .
 .El
 .Sh OPTIONS
 .Bl -tag -width -x
@@ -344,18 +359,22 @@ it will write a newline to
 .Ar notif
 cannot be lesser than 3.
 By default, no notification is sent.
-Please note that using this option signals shallow readiness:
+Please note that using this option signals
+.Em shallow readiness :
 .Nm
 being
 .Dq ready
 only means that it is ready to accept commands.
-It does not mean that all the services it launches at start are
-themselves ready, or even started, or even that the relevant
+It
+.Em does not mean
+that all the services it launches at start are themselves ready, or
+even started, or even that the relevant
 .Xr s6-supervise 1
 processes have been started.
-If you need to test for deep readiness, meaning that all the services
-in the supervision tree have been started and are ready, you cannot
-rely on this option.
+If you need to test for
+.Em deep readiness ,
+meaning that all the services in the supervision tree have been
+started and are ready, you cannot rely on this option.
 .It Fl X Ar consoleholder
 Assume the output console is available on descriptor
 .Ar consoleholder .
@@ -364,7 +383,7 @@ If this option is given, and a s6-svscan-log service exists, the
 process for that service will be run with
 .Ar consoleholder
 as its standard error.
-This is mainly useful for a setup done via s6-linux-init, where all
+This is mainly useful for a setup done via s6-linux-init[2], where all
 error messages go to the s6-svscan-log catch-all logger service by
 default, except messages from this service itself, which fall back to
 .Ar consoleholder .
@@ -404,7 +423,9 @@ first one and
 will only detect new services when told to via a
 .Ql s6-svscanctl -a
 command.
-It is strongly discouraged to set
+It is
+.Em strongly
+discouraged to set
 .Ar rescan
 to a positive value under 500.
 .El
@@ -421,6 +442,12 @@ to a positive value under 500.
 .Xr s6-svscanctl 1 ,
 .Xr s6-svstat 1 ,
 .Xr s6-svwait 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/s6/s6-svscan-1.html
+.Pp
+[2]
+.Lk https://skarnet.org/software/s6-linux-init/
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-svscan.html
