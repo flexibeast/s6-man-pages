@@ -1,9 +1,9 @@
-.Dd September 10, 2020
+.Dd September 16, 2020
 .Dt S6-TAI64N 1
 .Os
 .Sh NAME
 .Nm s6-tai64n
-.Nd read from stdin and write to stdout, prepending lines with a TAI64N timestamp and a space
+.Nd read from stdin and write to stdout, prepending lines with a TAI64N timestamp[1] and a space
 .Sh SYNOPSIS
 .Nm
 .Sh DESCRIPTION
@@ -32,6 +32,9 @@ not: it's simpler and more efficient in every case.
 .Xr s6-setuidgid 1 ,
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64nlocal 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/libstddjb/tai.html#timestamp
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-tai64n.html
