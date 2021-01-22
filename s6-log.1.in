@@ -1,4 +1,4 @@
-.Dd September 13, 2020
+.Dd January 22, 2021
 .Dt S6-LOG 1
 .Os
 .Sh NAME
@@ -7,11 +7,9 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl d Ar notif
-.Op Fl q | v
+.Op Fl q | Fl v
 .Op Fl b
 .Op Fl p
-.Op Fl t
-.Op Fl e
 .Op Fl l Ar linelimit
 .Ar logging script
 .Sh DESCRIPTION
@@ -50,7 +48,7 @@ has the executable-by-user flag, it means that no
 process is currently writing to it and the previous
 .Nm
 process managed to cleanly finalize it.
-If it does not, either a
+If it does not, either an
 .Nm
 process is writing to it or the previous one has been interrupted
 without finalizing it.
@@ -366,7 +364,7 @@ These directives determine what
 .Nm
 actually does with the selected lines.
 .Bl -tag -width x
-.It 2 No or e
+.It 2
 Alert.
 .Nm
 will print
@@ -374,9 +372,6 @@ will print
 possibly prepended with a timestamp, followed by the first
 .Ar alertsize
 bytes of the line, to its standard error.
-The
-.Ql e
-form is deprecated.
 .It 1
 Forward to stdout.
 .Nm
@@ -546,7 +541,7 @@ into security holes.
 syslog requires a syslogd service, and fails otherwise.
 A syslogd service may not be present, it may fail... or it may want to
 log stuff.
-Who's going to take care of syslogd's error messages ?
+Who's going to take care of syslogd's error messages?
 .El
 .Pp
 syslog is slow, it's unsafe, and it's incomplete.
@@ -642,7 +637,7 @@ messages, and maybe process 1's error messages, are sent to the system
 console.
 .El
 .Pp
-.Sy What does s6-log have to do with all this ?
+.Sy What does s6-log have to do with all this?
 .Pp
 In a
 .Em logging chain
@@ -752,17 +747,6 @@ reading EOF on stdin.
 This is useful for a logger that you really do not want to lose even
 if automated administration (e.g. the downing of a supervision tree)
 would kill it.
-.It Fl t
-Timestamp.
-Prepends every log line that is written to a logging directory with a
-TAI64N[2] timestamp.
-.Sy This option is now deprecated.
-.It Fl e
-Timestamp alerts.
-Prepends every
-.Dq alert
-line with a TAI64N[2] timestamp.
-.Sy This option is now deprecated.
 .It Fl q | v
 Quiet | verbose.
 Decreases | increases
@@ -801,7 +785,7 @@ the
 logdir, with a maximum archive of 20 log files of 1 MB each; makes
 sure every line has been written before reading the next one.
 .Pp
-.Dl s6-log n30 E500 - +fatal: e - +^STAT =/var/log/foobard/status f s10000000 S15000000 T !"gzip -nq9" /var/log/foobard
+.Dl s6-log n30 E500 - +fatal: 2 - +^STAT =/var/log/foobard/status f s10000000 S15000000 T !"gzip -nq9" /var/log/foobard
 .Bl -bullet -width x
 .It
 Sends alerts to stderr with the 500 first bytes of lines containing
@@ -845,7 +829,7 @@ and save the result into a timestamped archive file, with a maximum of
 .Lk https://skarnet.org/software/execline/
 .Pp
 [7]
-.Lk https://rainer.gerhards.net/2007/08/why-doesworld-need-another-syslogd.html
+.Lk https://blog.gerhards.net/2007/08/why-doesworld-need-another-syslogd.html
 .Pp
 [8]
 .Lk https://busybox.net/

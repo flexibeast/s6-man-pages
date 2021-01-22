@@ -1,4 +1,4 @@
-.Dd September 12, 2020
+.Dd January 19, 2021
 .Dt S6-FTRIG-LISTEN1 1
 .Os
 .Sh NAME
@@ -99,5 +99,4 @@ This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-ftrig-listen1.html
 .Sh AUTHORS
 .An Laurent Bercot
-b
 .An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

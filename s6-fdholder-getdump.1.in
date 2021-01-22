@@ -1,4 +1,4 @@
-.Dd September 14, 2020
+.Dd January 18, 2021
 .Dt S6-FDHOLDER-GETDUMP 1
 .Os
 .Sh NAME
@@ -20,7 +20,7 @@ server process listening on
 .Ar path .
 .Pp
 It retrieves a copy of the whole set of file descriptors stored in
-that daemon, including their identifiers and expiration dates.
+this daemon, including their identifiers and expiration dates.
 .Pp
 It then executes into
 .Ar prog...
@@ -72,7 +72,7 @@ Contains the expiration date of the
 .Va i Ns th
 open file descriptor, if applicable.
 That date is stored in external TAI64N format[1].
-If the file descriptor is not supposed to expire, that
+If the file descriptor is not supposed to expire, this
 environment variable is not defined.
 .El
 .El

@@ -1,4 +1,4 @@
-.Dd September 14, 2020
+.Dd January 19, 2021
 .Dt S6-FDHOLDER-STORE 1
 .Os
 .Sh NAME
@@ -38,7 +38,7 @@ The descriptor is stored with an expiration time of
 .Ar fdtimeout
 milliseconds, which means the
 .Xr s6-fdholderd 1
-daemon will close and get rid of the descriptor after that time.
+daemon will close and get rid of the descriptor after this time.
 By default,
 .Ar fdtimeout
 is 0, which means infinite - no expiration time.
@@ -61,7 +61,7 @@ The meanings of the error messages are explained in
 .It 100
 Wrong usage.
 .It 111
-System call failed - that includes attempting to connect to a
+System call failed - this includes attempting to connect to a
 nonexistent socket, or one where no
 .Xr s6-fdholderd 1
 daemon is listening.

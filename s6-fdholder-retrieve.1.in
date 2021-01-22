@@ -1,4 +1,4 @@
-.Dd September 14, 2020
+.Dd January 19, 2021
 .Dt S6-FDHOLDER-RETRIEVE 1
 .Os
 .Sh NAME
@@ -6,7 +6,7 @@
 .Nd connect to an
 .Xr s6-fdholderd 1
 daemon listening on a Unix domain socket, retrieve a file descriptor
-from that daemon, then execute a program with that file descriptor as
+from this daemon, then execute a program with this file descriptor as
 the program's standard input
 .Sh SYNOPSIS
 .Nm
@@ -82,7 +82,7 @@ daemon listening on the
 .Pa /service/fdholderd/s
 socket, and execute into
 .Ql s6-ipcserverd cat
-with that file descriptor as stdin.
+with this file descriptor as stdin.
 In this case, if
 .Ql MYSOCKET
 referred to a Unix domain socket,

@@ -50,12 +50,14 @@ man1_targets = \
 	s6-svlisten.1 \
 	s6-svlisten1.1 \
 	s6-svok.1 \
+	s6-svperms.1 \
 	s6-svscan.1 \
 	s6-svscanctl.1 \
 	s6-svstat.1 \
 	s6-svwait.1 \
 	s6-tai64n.1 \
 	s6-tai64nlocal.1 \
+	s6-usertree-maker.1 \
 	s6lockd-helper.1 \
 	ucspilogd.1
 

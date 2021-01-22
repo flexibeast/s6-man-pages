@@ -1,4 +1,4 @@
-.Dd September 15, 2020
+.Dd January 21, 2021
 .Dt S6-SVC 1
 .Os
 .Sh NAME
@@ -78,19 +78,13 @@ When the service is asked to be down and the supervised process dies,
 .Xr s6-supervise 1
 will exit too.
 This command should normally never be used on a working system.
-.It Fl X
-Close fds and exit.
-Like
-.Fl x ,
-but
+Note that if this command is sent and a
+.Pa ./finish
+script exists for the service, the last
+.Pa ./finish
+invocation before
 .Xr s6-supervise 1
-will immediately close its stdin, stdout and stderr.
-This is useful when
-.Xr s6-supervise 1
-has descriptors open to the service it is supervising and the service
-is waiting for them to close before exiting.
-Note that if this option is used, the last execution of the service's
-finish script will be run with stdin, stdout and stderr redirected to
+exits will run with its stdin and stdout redirected to
 .Pa /dev/null .
 .It Fl O
 Mark the service to run once at most.
@@ -167,7 +161,7 @@ notified readiness.
 writes control commands into the
 .Pa servicedir/supervise/control
 FIFO.
-A
+An
 .Xr s6-supervise 1
 process running on
 .Pa servicedir

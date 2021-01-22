@@ -1,4 +1,4 @@
-.Dd September 14, 2020
+.Dd January 19, 2021
 .Dt S6-FDHOLDER-LIST 1
 .Os
 .Sh NAME
@@ -18,7 +18,7 @@ server process listening on
 .Pp
 It gets the list of identifiers corresponding to the currently held
 file descriptors.
-It prints that list to stdout, one per line.
+It prints this list to stdout, one per line.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl t Ar timeout

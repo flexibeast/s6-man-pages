@@ -1,4 +1,4 @@
-.Dd September 16, 2020
+.Dd January 21, 2021
 .Dt S6-SUPERVISE 1
 .Os
 .Sh NAME
@@ -133,19 +133,25 @@ set to 3, you would start your daemon as
 .Nm
 reacts to the following signals:
 .Bl -tag -width x
-.It SIGTERM
+.It Dv SIGTERM
 Bring down the service and exit, as if a
 .Ql s6-svc -xd
 command had been received.
-.It SIGHUP
-Exit as soon as the service stops, as if a
+.It Dv SIGHUP
+Close its own stdin and stdout, and exit as soon as the service stops,
+as if an
 .Ql s6-svc -x
-command had been received
-.It SIGQUIT
-Close stdin, stdout and stderr and exit as soon as the service stops,
-as if a
-.Ql s6-svc -X
 command had been received.
+.It Dv SIGQUIT
+Exit immediately without touching the service in any way.
+.It Dv SIGINT
+Send a SIGINT to the process group of the service, then exit immediately. (The point here is to correctly forward
+.Dv SIGINT
+in the case where
+.Nm
+is running in a terminal and the user sent
+.Ql ^C
+to interrupt it.)
 .El
 .Ss Detailed operation
 .Bl -bullet -width x
@@ -330,27 +336,15 @@ will spawn the necessary
 processes, and will also take care of logged services.
 .Pp
 .Nm
-is not supposed to have a controlling terminal: it's generally
-launched by a
-.Xr s6-svscan 1
-process that itself does not have a controlling terminal.
-If you run
-.Nm
-from an interactive shell, be warned that typing ^C in the controlling
-terminal (which sends a SIGINT to all processes in the foreground
-process group in the terminal) will terminate
-.Nm ,
-but not the supervised processes - so, the daemon will keep running as
-an orphan.
-This is by design: supervised processes should be as resilient as
-possible, even when their supervisors die.
-However, if you want to launch
-.Nm
-from an interactive shell and need your service to die when you ^C it,
-you can obtain this behaviour by creating a
-.Pa ./nosetsid
-file in the
-.Xr s6-service-directory 7 .
+always spawns its child in a new session, as a session leader.
+The goal is to protect the supervision tree from misbehaved services
+that would send signals to their whole process group.
+Nevertheless,
+.Nm Ap
+s handling of
+.Dv SIGINT
+ensures that its service is killed if you happen to run it in a terminal and send it a
+.Ql ^C .
 .Pp
 You can use
 .Xr s6-svc 1

@@ -1,4 +1,4 @@
-.Dd September 14, 2020
+.Dd January 22, 2021
 .Dt S6-FDHOLDER-TRANSFERDUMP 1
 .Os
 .Sh NAME
@@ -10,7 +10,7 @@ daemons and transfer the content of the first one to the second one
 .Nm
 .\" '-T lint' reports "WARNING: skipping no-space macro",
 .\" but the rendered output is correct.
-.Op Fl t Ar timeoutfrom Ns : Ns Ar timeoutto
+.Op Fl t Ar timeoutfrom : Ns Ar timeoutto
 .Ar pathfrom
 .Ar pathto
 .Sh DESCRIPTION
@@ -51,7 +51,7 @@ daemon instance allows it to restart without losing the descriptors.
 .Bl -tag -width x
 .\" '-T lint' reports "WARNING: skipping no-space macro",
 .\" but the rendered output is correct.
-.It Fl t Ar timeoutfrom Ns : Ns Ar timeoutto
+.It Fl t Ar timeoutfrom : Ns Ar timeoutto
 If the operations cannot be processed in
 .Ar timeoutfrom
 .Po

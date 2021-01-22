@@ -1,4 +1,4 @@
-.Dd September 14, 2020
+.Dd January 18, 2021
 .Dt S6-FDHOLDER-DAEMON 1
 .Os
 .Sh NAME
@@ -79,7 +79,7 @@ access rights, as described in
 .Xr s6-fdholderd 1 .
 .Pp
 .Nm
-is meant to be used in a s6 run script, as a supervised local
+is meant to be used in an s6 run script, as a supervised local
 service.
 It does not fork itself or write to syslog.
 However, it can be run under any infrastructure, including other

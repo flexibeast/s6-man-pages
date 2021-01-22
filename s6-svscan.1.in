@@ -1,4 +1,4 @@
-.Dd September 16, 2020
+.Dd January 21, 2021
 .Dt S6-SVSCAN 1
 .Os
 .Sh NAME
@@ -8,7 +8,6 @@
 processes
 .Sh SYNOPSIS
 .Nm
-.Op Fl S | s
 .Op Fl d Ar notif
 .Op Fl X Ar consoleholder
 .Op Fl c Ar max
@@ -43,12 +42,9 @@ creates it.
 However, it is recommended to already have a
 .Pa .s6-svscan
 subdirectory in your scan directory, because
+it is used to configure
 .Nm
-may try and execute into the
-.Pa .s6-svscan/crash
-or
-.Pa .s6-svscan/finish
-files at some point - so those files should exist and be executable.
+operation, see below.
 .Pp
 From this point on,
 .Nm s6-svscan
@@ -76,118 +72,114 @@ see below.
 .Nm
 runs until it is told to stop via
 .Xr s6-svscanctl 1 ,
-or a signal.
+or an appropriate signal (see below).
 Then it executes into the
 .Pa .s6-svscan/finish
-program.
-The program is given an argument that depends on the
-.Xr s6-svscanctl 1
-options that were used.
-.Pp
-If that execution fails,
-.Nm
-falls back on a
-.Pa .s6-svscan/crash
-execution.
+program, if present; if not, it exits 0.
 .Ss Signals
 .Nm
-always reacts to the following signals:
+has special handling for the following signals:
 .Bl -tag -width x
-.It SIGCHLD
-Triggers the reaper.
-.It SIGALRM
-Triggers the scanner.
-.It SIGABRT
-Acts as if a
-.Ql s6-svscanctl -b
-command had been received.
+.It Dv SIGCHLD
+.It Dv SIGALRM
+.It Dv SIGABRT
+.It Dv SIGHUP
+.It Dv SIGINT
+.It Dv SIGTERM
+.It Dv SIGQUIT
+.It Dv SIGUSR1
+.It Dv SIGUSR2
+.It Dv SIGPWR
+(on systems that support it)
+.It Dv SIGWINCH
+(on systems that support it)
 .El
 .Pp
-By default, it also reacts to the following signals:
+Signals that are not in the above list are not caught by
+.Nm
+and will have the system's default effect.
+.Pp
+The behaviour for the first three signals in the list is always fixed:
 .Bl -tag -width x
-.It SIGTERM
-Acts as if a
-.Ql s6-svscanctl -t
-command had been received.
-.It SIGHUP
-Acts as if a
-.Ql s6-svscanctl -h
-command had been received.
-.It SIGQUIT
-Acts as if a
-.Ql s6-svscanctl -q
-command had been received.
-.It SIGINT
-Acts as if a
-.Ql s6-svscanctl -6
-command had been received.
-.El
-.Pp
-But if the
-.Fl s
-option was given, then instead of those default actions,
-.Nm
-uses configurable handlers: it forks and executes a program every time
-it receives one of the following signals.
-.Bl -tag -width x
-.It SIGTERM
-Fork and execute
-.Pa .s6-svscan/SIGTERM
-.It SIGHUP
-Fork and execute
-.Pa .s6-svscan/SIGHUP
-.It SIGQUIT
-Fork and execute
-.Pa .s6-svscan/SIGQUIT
-.It SIGINT
-Fork and execute
-.Pa .s6-svscan/SIGINT
-.It SIGUSR1
-Fork and execute
-.Pa .s6-svscan/SIGUSR1
-.It SIGUSR2
-Fork and execute
-.Pa .s6-svscan/SIGUSR2
-.It SIGPWR (on systems that define it)
-Fork and execute
-.Pa .s6-svscan/SIGPWR
-.It SIGWINCH (on systems that define it)
-Fork and execute
-.Pa .s6-svscan/SIGWINCH
-.El
-.Pp
-If an action cannot be taken (the relevant file doesn't exist, or
-isn't executable, or any kind of error happens),
-.Nm
-prints a warning message to its standard error but does nothing else
-with the signal.
-.Pp
-The
-.Fl s
-mechanism is useful, for instance, when
-.Nm
-is running as process 1 and needs to trap signals such as SIGINT (sent
-on some systems by a Ctrl-Alt-Del press) in order to perform some
-specific work instead of executing into
+.It Dv SIGCHLD
+trigger the reaper.
+.It Dv SIGALRM
+trigger the scanner.
+.It Dv SIBABRT
+immediately exec into
 .Pa .s6-svscan/finish
-on the spot.
+(or exit 0 if that script does not exist), without waiting for any
+processes to die.
+.El
 .Pp
+The behaviour for the rest of the list is configurable: on receipt of a
+.Ql SIGFOO ,
 .Nm
-will not exit its loop on its own when it receives a signal such as
-SIGINT and the
-.Fl s
-option has been given.
-To make it exit its loop, invoke a
-.Xr s6-svscanctl 1
-command from the signal handling script.
-For instance, a
-.Pa .s6-svscan/SIGINT
-script could look like this:
-.Bd -literal -offset indent
-#!/command/execlineb -P
-foreground { shutdown-the-services }
-s6-svscanctl -i .
-.Ed
+will try to run an executable
+.Pa .s6-svscan/SIGFOO
+file.
+For instance, an
+.Pa .s6-svscan/SIGTERM
+executable script will be run on receipt of a
+.Dv SIGTERM .
+If the file cannot be found, or cannot be executed for any reason, the
+default behaviour for the signal will be applied.
+Default behaviours are:
+.Bl -tag -width x
+.It Dv SIGHUP
+Rescan and prune the supervision tree, i.e. make sure that new service
+directories visible from the scan directory have an
+.Xr s6-supervise 1
+process running on them, and instruct
+.Xr s6-supervise 1
+processes running on service directories that have become invisible
+from the scan directory to stop their service and exit.
+This behaviour can also be achieved via the
+.Ql s6-svscanctl -an Ar scandir
+command.
+This is the closest that
+.Nm
+can get to the traditional
+.Dq reload your configuration
+behaviour.
+.It Dv SIGINT
+same as
+.Dv SIGTERM
+below.
+.It Dv SIGTERM
+Instruct all the
+.Xr s6-supervise 1
+processes to stop their service and exit; wait for the whole
+supervision tree to die, without losing any logs; then exec into
+.Pa .s6-svscan/finish
+or exit 0. This behaviour can also be achieved via the
+.Ql s6-svscanctl -t Ar scandir
+command.
+.It Dv SIGQUIT
+Same as
+.Dv SIGTERM
+above, except that if a service is logged (i.e. there is a
+.Pa foo
+service
+.Em and
+a
+.Pa foo/log
+service) then the logging service will also be killed, instead of
+being allowed to exit naturally after its producer has flushed its
+output and died.
+This can solve problems with badly written logging programs, but it
+can also cause loss of logs since the logger may die before the
+producer has finished flushing everything.
+The behaviour can also be achieved via the
+.Ql s6-svscanctl -q Ar scandir
+command; you should only use this if
+.Dv SIGTERM Ns / Ns Fl t
+fails to properly tear down the supervision tree.
+.It Others
+No effect if an appropriate executable file in
+.Pa .s6-svscan/
+cannot be run.
+.El
 .Ss The reaper
 Upon receipt of a SIGCHLD, or a
 .Ql s6-svscanctl -z
@@ -213,15 +205,17 @@ process watched by
 and the last scan flagged that process as active, then it is restarted
 one second later.
 .Ss The scanner
-Every
-.Ar rescan
-milliseconds, or upon receipt of a SIGALRM or a
+Upon receipt of a SIGALRM or a
 .Ql s6-svscanctl -a
 command,
 .Nm
 runs a
 .Em scanner
-routine.
+routine. (It also runs it every
+.Ar rescan
+milliseconds if the
+.Fl t
+option has been given.)
 .Pp
 The scanner scans the current directory for subdirectories (or
 symbolic links to directories), which must be service directories.
@@ -232,7 +226,7 @@ subdirectories.
 .Pp
 For every new subdirectory
 .Ar dir
-it finds, the scanner spawns a
+it finds, the scanner spawns an
 .Xr s6-supervise 1
 process on it.
 If
@@ -240,7 +234,7 @@ If
 .Ar dir
 /log
 .Sm on
-exists, it spawns a
+exists, it spawns an
 .Xr s6-supervise 1
 process on both
 .Ar dir
@@ -266,9 +260,10 @@ No command is sent to stop inactive
 processes (unless the administrator uses
 .Sm off
 .Ql s6-svscanctl -n
-),
+or a
+.Dv SIGHUP
 .Sm on
-but inactive
+), but inactive
 .Xr s6-supervise 1
 processes will not be restarted if they die.
 .Ss Notes
@@ -307,46 +302,17 @@ impossible to guarantee that
 .Nm
 does not use heap memory at all.
 .It
-When run with the
-.Fl t0
-option,
-.Nm s6-svscan
-.Em never polls ,
-it only wakes up on notifications, just like
-.Xr s6-supervise 1 .
+Unless run with a nonzero
+.Fl t
+option, which is only a legacy feature used to emulate other
+supervision suites such as daemontools or runit,
+.Nm
+.Em never polls ;
+it only wakes up on notifications.
 The s6 supervision tree can be used in energy-critical environments.
-.It
-The supervision tree (i.e. the tree of processes made of
-.Nm
-and all its scions) is not supposed to have a controlling terminal;
-.Nm
-generally is either process 1 or a child of process 1, not something
-that is launched from a terminal.
-If you run
-.Nm
-from an interactive shell, be warned that typing ^C in the controlling
-terminal (which sends a SIGINT to all processes in the foreground
-process group in the terminal) will terminate the supervision tree,
-but not the supervised processes - so, the supervised processes will
-keep running as orphans.
-This is by design: supervised processes should be as resilient as
-possible, even when their supervisors die.
-However, if you want to launch
-.Nm
-from an interactive shell and need your services to die with the
-supervision tree when you ^C it, you can obtain this behaviour by
-creating
-.Pa ./nosetsid
-files in every
-.Xr s6-service-directory 7 .
 .El
 .Sh OPTIONS
 .Bl -tag -width -x
-.It Fl S
-Do not divert signals.
-This is the default for now; it may change in a future version of s6.
-.It Fl s
-Divert signals - see below.
 .It Fl d Ar notif
 Notify readiness on file descriptor
 .Ar notif .
@@ -423,11 +389,14 @@ first one and
 will only detect new services when told to via a
 .Ql s6-svscanctl -a
 command.
-It is
-.Em strongly
-discouraged to set
-.Ar rescan
-to a positive value under 500.
+Use of this option is discouraged; it should only be given to emulate
+the behaviour of other supervision suites.
+.Po
+.Ql -t5000
+for daemontools' svscan,
+.Ql -t14000
+for runit's runsvdir.
+.Pc
 .El
 .Sh SEE ALSO
 .Xr s6-notifyoncheck 1 ,

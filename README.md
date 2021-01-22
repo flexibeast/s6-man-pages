@@ -1,8 +1,10 @@
 # Summary
 
-This repository provides [mdoc(7)](https://man.openbsd.org/mdoc.7) versions of
-the HTML documentation for the [s6 supervision
-suite](http://skarnet.org/software/s6/).
+This repository provides [mdoc(7)](https://man.openbsd.org/mdoc.7)
+ports of the HTML documentation for the [s6 supervision
+suite](http://skarnet.org/software/s6/). The HTML version on the s6
+site is authoritative; in the event of semantic differences between an
+HTML original and its port, please open an issue in this repository.
 
 Individual man pages can be produced with
 [mandoc(1)](https://man.openbsd.org/mandoc.1):
@@ -17,7 +19,7 @@ Alternatively, use the `-a` flag to view them directly:
 $ mandoc -a s6-svscan.1.in
 ```
 
-[man(7)](https://man.voidlinux.org/man.7) and HTML versions can be produced with
+[man(7)](https://man.openbsd.org/man.7) and HTML versions can be produced with
 `mandoc`'s `-T` flag:
 
 ```

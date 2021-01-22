@@ -1,4 +1,4 @@
-.Dd September 12, 2020
+.Dd January 22, 2021
 .Dt S6-ENVUIDGID 1
 .Os
 .Sh NAME
@@ -14,9 +14,7 @@ given, then execute into another program
 .Nm
 .Op Fl u | g | B
 .Op Fl n
-.\" '-T lint' reports "WARNING: skipping no-space macro",
-.\" but the rendered output is correct.
-.Op Fl i | D Ar uid Ns : Ns Ar gid Ns : Ns Ar gidlist
+.Op Fl i | D Ar uid : Ns Ar gid : Ns Ar gidlist
 .Ar account
 .Ar prog...
 .Sh DESCRIPTION
@@ -134,9 +132,7 @@ If
 .Ar account
 is unknown, exit 1 with an error message.
 This is the default.
-.\" '-T lint' reports "WARNING: skipping no-space macro",
-.\" but the rendered output is correct.
-.It Fl D Ar uid Ns : Ns Ar gid Ns : Ns Ar gidlist
+.It Fl D Ar uid : Ns Ar gid : Ns Ar gidlist
 If
 .Ar account
 is unknown, use

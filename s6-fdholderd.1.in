@@ -1,4 +1,4 @@
-.Dd September 14, 2020
+.Dd January 22, 2021
 .Dt S6-FDHOLDERD 1
 .Os
 .Sh NAME
@@ -141,7 +141,7 @@ A good convention is to use
 .\" but the rendered output is correct.
 .Ql unix: Ns Em path Ns / Ns Em to Ns / Ns Em socket
 for Unix domain sockets and
-.Ql Em protocol Ns : Ns Em ip Ns : Ns Em port
+.Ql Em protocol : Ns Em ip : Ns Em port
 for INET domain sockets.
 .Pp
 An identifier is chosen by the storing client, within the limits of

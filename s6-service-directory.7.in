@@ -1,4 +1,4 @@
-.Dd September 15, 2020
+.Dd January 21, 2021
 .Dt S6-SERVICE-DIRECTORY 7
 .Os
 .Sh NAME
@@ -79,7 +79,7 @@ This is achieved by
 .Ql fdmove -c 2 1
 in execline[3], and
 .Ql exec 2>&1
-in shell.
+in shell[4].
 .It
 adjust the environment for your
 .Em foo
@@ -167,6 +167,18 @@ interprets this as a permanent failure for the service, and does not
 restart it, as if an
 .Ql s6-svc -O
 command had been sent.
+.It
+If
+.Xr s6-supervise 1
+has been instructed to exit after the service dies, via an
+.Ql s6-svc -x
+command or a
+.Dv SIGHUP ,
+then the next invocation of
+.Pa finish
+will (obviously) be the last, and it will run with stdin and stdout
+pointing to
+.Pa /dev/null .
 .El
 .It
 A directory named
@@ -190,18 +202,6 @@ command.
 If no
 .Pa down
 file exists, the default state of the service is up.
-.It
-An optional, empty, regular file named
-.Pa nosetsid .
-If such a file exists,
-.Xr s6-supervise 1
-will not make the service a process group and session leader; the
-service will be run in the same process group as
-.Xr s6-supervise 1 .
-If no
-.Pa nosetsid
-file exists, the service has its own process group and is started as a
-session leader.
 .It
 An optional regular file named
 .Pa notification-fd .
@@ -401,7 +401,7 @@ read-write, which is unacceptable if you are concerned with
 reliability - if you are, for instance, designing an embedded
 platform.
 .It
-Some people[4] like to have their service directories in a read-only
+Some people[5] like to have their service directories in a read-only
 filesystem, with supervise symlinks pointing to various places in
 writable filesystems.
 This setup looks a bit complex to me: it requires careful handling of
@@ -470,7 +470,10 @@ No stale files can make your system unstable.
 .Lk https://skarnet.org/software/execline/
 .Pp
 [4]
-.Lk http://code.dogmap.org/
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
+.Pp
+[5]
+.Lk https://code.dogmap.org/
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/servicedir.html
