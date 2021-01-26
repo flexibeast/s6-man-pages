@@ -1,4 +1,4 @@
-.Dd January 22, 2021
+.Dd January 26, 2021
 .Dt S6-LOG 1
 .Os
 .Sh NAME
@@ -763,18 +763,20 @@ Write alerts, warnings and fatal errors.
 .It Fl l Ar linelimit
 If a log line is longer than
 .Ar linelimit
-bytes, cut it in two by inserting a newline.
-The newline may appear anywhere after
+bytes, split it by inserting a newline after the
+.Ar linelimit Ns
+th byte.
+After the split, the remainder of the line will also be processed, so
+it will go through the selection process, timestamping, etc.
 .Ar linelimit
-or more bytes.
-.Ar linelimit
-cannot be less than 48.
-Using this option ensures that an ill-formatted log stream will not
-make
-.Nm
-uncontrollably eat memory by trying to read and process an extremely
-long line in one go.
+cannot be less than 48, unless it is 0 (which means infinite).
 The default is 8192 bytes.
+Setting
+.Ar linelimit
+to 0 ensures that lines will never be split; this may cause important
+memory consumption by
+.Nm
+if it is fed extremely long lines, so use with caution.
 .El
 .Sh EXAMPLES
 .Dl s6-log -b n20 s1000000 t /var/log/services/stuff

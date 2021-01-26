@@ -1,4 +1,4 @@
-.Dd September 15, 2020
+.Dd January 26, 2021
 .Dt S6-SVOK 1
 .Os
 .Sh NAME
@@ -11,7 +11,7 @@ is currently supervised
 .Ar servicedir
 .Sh DESCRIPTION
 .Nm
-checks whether a
+checks whether an
 .Xr s6-supervise 1
 process is currently monitoring
 .Ar servicedir .

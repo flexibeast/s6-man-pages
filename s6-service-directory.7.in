@@ -1,4 +1,4 @@
-.Dd January 21, 2021
+.Dd January 26, 2021
 .Dt S6-SERVICE-DIRECTORY 7
 .Os
 .Sh NAME
@@ -234,7 +234,7 @@ If such a file exists, it must only contain an unsigned integer
 .Em t .
 If
 .Em t
-is nonzero, then on receipt of a
+is nonzero, then on receipt of an
 .Ql s6-svc -d
 command, which sends a SIGTERM (by default, see down-signal below) and
 a SIGCONT to the service, a timeout of
@@ -245,7 +245,7 @@ milliseconds, then it is sent a SIGKILL.
 If
 .Pa timeout-kill
 does not exist, or contains 0 or an invalid value, then the service is
-never forcibly killed (unless, of course, a
+never forcibly killed (unless, of course, an
 .Ql s6-svc -k
 command is sent).
 .It

@@ -1,4 +1,4 @@
-.Dd January 21, 2021
+.Dd January 26, 2021
 .Dt S6-SVSCAN 1
 .Os
 .Sh NAME
@@ -181,7 +181,7 @@ No effect if an appropriate executable file in
 cannot be run.
 .El
 .Ss The reaper
-Upon receipt of a SIGCHLD, or a
+Upon receipt of a SIGCHLD, or an
 .Ql s6-svscanctl -z
 command,
 .Nm
@@ -198,7 +198,7 @@ This is especially important when
 .Nm
 is run as process 1[1].
 .Pp
-If the dead child is a
+If the dead child is an
 .Xr s6-supervise 1
 process watched by
 .Nm ,
