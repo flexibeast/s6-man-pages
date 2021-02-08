@@ -231,7 +231,7 @@ daemon is guaranteed to be listening on
 .Pa path ,
 and events can be sent without the risk of a race condition.
 .Ss Synchronously waiting for events
-.Bd -literal -offset literal
+.Bd -literal -offset indent
 uint16_t list[1] ;
 unsigned int n = 1 ;
 char trigger ;
