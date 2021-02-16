@@ -1,4 +1,4 @@
-.Dd January 21, 2021
+.Dd February 16, 2021
 .Dt S6-SVC 1
 .Os
 .Sh NAME
@@ -29,6 +29,25 @@ It exits 111 if it cannot send a command, or
 .Xr s6-supervise 1
 process is running on
 .Ar servicedir .
+.Ss Notes
+The
+.Fl t
+and
+.Fl r
+options make
+.Xr s6-supervise 1
+send a signal to the service if it is up; but if the service is
+currently down, they do nothing, and in particular they do not
+instruct
+.Xr s6-supervise 1
+to bring the service up.
+Consequently,
+.Ql s6-svc -rwr Ar servicedir
+may wait forever for the service to be up, if it is currently wanted
+down.
+To avoid that, make sure your service is wanted up by using
+.Ql s6-svc -ruwr Ar servicedir
+instead.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl a
@@ -215,6 +234,9 @@ Send a SIGTERM to the ftpd server; wait for
 .Xr s6-supervise 1
 to restart it, and block until it has notified that it is ready to
 serve again.
+Refer to the
+.Sx Notes
+subsection for a caveat.
 .Pp
 .Dl s6-svc -a /service/httpd/log
 .Pp
