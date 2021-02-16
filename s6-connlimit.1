@@ -37,9 +37,9 @@ without performing any check: no maximum number of connections has
 been defined.
 .Pp
 The
-s6-tcpserver4[1]
+.Xr s6-tcpserver4 1
 and
-s6-tcpserver6[2]
+.Xr s6-tcpserver6 1
 programs define the
 .Ev PROTO
 environment variable to
@@ -49,7 +49,7 @@ and spawn every child server with the
 environment variable set to the number of connections from the same IP
 address.
 The
-s6-tcpserver-access[3]
+.Xr s6-tcpserver-access 1
 program can set environment variables depending on the client's IP
 address.
 If the
@@ -78,7 +78,7 @@ to limit the number of client connections by UID.
 .Pp
 The
 .Nm
-utility was once part of the s6-networking[4] suite, and is mostly useful
+utility was once part of the s6-networking[1] suite, and is mostly useful
 with TCP connections, which is why the examples here involve TCP.
 Nevertheless, it can be used with connections across Unix domain
 sockets, and that is why it has been moved to the s6 package.
@@ -114,18 +114,12 @@ instead of the default of 40.
 .Xr s6-ipcserver 1 ,
 .Xr s6-ipcserver-access 1 ,
 .Xr s6-ipcserver-socketbinder 1 ,
-.Xr s6-ipcserverd 1
+.Xr s6-ipcserverd 1 ,
+.Xr s6-tcpserver-access 1 ,
+.Xr s6-tcpserver4 1 ,
+.Xr s6-tcpserver6 1 
 .Pp
 [1]
-.Lk https://skarnet.org/software/s6-networking/s6-tcpserver4.html
-.Pp
-[2]
-.Lk https://skarnet.org/software/s6-networking/s6-tcpserver6.html
-.Pp
-[3]
-.Lk https://skarnet.org/software/s6-networking/s6-tcpserver-access.html
-.Pp
-[4]
 .Lk https://skarnet.org/software/s6-networking/
 .Pp
 This man page is ported from the authoritative documentation at:

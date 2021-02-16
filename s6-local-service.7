@@ -1,4 +1,4 @@
-.Dd September 14, 2020
+.Dd February 16, 2021
 .Dt S6-LOCAL-SERVICE 7
 .Os
 .Sh NAME
@@ -79,7 +79,7 @@ The UCSPI[1] protocol is an easy way of abstracting clients and servers
 from the network.
 A server written as a UCSPI server, just as it can be run under inetd
 or
-s6-tcpserver[2],
+.Xr s6-tcpserver 1 ,
 can be run under
 .Xr s6-ipcserver 1 :
 choose a socket location and you have a local service.
@@ -107,7 +107,7 @@ process when the notification pattern matches a regular expression.
 .Xr s6-s6lockd 1 ,
 handling time-constrained lock acquisition on client behalf.
 .It
-skadnsd[3],
+skadnsd[2],
 performing asynchronous DNS queries and only waking up the client
 process when an answer arrives.
 .El
@@ -128,13 +128,11 @@ used for asynchronous notifications from the server to the client.
 The fd-passing mechanism is used to transfer the additional channel
 from the server to the client.
 .Sh SEE ALSO
+.Xr s6-tcpserver 1
 [1]
 .Lk https://cr.yp.to/proto/ucspi.txt
 .Pp
 [2]
-.Lk https://skarnet.org/software/s6-networking/s6-tcpserver.html
-.Pp
-[3]
 .Lk https://skarnet.org/software/s6-dns/skadns/skadnsd.html
 .Pp
 This man page is ported from the authoritative documentation at:

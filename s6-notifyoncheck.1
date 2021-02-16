@@ -1,4 +1,4 @@
-.Dd September 12, 2020
+.Dd February 16, 2021
 .Dt S6-NOTIFYONCHECK 1
 .Os
 .Sh NAME
@@ -179,14 +179,15 @@ instead of
 .Pa ./data/check .
 The
 .Ar checkprog
-string will be parsed by execlineb[2], so it can contain a full command
-line.
+string will be parsed by
+.Xr execlineb 1 ,
+so it can contain a full command line.
 This option is mainly useful is the program used to poll the service
 is very simple and can be inlined as a simple command line, to avoid
 needing to manage a whole script and a
 .Pa ./data/check
 file.
-This option is only supported if the execline[3] package is installed; if
+This option is only supported if the execline[2] package is installed; if
 it is not, the
 .Fl c
 option cannot be used and the checking script must always be placed in
@@ -225,6 +226,7 @@ Timed out before readiness was achieved.
 System call failed.
 .El
 .Sh SEE ALSO
+.Xr execlineb 1 ,
 .Xr s6-permafailon 1 ,
 .Xr s6-supervise 1 ,
 .Xr s6-svc 1 ,
@@ -244,9 +246,6 @@ System call failed.
 .Ek
 .Pp
 [2]
-.Lk https://skarnet.org/software/execline/execlineb.html
-.Pp
-[3]
 .Lk https://skarnet.org/software/execline/
 .Pp
 This man page is ported from the authoritative documentation at:

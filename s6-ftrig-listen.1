@@ -1,4 +1,4 @@
-.Dd September 12, 2020
+.Dd February 16, 2021
 .Dt S6-FTRIG-LISTEN 1
 .Os
 .Sh NAME
@@ -8,7 +8,9 @@
 spawn a program, then wait for pattern of events to occur on the
 fifodirs
 .Sh SYNOPSIS
-In an execlineb[1] script:
+In an
+.Xr execlineb 1
+script:
 .Pp
 .Nm
 .Op Fl a | o
@@ -41,7 +43,7 @@ It waits for the series of events received on
 to match
 .Ar regexp Ns - Ns Em i .
 .Ar regexp Ns - Ns Em i
-must be Extended Regular Expressions[2].
+must be Extended Regular Expressions[1].
 .Pp
 When the series of read events matches the regexps,
 .Nm
@@ -79,6 +81,7 @@ has been notified with events matching its
 .Ar regexp Ns - Ns Em i .
 .El
 .Sh SEE ALSO
+.Xr execlineb 1 ,
 .Xr s6-cleanfifodir 1 ,
 .Xr s6-ftrig-listen1 1 ,
 .Xr s6-ftrig-notify 1 ,
@@ -87,9 +90,6 @@ has been notified with events matching its
 .Xr s6-mkfifodir 1
 .Pp
 [1]
-.Lk https://git.skarnet.org/software/execline/execlineb.html
-.Pp
-[2]
 .Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html#tag_09_04
 .Pp
 This man page is ported from the authoritative documentation at:

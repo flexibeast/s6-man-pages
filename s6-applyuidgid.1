@@ -1,4 +1,4 @@
-.Dd September 12, 2020
+.Dd February 16, 2021
 .Dt S6-APPLYUIDGID 1
 .Os
 .Sh NAME
@@ -25,7 +25,7 @@ is a more generic version of
 .Xr s6-setuidgid 1 .
 It is used as a command line building block by some programs that
 rewrite their command line, such as
-s6-tcpserver[1].
+.Xr s6-tcpserver 1 .
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl u Ar uid
@@ -72,10 +72,8 @@ variables will be removed from the process environment.
 .Xr s6-setuidgid 1 ,
 .Xr s6-softlimit 1 ,
 .Xr s6-tai64n 1 ,
-.Xr s6-tai64nlocal 1
-.Pp
-[1]
-.Lk https://skarnet.org/software/s6-networking/s6-tcpserver.html
+.Xr s6-tai64nlocal 1 ,
+.Xr s6-tcpserver 1
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-applyuidgid.html

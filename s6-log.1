@@ -1,4 +1,4 @@
-.Dd January 26, 2021
+.Dd February 16, 2021
 .Dt S6-LOG 1
 .Os
 .Sh NAME
@@ -430,7 +430,9 @@ is monitoring, as if the
 file in those logdirs had reached the size limit.
 .El
 .Ss Why use execlineb to interpret the Do processor Dc string?
-Because it is exactly what execlineb[5] is for.
+Because it is exactly what
+.Xr execlineb 1
+is for.
 .Bl -bullet -width x
 .It
 Directly executing
@@ -452,8 +454,8 @@ only need a way to turn a string into an
 .Em argv ,
 i.e. a command line.
 .It
-execlineb[5] was designed just for this: to turn simple strings into
-command lines.
+.Xr execlineb 1
+was designed just for this: to turn simple strings into command lines.
 It is a very fast and lightweight script launcher, that does not do
 any heavy startup initialization like
 .Pa /bin/sh
@@ -461,7 +463,7 @@ does.
 It happens to be the perfect tool for the job.
 .It
 To be perfectly honest: I also did this on purpose so people have a
-reason to use the execline[6] language.
+reason to use the execline[5] language.
 But seriously, it really is the perfect tool for the job.
 .El
 .Ss Why have another logging mechanism?
@@ -471,7 +473,7 @@ I'm not being judgmental; I'm just stating the obvious.
 .Pp
 .Sy The syslog design is flawed from the start
 .Pp
-When asked why he started rsyslog[7], Rainer Gerhards came up with a lot
+When asked why he started rsyslog[6], Rainer Gerhards came up with a lot
 of hand-waving and not a single word about technical points.
 There is a reason for that: rsyslog is forked from sysklogd!
 So, no matter how many bells and whistles are added to it, it still
@@ -528,7 +530,7 @@ choice here:
 .Em logging and log rotation management must be done
 .Sy by the same tool .
 Only a few non-mainstream implementations of syslogd do this,
-including the Busybox[8] one - and that is a feature added by the Busybox
+including the Busybox[7] one - and that is a feature added by the Busybox
 developers who are aware of the problem but want to maintain
 compatibility with the historical syslogd.
 Neither syslogd (-ng or not) nor rsyslogd manages its log files:
@@ -577,7 +579,7 @@ Error messages from this logging mechanism naturally go to the machine
 console.
 .It
 Process 1's own error messages can go to the machine console, or dirty
-tricks can be used[9] so they go to the catch-all logging mechanism.
+tricks can be used[8] so they go to the catch-all logging mechanism.
 .It
 Services that are spawned by process 1 should come with their own
 logger service; the supervision mechanism offered by
@@ -673,7 +675,7 @@ powerful as a traditional syslogd.
 .Nm
 can log to a RAM filesystem and thus is suitable as a catch-all
 logger.
-Clever tricks like Upstart's logd or daemontools' readproctitle[10] are
+Clever tricks like Upstart's logd or daemontools' readproctitle[9] are
 just that: tricks.
 .Nm
 gives a unified interface to all of your system's loggers.
@@ -810,6 +812,7 @@ and save the result into a timestamped archive file, with a maximum of
 30 such files or a total of 15 MB of compressed archive files.
 .El
 .Sh SEE ALSO
+.Xr execlineb 1 ,
 .Xr ucspilogd 1
 .Pp
 [1]
@@ -825,21 +828,18 @@ and save the result into a timestamped archive file, with a maximum of
 .Lk https://en.wikipedia.org/wiki/ISO_8601
 .Pp
 [5]
-.Lk https://skarnet.org/software/execline/execlineb.html
-.Pp
-[6]
 .Lk https://skarnet.org/software/execline/
 .Pp
-[7]
+[6]
 .Lk https://blog.gerhards.net/2007/08/why-doesworld-need-another-syslogd.html
 .Pp
-[8]
+[7]
 .Lk https://busybox.net/
 .Pp
-[9]
+[8]
 .Lk https://skarnet.org/software/s6/s6-svscan-1.html#log
 .Pp
-[10]
+[9]
 .Lk https://cr.yp.to/daemontools/readproctitle.html
 .Pp
 This man page is ported from the authoritative documentation at:

@@ -1,4 +1,4 @@
-.Dd September 13, 2020
+.Dd February 16, 2021
 .Dt S6-ACCESSRULES-CDB-FROM-FS 1
 .Os
 .Sh NAME
@@ -6,8 +6,8 @@
 .Nd compile a directory containing a ruleset suitable for
 .Xr s6-ipcserver-access 1
 or
-s6-tcpserver-access[1]
-into a CDB[2] file
+.Xr s6-tcpserver-access 1
+into a CDB[1] file
 .Sh SYNOPSIS
 .Nm
 .Ar cdbfile
@@ -16,7 +16,7 @@ into a CDB[2] file
 .Nm
 compiles the
 .Ar dir
-directory containing a ruleset into a CDB[2] file
+directory containing a ruleset into a CDB[1] file
 .Ar cdbfile
 then exits 0.
 .Ss Ruleset directory format
@@ -24,7 +24,7 @@ To be understood by
 .Nm ,
 .Xr s6-ipcserver-access 1 ,
 or
-s6-tcpserver-access[1],
+.Xr s6-tcpserver-access 1 ,
 .Ar dir
 must have a specific format.
 .Pp
@@ -53,7 +53,7 @@ Depending on the application, other directories can appear in
 and be compiled into
 .Ar cdbfile ,
 but
-s6-tcpserver-access[1]
+.Xr s6-tcpserver-access 1
 only uses the first three, and
 .Xr s6-ipcserver-access 1
 only uses the last two.
@@ -112,8 +112,10 @@ A file named
 If such a file exists along with an
 .Pa allow
 file, then its contents represent a command line that, interpreted by
-the execlineb[3] launcher, will be executed after accepting the
-connection, totally bypassing the original command line.
+the
+.Xr execlineb 1
+launcher, will be executed after accepting the connection, totally
+bypassing the original command line.
 .Nm
 truncates the
 .Pa exec
@@ -144,7 +146,7 @@ was a suitable candidate for the
 option of
 .Xr s6-ipcserver-access 1
 or
-s6-tcpserver-access[1],
+.Xr s6-tcpserver-access 1,
 then
 .Ar cdbfile
 will be a suitable candidate for the
@@ -156,6 +158,7 @@ can be decompiled by the
 .Xr s6-accessrules-fs-from-cdb 1
 program.
 .Sh SEE ALSO
+.Xr execlineb 1 ,
 .Xr s6-accessrules-fs-from-cdb 1 ,
 .Xr s6-connlimit 1 ,
 .Xr s6-ioconnect 1 ,
@@ -163,16 +166,11 @@ program.
 .Xr s6-ipcserver 1 ,
 .Xr s6-ipcserver-access 1 ,
 .Xr s6-ipcserver-socketbinder 1 ,
-.Xr s6-ipcserverd 1
+.Xr s6-ipcserverd 1 ,
+.Xr s6-tcpserver-access 1
 .Pp
 [1]
-.Lk https://skarnet.org/software/s6-networking/s6-tcpserver-access.html
-.Pp
-[2]
 .Lk https://en.wikipedia.org/wiki/Cdb_(software)
-.Pp
-[3]
-.Lk https://skarnet.org/software/execline/execlineb.html
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6/s6-accessrules-cdb-from-fs.html
