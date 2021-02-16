@@ -79,8 +79,8 @@ man7_targets = \
 all: install
 
 install:
-	install -m 644 $(man1_targets) $(man1)
-	install -m 644 $(man7_targets) $(man7)
+	install -D -m 644 -t $(man1) $(man1_targets)
+	install -D -m 644 -t $(man7) $(man7_targets)
 
 uninstall:
 	cd $(man1); rm -f $(man1_targets)
