@@ -1,4 +1,4 @@
-.Dd September 12, 2020
+.Dd April 22, 2021
 .Dt S6-FTRIG-WAIT 1
 .Os
 .Sh NAME
@@ -26,7 +26,8 @@ must be an Extended Regular Expression[1].
 When the series of read events matches
 .Ar regexp ,
 .Nm
-prints the last event it received (one byte) to stdout, then exits 0.
+prints the last event it received to stdout (one byte followed by a newline),
+then exits 0.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl t Ar timeout
