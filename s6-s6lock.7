@@ -25,13 +25,13 @@ available.
 Given the nature of the
 .Nm
 library, it makes sense to use an
-.Xr s6-s6lockd 1
+.Xr s6lockd 1
 .Xr s6-local-service 7
 concurrently accessed by several applications using such locks to gate
 shared resources.
 .Pp
 If you're not using an
-.Xr s6-s6lockd 1
+.Xr s6lockd 1
 .Xr s6-local-service 7 ,
 make sure your application is not disturbed by children it doesn't
 know it has.
@@ -54,14 +54,14 @@ s6lock_start_g(&a, path, &deadline) ;
 .Pp
 .Fn s6lock_start_g
 starts a session by connecting to an
-.Xr s6-s6lockd 1
+.Xr s6lockd 1
 service listening on
 .Va path .
 The working directory is set by the administrator of the service.
 .Pp
 .Fn s6lock_startf_g
 starts a session with an
-.Xr s6-s6lockd 1
+.Xr s6lockd 1
 process as a child, using
 .Va lockdir
 as its working directory.
@@ -123,7 +123,7 @@ r = s6lock_release_g(&a, id, &deadline) ;
 .Pp
 .Fn s6lock_acquire_sh_g
 instructs the
-.Xr s6-s6lockd 1
+.Xr s6lockd 1
 daemon, related to the open session represented by the
 .Va a
 handle, to try and acquire a shared lock on the
@@ -195,7 +195,7 @@ it though.
 Call this function whenever the fd checks readability: it will update
 .Va a Ap
 s internal structures with information from the
-.Xr s6-s6lockd 1
+.Xr s6lockd 1
 daemon.
 It returns -1 if an error occurs; in case of success, it returns the
 number of identifiers for which something happened.
@@ -220,7 +220,7 @@ Use after a call to
 .It
 If an error occurred, returns -1 and sets errno.
 The error number may have been transmitted from
-.Xr s6-s6lockd 1 .
+.Xr s6lockd 1 .
 .It
 If the lock has not been acquired yet, returns 0.
 .It
