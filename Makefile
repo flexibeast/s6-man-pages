@@ -35,7 +35,7 @@ man1_targets = \
 	s6-mkfifodir.1 \
 	s6-notifyoncheck.1 \
 	s6-permafailon.1 \
-	s6-s6lockd.1 \
+	s6lockd.1 \
 	s6-setlock.1 \
 	s6-setsid.1 \
 	s6-setuidgid.1 \
