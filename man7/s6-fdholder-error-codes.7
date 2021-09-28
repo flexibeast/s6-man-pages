@@ -1,0 +1,136 @@
+.Dd September 29, 2021
+.Dt S6-FDHOLDER-ERROR-CODES 7
+.Os
+.Sh NAME
+.Nm s6-fdholder-error-codes
+.Nd error codes returned by the
+.Xr s6-fdholderd 8
+daemon
+.Sh DESCRIPTION
+The following error messages (and corresponding
+.Xr errno 3
+codes) can be returned by the
+.Xr s6-fdholderd 8
+daemon to its various clients.
+This page explains why they occur.
+.Bl -bullet -width x
+.It
+.Ql Protocol error
+.Po
+.Dv EPROTO
+.Pc
+or
+.Ql Protocol wrong type for socket
+.Po
+.Dv EPROTOTYPE
+.Pc
+.Pp
+The client connected to the wrong kind of server and they cannot
+communicate.
+This is generally a programming error.
+It can also signal a bug in the s6-fdholder tools, but protocol bugs
+have usually been wiped out before an s6 release.
+.It
+.Ql Broken pipe
+.Po
+.Dv EPIPE
+.Pc
+.Pp
+The client was not authorized to connect to the server, which closed
+the connection.
+You need to configure the access rights to the server.
+.It
+.Ql Operation not permitted
+.Po
+.Dv EPERM
+.Pc
+.Pp
+Even though the client was authorized to connect to the server, the
+specific operation it wanted to perform was denied.
+You need to configure the access rights to the server.
+.It
+.Ql Too many open files in system
+.Po
+.Dv ENFILE
+.Pc
+.Pp
+The client attempted to store more file descriptors than the server
+can hold.
+Or, the client attempted to retrieve more file descriptors than it can
+hold.
+You should check the
+.Fl n
+option to
+.Xr s6-fdholderd 8 ,
+as well as the
+.Dv RLIMIT_NOFILE Ns [1]
+resource limits used by the client and the server, and adjust them
+accordingly.
+.It
+.Ql Resource busy
+.Po
+.Dv EBUSY
+.Pc
+.Pp
+The client attempted to store a descriptor under an identifier that is
+already used.
+.It
+.Ql Filename too long
+.Po
+.Dv ENAMETOOLONG
+.Pc
+.Pp
+The identifier provided by the client was too long.
+.It
+.Ql \&No such file or directory
+.Po
+.Dv ENOENT
+.Pc
+.Pp
+The identifier provided by the client was not found in the server
+database.
+.It
+.Ql Bad file descriptor
+.Po
+.Dv EBADF
+.Pc
+.Pp
+The client attempted to transmit a closed, or otherwise unsuitable for
+fd-passing, file descriptor.
+.It
+.Ql Operation timed out
+.Po
+.Dv ETIMEDOUT
+.Pc
+.Pp
+The client, or the server, took too long to perform the wanted
+operation.
+This is most probably a programming error, because both client and
+server should have a very fast reaction time.
+Check that the client is connecting to the right server, and check
+.Fl t
+options to both client and server (the argument is interpreted as
+milliseconds!).
+.El
+.Pp
+Other errors indicate a transient error such as lack of memory,
+hardware failure, etc.
+.Sh SEE ALSO
+.Xr s6-fdholder-daemon 8 ,
+.Xr s6-fdholder-delete 8 ,
+.Xr s6-fdholder-getdump 8 ,
+.Xr s6-fdholder-list 8 ,
+.Xr s6-fdholder-retrieve 8 ,
+.Xr s6-fdholder-setdump 8 ,
+.Xr s6-fdholder-store 8 ,
+.Xr s6-fdholder-transferdump 8 ,
+.Xr s6-fdholderd 8
+.Pp
+[1]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_resource.h.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-fdholder-errorcodes.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

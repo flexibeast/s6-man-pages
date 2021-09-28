@@ -1,0 +1,37 @@
+.Dd September 29, 2021
+.Dt S6-CLEANFIFODIR 8
+.Os
+.Sh NAME
+.Nm s6-cleanfifodir
+.Nd clean up an
+.Xr s6-fifodir 7
+.Sh SYNOPSIS
+.Nm
+.Ar fifodir
+.Sh DESCRIPTION
+.Nm
+cleans up
+.Ar fifodir ,
+that must belong to the current user.
+That means it removes all stale FIFOs in
+.Ar fifodir .
+.Pp
+In normal use, it is not necessary to call
+.Nm .
+However, stale FIFOs can be left by
+.Xr s6-ftrigrd 8
+processes that were violently killed, so it's good practice to
+regularly clean up fifodirs.
+.Sh SEE ALSO
+.Xr s6-ftrig-listen 8 ,
+.Xr s6-ftrig-listen1 8 ,
+.Xr s6-ftrig-notify 8 ,
+.Xr s6-ftrig-wait 8 ,
+.Xr s6-ftrigrd 8 ,
+.Xr s6-mkfifodir 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-cleanfifodir.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

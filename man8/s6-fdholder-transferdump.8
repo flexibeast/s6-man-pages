@@ -1,0 +1,106 @@
+.Dd September 29, 2021
+.Dt S6-FDHOLDER-TRANSFERDUMP 8
+.Os
+.Sh NAME
+.Nm s6-fdholder-transferdump
+.Nd connect to two separate
+.Xr s6-fdholderd 8
+daemons and transfer the content of the first one to the second one
+.Sh SYNOPSIS
+.Nm
+.\" '-T lint' reports "WARNING: skipping no-space macro",
+.\" but the rendered output is correct.
+.Op Fl t Ar timeoutfrom : Ns Ar timeoutto
+.Ar pathfrom
+.Ar pathto
+.Sh DESCRIPTION
+.Nm
+connects to an
+.Xr s6-fdholderd 8
+server process listening on
+.Ar pathfrom
+and gets the whole set of file descriptors from this server, with
+their identifiers and (when relevant) expiration dates.
+.Pp
+It then connects to a different instance of
+.Xr s6-fdholderd 8 ,
+listening on
+.Ar pathto ,
+and stores the set of file descriptors in it.
+The set is added to the second server, which keeps the descriptors it
+was already holding.
+.Pp
+Dumping the entire state of
+.Xr s6-fdholderd 8
+requires special authorizations.
+Make sure the
+.Xr s6-fdholderd 8
+instances are configured to accept dump-getting and dump-setting
+requests from your client.
+Refer to
+.Xr s6-fdholderd 8
+for details.
+.Pp
+A typical use case of
+.Nm
+is when the main fd-holding daemon needs to upgrade, or restart for
+some reason.
+Transferring the file descriptors into another, temporary, fd-holding
+daemon instance allows it to restart without losing the descriptors.
+.Sh OPTIONS
+.Bl -tag -width x
+.\" '-T lint' reports "WARNING: skipping no-space macro",
+.\" but the rendered output is correct.
+.It Fl t Ar timeoutfrom : Ns Ar timeoutto
+If the operations cannot be processed in
+.Ar timeoutfrom
+.Po
+for the connection to
+.Ar pathfrom
+.Pc
+or
+.Ar timeoutto
+.Po
+for the connection to
+.Ar pathto
+.Pc
+milliseconds, then fail with an error message.
+Communications with the servers should be near-instant, so this option
+is only here to protect users against programming errors (connecting
+to the wrong socket, for instance).
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 1
+The source server denied the operation.
+The meanings of the error messages are explained in
+.Xr s6-fdholder-error-codes 7 .
+.It 2
+The destination server denied the operation.
+The meanings of the error messages are explained in
+.Xr s6-fdholder-error-codes 7 .
+.It 100
+Wrong usage.
+.It 111
+System call failed - this includes attempting to connect to a
+nonexistent socket, or one where no
+.Xr s6-fdholderd 8
+daemon is listening.
+.El
+.Sh SEE ALSO
+.Xr s6-fdholder-daemon 8 ,
+.Xr s6-fdholder-delete 8 ,
+.Xr s6-fdholder-getdump 8 ,
+.Xr s6-fdholder-list 8 ,
+.Xr s6-fdholder-retrieve 8 ,
+.Xr s6-fdholder-setdump 8 ,
+.Xr s6-fdholder-store 8 ,
+.Xr s6-fdholderd 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-fdholder-transferdump.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

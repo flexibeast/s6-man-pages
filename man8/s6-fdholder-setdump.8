@@ -1,0 +1,88 @@
+.Dd September 29, 2021
+.Dt S6-FDHOLDER-SETDUMP 8
+.Os
+.Sh NAME
+.Nm s6-fdholder-setdump
+.Nd connect to an
+.Xr s6-fdholderd 8
+daemon listening on a Unix domain socket, and dump a set of file
+descriptors into that daemon
+.Sh SYNOPSIS
+.Nm
+.Op Fl t Ar timeout
+.Ar path
+.Sh DESCRIPTION
+.Nm
+connects to an
+.Xr s6-fdholderd 8
+server process listening on
+.Ar path .
+.Pp
+It attempts to pass a complete state - i.e. a set of file descriptors
+with identifiers and expiration dates - to the server.
+.Pp
+The file descriptors to transmit to the server should of course be
+already open in the
+.Nm
+program; also,
+.Nm
+should have certain environment variables that describe that set of
+file descriptors.
+The format of the environment is the same as the one set by
+.Xr s6-fdholder-getdump 8 .
+.Pp
+Setting the whole state of an
+.Xr s6-fdholderd 8
+daemon requires specific privileges.
+Make sure you properly configure
+.Xr s6-fdholderd 8
+access rights so your client can perform that operation.
+.Pp
+Previously held fds will still be kept by the server (so,
+.Dq setting
+the state is more like
+.Dq adding to
+the state), unless there is an identifier collision, in which case the
+fd in the transmitted set takes precedence and the previously held fd
+is overwritten.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl t Ar timeout
+If the operation cannot be processed in
+.Ar timeout
+milliseconds, then fail with an error message.
+Communications with the server should be near-instant, so this option
+is only here to protect users against programming errors (connecting
+to the wrong socket, for instance).
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 1
+The server denied the operation.
+The meanings of the error messages are explained in
+.Xr s6-fdholder-error-codes 7 .
+.It 100
+Wrong usage.
+.It 111
+System call failed - this includes attempting to connect to a
+nonexistent socket, or one where no
+.Xr s6-fdholderd 8
+daemon is listening.
+.El
+.Sh SEE ALSO
+.Xr s6-fdholder-daemon 8 ,
+.Xr s6-fdholder-delete 8 ,
+.Xr s6-fdholder-getdump 8 ,
+.Xr s6-fdholder-list 8 ,
+.Xr s6-fdholder-retrieve 8 ,
+.Xr s6-fdholder-store 8 ,
+.Xr s6-fdholder-transferdump 8 ,
+.Xr s6-fdholderd 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-fdholder-setdump.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

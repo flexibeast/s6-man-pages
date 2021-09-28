@@ -1,0 +1,82 @@
+.Dd September 29, 2021
+.Dt S6-SETLOCK 8
+.Os
+.Sh NAME
+.Nm s6-setlock
+.Nd take a lock on a file, then execute into another program
+.Sh SYNOPSIS
+.Nm
+.Op Fl n | N | t Ar timeout
+.Op Fl r | w
+.Ar file
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+creates
+.Ar file
+if it does not exist and opens it for writing.
+.Pp
+It locks
+.Ar file .
+If it cannot take the lock for any reason, it exits 1.
+.Pp
+It executes into
+.Ar prog... .
+.Pp
+.Nm
+leaks an open file descriptor into the
+.Ar prog
+execution.
+This is intended: the fd holds the lock, which is released when
+.Ar prog
+exits.
+.Ar prog
+must not touch fds it does not know about.
+.Pp
+If the timed lock option is chosen,
+.Nm
+does not acquire the lock itself.
+Instead, it spawns an
+.Xr s6lockd-helper 8
+process that acquires the lock while
+.Nm
+controls the timeout; the
+.Xr s6lockd-helper 8
+process then holds the lock and lives as long as
+.Ar prog .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl n
+Nonblocking lock.
+If
+.Nm
+cannot acquire the lock, it will exit 1 immediately.
+.It Fl N
+Blocking lock.
+.Nm
+will wait until it can acquire the lock.
+This is the default.
+.It Fl t Ar timeout
+Timed lock.
+If
+.Nm
+cannot acquire the lock after
+.Ar timeout
+milliseconds, it will exit 1.
+.It Fl r
+Shared lock.
+Other shared locks on the same file will not prevent the lock from
+being acquired (but an exclusive lock will).
+.It Fl w
+Exclusive lock.
+This is the default.
+.El
+.Sh SEE ALSO
+.Xr s6lockd 8 ,
+.Xr s6lockd-helper 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-setlock.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

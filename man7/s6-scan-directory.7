@@ -1,0 +1,176 @@
+.Dd September 29, 2021
+.Dt S6-SCAN-DIRECTORY 7
+.Os
+.Sh NAME
+.Nm s6-scan-directory
+.Nd directory containing a list of service directories, or symbolic links pointing to service directories
+.Sh DESCRIPTION
+A
+.Em scan directory
+represents a list of services that are supposed to be
+supervised.
+Running
+.Xr s6-svscan 8
+on this scan directory launches a
+.Em supervision tree :
+every service listed in the scan directory will be supervised.
+.Pp
+There is normally only one scan directory per system, although nothing
+prevents a system administrator from having more. daemontools[1]
+traditionally uses
+.Pa /service ,
+and runit[2] traditionally uses
+.Pa /etc/service .
+s6 does not care where your scan directory is, but I would advise
+.Pa /service
+for compatibility with daemontools.
+Depending on your installation,
+.Pa /service
+could be a symbolic link and point to a place either in a RAM
+filesystem or in
+.Pa /var .
+.Ss Where and how to build a scan directory
+Opinions and practices differ.
+.Pp
+It is generally accepted that the place where you store all your
+service directories (your
+.Dq service repository )
+should not be used as a scan directory - for a simple reason: you
+might want to have service directories for more services than what you
+want to start at any given time.
+In other words, your scan directory will be a subset of your service
+repository, so you cannot just run
+.Xr s6-svscan 8
+on every service you have a service directory for.
+So, the first thing is to separate your service repository, which is
+just a storage place for all the services you might want to manage
+someday, and your scan directory, which is a directory representing
+all the services that you are currently managing.
+.Ss SERVICE REPOSITORY
+Where to store your service repository is purely a matter of personal
+preference.
+You just have to be aware that
+.Xr s6-supervise 8
+needs writable
+.Pa supervise
+and
+.Pa event
+subdirectories in a service directory it monitors.
+.Ss SCAN DIRECTORY
+Where and how to build your scan directory depends heavily on your
+boot system - and on your personal preference too.
+.Pp
+Standard daemontools[1] and runit[2] installations like to have a
+fixed scan directory containing symlinks to service directories
+located in the service repository.
+In other words, the service repository contains the real working
+copies of the service directories.
+This works, as long as:
+.Bl -bullet -width x
+.It
+It is possible to create writable
+.Pa supervise
+and
+.Pa event
+subdirectories in every managed service directory.
+This can be achieved for instance via symlinks, or by having the
+service repository stored on a writable filesystem.
+.It
+The scan program
+.Po
+.Xr s6-svscan 8 ,
+svscan,
+.Xr runsvdir 8 ...
+.Pc
+is started late enough for all the necessary filesystems to be mounted.
+.El
+.Pp
+My own recommendation would be to have working copies of the service
+directories entirely separate from the service repository.
+The service repository can be safely stored on the root filesystem,
+and the needed directories copied to a RAM filesystem at boot
+time.
+The scan directory can be either the place where the working copies
+are written, or another directory containing symlinks to those working
+copies. (The latter is useful if you are using the
+.Fl t
+option to
+.Xr s6-svscan 8
+with a nonzero argument: copying a directory is not atomic, but making
+a symlink is, so there is no risk of your scanner finding a directory
+while it is being copied - which could result in
+.Xr s6-supervise 8
+getting the wrong information and not managing the service properly.)
+.Pp
+An example:
+.Bl -bullet -width x
+.It
+Have your service repository in
+.Pa /img/services ,
+i.e. have service directories in
+.Pa /img/services/ftpd ,
+.Pa /img/services/httpd ,
+.Pa /img/services/sshd ,
+etc.
+.It
+When booting, make
+.Pa /tmp
+a RAM filesystem, and create the directories
+.Pa /tmp/services
+and
+.Pa /tmp/service .
+.It
+Have
+.Xr s6-svscan 8
+run on
+.Pa /tmp/service ,
+as early as possible in your boot sequence.
+This is possible whether you want to run
+.Xr s6-svscan 8
+as process 1[3] or not[4].
+.It
+During the boot sequence, populate
+.Pa /tmp/services
+with copies of the service directories you need: for instance,
+.Bd -literal -offset indent
+cp -a /img/services/sshd /tmp/services/sshd
+cp -a /img/services/ftpd /tmp/services/ftpd
+etc.
+.Ed
+.It
+When you are ready to start a service, make a symlink in the
+.Pa /tmp/service
+scan directory pointing to the working copy of the
+.Xr s6-service-directory 7
+you need in
+.Pa /tmp/services ,
+then notify
+.Xr s6-svscan 8 .
+For instance, to start ftpd and httpd together:
+.Bd -literal -offset indent
+ln -s ../services/ftpd /tmp/service
+ln -s ../services/httpd /tmp/service
+s6-svscanctl -a /tmp/service
+.Ed
+.El
+.Sh SEE ALSO
+.Xr s6-fifodir 7 ,
+.Xr s6-service-directory 7
+.Pp
+[1]
+.Lk https://cr.yp.to/daemontools.html
+.Pp
+[2]
+.Lk http://smarden.org/runit/
+.Pp
+[3]
+.Lk https://skarnet.org/software/s6/s6-svscan-1.html
+.Pp
+[4]
+.Lk https://skarnet.org/software/s6/s6-svscan-not-1.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/scandir.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

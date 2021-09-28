@@ -19,5 +19,5 @@ HTML versions can be produced with
 [mandoc(1)](https://man.openbsd.org/mandoc.1)'s `-T` flag:
 
 ```
-$ mandoc -T html s6-svscan.1 > s6-svscan.1.html
+$ mandoc -T html man8/s6-svscan.8 > s6-svscan.8.html
 ```

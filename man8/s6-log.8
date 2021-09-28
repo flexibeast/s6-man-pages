@@ -1,0 +1,850 @@
+.Dd September 29, 2021
+.Dt S6-LOG 8
+.Os
+.Sh NAME
+.Nm s6-log
+.Nd reliable logging program with automated log rotation, similar to daemontools' multilog[1], with full POSIX regular expression support
+.Sh SYNOPSIS
+.Nm
+.Op Fl d Ar notif
+.Op Fl q | Fl v
+.Op Fl b
+.Op Fl p
+.Op Fl l Ar linelimit
+.Op --
+.Ar logging script
+.Sh DESCRIPTION
+.Nm
+reads and compiles
+.Ar logging script
+to an internal form.
+Then it reads its standard input, line by line, and performs actions
+on it, following the script it is given.
+It does its best to ensure there is
+.Em never any log loss .
+It exits cleanly when stdin closes or when it receives a SIGTERM or a
+SIGHUP.
+.Ss logdirs
+A
+.Em logdir
+.Po
+.Em logging directory
+.Pc
+is a place where logs are stored.
+.Nm
+can be scripted to write into one or more logdirs.
+.Pp
+A logdir may contain the following files:
+.Bl -tag -width x
+.It Pa lock
+This file is locked by
+.Nm
+at start, to make sure only one instance is running at the same time.
+.It Pa current
+The file where selected log lines are appended.
+If
+.Pa current
+has the executable-by-user flag, it means that no
+.Nm
+process is currently writing to it and the previous
+.Nm
+process managed to cleanly finalize it.
+If it does not, either an
+.Nm
+process is writing to it or the previous one has been interrupted
+without finalizing it.
+.It Pa state
+Last processor's output, see below.
+.It Pa previous
+A rotation is happening in that logdir.
+.It Pa processed, newstate
+A rotation is happening in that logdir and the processor script is running.
+.It timestamped files
+Those files are
+.Sm off
+@
+.Em timestamp .
+s or @
+.Em timestamp .
+u
+.Sm on
+and are old log files that have been processed and rotated
+.Po
+if they're ending in
+.Ql .s
+.Pc
+or that were the
+.Pa current
+file when
+.Nm
+got interrupted
+.Po
+if they're ending in
+.Ql .u
+.Pc ,
+in which case they have not been processed.
+.El
+.Pp
+.Sy Rotation
+.Pp
+In a logdir, selected lines are appended to the
+.Pa current
+file.
+When
+.Pa current
+becomes too big, a rotation happens.
+The
+.Pa current
+file will be possibly processed, then it will become an archived log
+file named
+.Sm off
+@
+.Em timestamp .
+s,
+.Sm on
+where
+.Em timestamp ,
+a TAI64N[2] timestamp, is the absolute time of the rotation.
+If there are too many archived log files in the logdir, the older ones
+are then deleted.
+Logging then resumes, to a brand new
+.Pa current
+file.
+.Pp
+You can use this mechanism to ensure that your logs never fill up the
+available disk space, for instance: something that neither syslogd,
+nor syslog-ng, nor rsyslog offers.
+.Pp
+.Sy Processors
+.Pp
+A
+.Em processor
+script can be set for every logdir.
+When a rotation occurs,
+.Pa current
+.Po
+which has then been renamed
+.Pa previous
+.Pc
+is fed to
+.Em processor Ap
+s stdin, and
+.Em processor Ap
+s stdout is saved and archived.
+.Em processor
+can also read the
+.Pa state
+file on its fd 4; what it writes to its fd 5 will be saved as the next
+.Pa state
+file, for the next rotation.
+A processor script runs with the logdir as its working directory.
+.Pp
+Processors should not background themselves:
+.Nm s6-log
+considers the processing done when its
+.Em processor
+direct child dies.
+Processors should exit 0 on success and nonzero on failure; if a
+processor fails,
+.Nm s6-log
+will try it again after some
+.Em cooldown
+time.
+.Pp
+Processors make
+.Nm
+Turing-complete by allowing you to use any external program to handle
+log files that are going to be archived.
+.Ss Logging script syntax
+When starting up,
+.Nm
+reads its arguments one by one; this argument sequence, or directive
+sequence, forms a logging script which tells
+.Nm
+what to log, where, and how.
+.Pp
+Every directive can be a
+.Em selection
+directive, a
+.Em control
+directive or an
+.Em action
+directive.
+A valid logging script always contains at least one action directive;
+every action directive can be preceded by zero or more selection or
+control directives.
+.Nm
+will exit 100 if the script is invalid.
+If it can process the script but the last directive is not an action
+directive,
+.Nm
+will emit a warning.
+.Pp
+.Sy Selection directives
+.Pp
+These directives tell
+.Nm
+whether to select or deselect lines it reads from stdin; actions will
+only happen on selected lines.
+By default, every line is selected.
+.Bl -tag -width x
+.Sm off
+.It + Ar regexp
+.Sm on
+Select yet-unselected lines that match
+.Ar regexp ,
+which must be a POSIX Extended Regular Expression[3].
+.Sm off
+.It - Ar regexp
+.Sm on
+Deselect yet-selected lines that match
+.Ar regexp ,
+which must be a POSIX Extended Regular Expression[3].
+.It f
+Select exactly lines that have not yet been acted upon (i.e. that were
+always deselected when the script encountered an action directive).
+.El
+.Pp
+.Sy Control directives
+.Pp
+These directives tune
+.Nm s6-log Ap
+s behaviour for the next actions.
+.Bl -tag -width x
+.Sm off
+.It n Ar number
+.Sm on
+Next logdirs will contain up to
+.Ar number
+archived log files.
+If there are more, the oldest archived log files will be deleted, only
+the latest number will be kept.
+By default,
+.Ar number
+is 10.
+.Sm off
+.It s Ar filesize
+.Sm on
+Next rotations will occur when
+.Pa current
+log files approach
+.Ar filesize
+bytes.
+By default,
+.Ar filesize
+is 99999; it cannot be set lower than 4096 or higher than 268435455.
+.Sm off
+.It S Ar totalsize
+.Sm on
+Next logdirs will contain up to
+.Ar totalsize
+bytes of archived (and maybe processed) log files.
+If archived log files take more space than that, the older ones are
+deleted until the total size fits.
+A
+.Ar totalsize
+of zero means no such limit; use
+.Ql n0
+instead if you don't want any archived log files.
+By default,
+.Ar totalsize
+is 0 (unlimited).
+.Sm off
+.It l Ar tolerance
+.Sm on
+Next rotations will be triggered when the size of
+.Pa current
+goes higher than
+.Ar filesize
+minus
+.Ar tolerance .
+.Ar tolerance
+cannot be more than half of
+.Ar filesize .
+By default,
+.Ar tolerance
+is 2000.
+.Sm off
+.It r Ar cooldown
+.Sm on
+If an error occurs during operations on the next logdirs, retry every
+.Ar cooldown
+milliseconds.
+By default,
+.Ar cooldown
+is 2000; it's strongly discouraged to set it to a value under 50.
+.Sm off
+.It E Ar alertsize
+.Sm on
+Only the first
+.Ar alertsize
+bytes of the selected lines will be used in the next alerts.
+An
+.Ar alertsize
+of 0 means no limit.
+By default,
+.Ar alertsize
+is 200.
+.Sm off
+.It ^ Ar statussize
+.Sm on
+Only the first
+.Ar statussize
+bytes of the selected lines will be used in the next status file
+updates.
+If a line is shorter than
+.Ar statussize
+bytes, the status file will be padded with newlines so it is always
+.Ar statussize
+bytes long. 0 means an unpadded, unlimited status file.
+By default,
+.Ar statussize
+is 1001.
+.Sm off
+.It ! Ar processor
+.Sm on
+Registers
+.Ql execlineb -Pc Ar processor
+as a processor for the next logdirs;
+.Ql execlineb
+must be found in
+.Nm Ap
+s
+.Ev PATH .
+This directive is only supported if s6 has been built with execline
+support; otherwise, it yields a syntax error at starting time.
+If
+.Ar processor
+is empty, no processor will be set for the next logdirs.
+By default, no processor is set.
+.Sm off
+.It ? Ar processor
+.Sm on
+Registers
+.Ql /bin/sh -c Ar processor
+as a processor for the next logdirs.
+It is just like the
+.Ql \&!
+directive, except that the processor string is interpreted by
+.Pa /bin/sh ,
+not execlineb.
+It is useful for people who want to build s6 without execline support.
+.It t
+The logged line will be prepended with a TAI64N[2] timestamp (and a
+space) before being processed by the next action directive.
+Giving the
+.Ql t
+directive several times before an action directive has no effect.
+.It T
+The selected line will be prepended with a ISO 8601[4] timestamp for
+combined date and time representing local time according to the
+system's timezone, with a space (not a 'T') between the date and the
+time and two spaces after the time, before being processed by the next
+action directive.
+Giving the
+.Ql T
+directive several times before an action directive has no effect.
+.El
+.Pp
+Note that unlike the other control directives, the
+.Ql t
+and
+.Ql T
+directives are
+.Em not sticky :
+their effect will disappear after the next action directive, and they
+need to be reapplied if necessary.
+If both a
+.Ql t
+and a
+.Ql T
+directives are given before an action directive, the TAI64N[2] timestamp
+will always appear before the ISO 8601 timestamp.
+.Ss Action directives
+These directives determine what
+.Nm
+actually does with the selected lines.
+.Bl -tag -width x
+.It 2
+Alert.
+.Nm
+will print
+.Dq s6-log: alert: ,
+possibly prepended with a timestamp, followed by the first
+.Ar alertsize
+bytes of the line, to its standard error.
+.It 1
+Forward to stdout.
+.Nm
+will print the selected line to its stdout.
+If any error occurs, e.g. if stdout was a pipe and the reading end
+closed, this directive will be ignored for the rest of
+.Nm Ap
+s lifetime.
+.Sm off
+.It = Ar statusfile
+.Sm on
+Status.
+.Nm
+will atomically update the
+.Ar statusfile
+file with the first
+.Ar statussize
+bytes of the line, and pad it with newlines.
+.Nm
+must have the right to write to
+.Ar statusfile
+and to
+.Ar statusfile Ap
+s directory.
+.It dir
+logdir.
+Must start with
+.Ql /
+or
+.Ql \&. .
+.
+.Nm
+will log the line into the logdir
+.Ar dir .
+.Nm
+must have the right to write to
+.Ar dir .
+.El
+.Ss Signals
+.Bl -tag -width x
+.It SIGTERM
+If
+.Nm
+has been run with the
+.Fl p
+option, does nothing.
+Without this option, SIGTERM instructs
+.Nm
+to stop reading stdin after the next newline and exit after logging
+the last line.
+.It SIGALRM
+Triggers a rotation on every logdir
+.Nm
+is monitoring, as if the
+.Pa current
+file in those logdirs had reached the size limit.
+.El
+.Ss Why use execlineb to interpret the Do processor Dc string?
+Because it is exactly what
+.Xr execlineb 1
+is for.
+.Bl -bullet -width x
+.It
+Directly executing
+.Ar processor
+is not flexible enough.
+We want to be able to run a complete command line, with an executable
+name and its arguments.
+.It
+We could interpret the processor string via
+.Pa /bin/sh .
+This is what multilog[1] does.
+However,
+.Pa /bin/sh ,
+despite being the traditional Unix interpreter, is overpowered for
+this.
+We don't need a complete shell script interpreter: most processor
+commands will be very simple, with only two or three words, and we
+only need a way to turn a string into an
+.Em argv ,
+i.e. a command line.
+.It
+.Xr execlineb 1
+was designed just for this: to turn simple strings into command lines.
+It is a very fast and lightweight script launcher, that does not do
+any heavy startup initialization like
+.Pa /bin/sh
+does.
+It happens to be the perfect tool for the job.
+.It
+To be perfectly honest: I also did this on purpose so people have a
+reason to use the execline[5] language.
+But seriously, it really is the perfect tool for the job.
+.El
+.Ss Why have another logging mechanism?
+Because the syslog mechanism and all its implementations (save one)
+suck.
+I'm not being judgmental; I'm just stating the obvious.
+.Pp
+.Sy The syslog design is flawed from the start
+.Pp
+When asked why he started rsyslog[6], Rainer Gerhards came up with a lot
+of hand-waving and not a single word about technical points.
+There is a reason for that: rsyslog is forked from sysklogd!
+So, no matter how many bells and whistles are added to it, it still
+suffers from the same basic flaws.
+.Pp
+The problem with syslogd does not come from such or such
+implementation.
+The problem comes from syslog's
+.Em design
+in the first place.
+.Bl -bullet -width x
+.It
+syslog makes you send
+.Em all
+your logs to the same place.
+The logs from a zillion processes are read by a single syslogd
+server.
+The server checks log lines against system-wide regular expressions to
+decide where to write them.
+This raises the following issues:
+.Bl -bullet -width x
+.It
+Unless the client explicitly mentions its name in every log line,
+there is no way for log readers to know what process generated a given
+line.
+Some syslogd implementations can log the pid of the client; big deal.
+.It
+Log lines from every client have to run through the same regular
+expression matching.
+This requires huge regular expression sets, and an obvious performance
+impact, to do anything meaningful.
+And as a matter of fact, standard syslogd configurations don't do
+anything meaningful: they separate the logs into a few streams such as
+.Pa /var/log/messages ,
+.Pa /var/log/auth.log ,
+.Pa /var/log/daemon.log
+or
+.Pa /var/log/syslog
+with very vague semantics.
+All of syslogd's line processing power remains unused, because making
+real use of it would be too complex.
+.El
+.It
+syslogd logs to
+.Em files .
+This is wrong, because files grow and disks fill up.
+Sure, there are utilities such as
+.Pa logrotate
+to perform cleaning up, but as long as logging and log rotation are
+kept separate, there is a race condition: a log file can grow and fill
+up a disk before a rotation occurs.
+I am all for separating tasks that can be separated, but there is no
+choice here:
+.Em logging and log rotation management must be done
+.Sy by the same tool .
+Only a few non-mainstream implementations of syslogd do this,
+including the Busybox[7] one - and that is a feature added by the Busybox
+developers who are aware of the problem but want to maintain
+compatibility with the historical syslogd.
+Neither syslogd (-ng or not) nor rsyslogd manages its log files:
+that's a flaw that no amount of external tools is going to fix.
+.It
+syslogd is a complex process that runs as root.
+We all know what complex processes running as root mean: bugs turning
+into security holes.
+.It
+syslog requires a syslogd service, and fails otherwise.
+A syslogd service may not be present, it may fail... or it may want to
+log stuff.
+Who's going to take care of syslogd's error messages?
+.El
+.Pp
+syslog is slow, it's unsafe, and it's incomplete.
+The only reason people use it is because it's historical, it exists,
+and there hasn't been any serious alternative yet, except maybe
+multilog[1], which
+.Nm
+improves upon.
+.Pp
+.Sy A not-so-modest proposal: the logging chain
+.Pp
+Unix distributions already do this to some extent, but it's at best
+unclear where the logs go for any given program.
+.Bl -bullet -width x
+.It
+Every program, without exception, should send its logs (be it error
+messages, warning messages, or anything) to its
+.Em standard error descriptor ,
+i.e. fd 2.
+.Em This is why it's open for .
+.It
+When process 1 starts, the logging chain is rooted to the
+.Em machine console :
+anything process 1 sends to its stderr appears, without modification,
+on the machine console, which should at any time remain the last
+resort place where logs are sent.
+.It
+Process 1 should spawn and supervise a
+.Em catch-all logging mechanism
+that handles logs from every service that does not take care of its
+own logging.
+Error messages from this logging mechanism naturally go to the machine
+console.
+.It
+Process 1's own error messages can go to the machine console, or dirty
+tricks can be used[8] so they go to the catch-all logging mechanism.
+.It
+Services that are spawned by process 1 should come with their own
+logger service; the supervision mechanism offered by
+.Xr s6-svscan 8
+makes it easy.
+Error messages from the loggers themselves naturally go to the
+catch-all mechanism.
+.It
+User login mechanisms such as
+.Pa getty ,
+.Pa xdm
+or
+.Pa sshd
+are services: they should be started with their own loggers.
+Of course, when a user gets a terminal and a shell, the shell's stderr
+should be redirected to the terminal: interactive programs break the
+automatic logging chain and delegate responsibility to the user.
+.It
+A syslogd service
+.Em may
+exist, to catch logs sent via
+.Fn syslog
+by legacy programs.
+But it is a normal service, and logs caught by this syslogd service
+are not part of the logging chain.
+It is probably overkill to provide the syslogd service with its own
+logger; error messages from syslogd can default to the catch-all
+logger.
+The s6 package, including the
+.Xr ucspilogd 8
+program, provides enough tools to easily implement a complete syslogd
+system, for a small fraction of the resource needs and the complexity
+of native syslogd implementations.
+.El
+.Pp
+So, given a program, where are its logs sent?
+.Bl -bullet -width x
+.It
+Logs sent via
+.Fn syslog
+will be handled by the syslogd service as usual.
+Smart administrators will make sure that those ones are as few as
+possible.
+The rest of this analysis is about logs sent to stderr.
+.It
+If the program is descended from a user's interactive program, its
+logs are sent to the user's terminal or the user's choice redirection
+target.
+.It
+If the program is descended from a logged service, its logs are
+naturally sent to the service's logger.
+.It
+Else the logs are sent to the catch-all logger.
+.It
+Only the catch-all logger's error messages, the kernel's fatal error
+messages, and maybe process 1's error messages, are sent to the system
+console.
+.El
+.Pp
+.Sy What does s6-log have to do with all this?
+.Pp
+In a
+.Em logging chain
+situation, every service must have its own logger.
+To avoid syslogd's design mistakes, one logger process per service
+must be run.
+.Nm
+fits that role.
+Using
+.Nm
+as your one-stop logger offers the following benefits:
+.Bl -bullet -width x
+.It
+Every instance of
+.Nm
+can run as a different user, so it's easy to give different access
+rights to different logs.
+It is also more secure not to have any logger process running as root.
+.It
+.Nm
+consumes very little memory per instance (unless it accumulates
+unflushed log lines, which you can avoid with the
+.Fl b
+option).
+So, launching a lot of
+.Nm
+processes does not waste resources.
+.It
+.Nm
+is vastly configurable via logging scripts; every instance is as
+powerful as a traditional syslogd.
+.It
+.Nm
+can log to a RAM filesystem and thus is suitable as a catch-all
+logger.
+Clever tricks like Upstart's logd or daemontools' readproctitle[9] are
+just that: tricks.
+.Nm
+gives a unified interface to all of your system's loggers.
+.El
+.Pp
+.Sy You're wrong about being as powerful as syslogd: s6-log does not do remote logging.
+.Pp
+You mean you want to send,
+.Em live ,
+every
+.Em log line
+over the network via
+.Em UDP ?
+You can't be serious.
+.Pp
+Do yourself a favor and use
+.Nm
+to write log lines to a logdir, with a processor script that sends
+files-being-archived to the network, possibly after compressing
+them.
+More reliability, less log lines lost, less network traffic, better
+engineering.
+If you have no disk to even write the
+.Pa current
+files to, write to a small RAM filesystem.
+.Pp
+If you
+.Em have
+to log stuff
+.Em live
+via the network, you do not need any local logging software.
+You don't even need syslogd.
+Just filter your stderr via some
+.Ql grep
+that selects lines for you, then sends them to a network socket.
+A trivial shell script, or execline script, can do that for you.
+.Pp
+Do not insist on using syslogd.
+It does nothing magical, and nothing that can't be done in a simpler
+way using simpler tools.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl d Ar notif
+Readiness notification.
+With this option,
+.Nm
+writes a newline character to file descriptor
+.Ar notif
+when it is ready, i.e. when it has successfully parsed its logging
+script and initialized all its necessary resources such as the logdirs
+defined in the script, and is now listening to stdin in order to
+process log lines.
+.It Fl b
+Blocking mode.
+With this option,
+.Nm
+stops reading its standard input while it has unflushed buffers.
+This ensures that every log line has been fully processed before
+reading the next one; this is also multilog[1]'s behaviour.
+By default,
+.Nm
+keeps reading from stdin even if its buffers still contain data.
+.Fl b
+is safer, but may slow down your service; the default is faster, but
+may lead to unbound memory use if you have a lot of output to write to
+a slow file system.
+.It Fl p
+Protect against SIGTERM.
+Do not exit on receipt of a SIGTERM; only exit on a SIGHUP or when
+reading EOF on stdin.
+This is useful for a logger that you really do not want to lose even
+if automated administration (e.g. the downing of a supervision tree)
+would kill it.
+.It Fl q | v
+Quiet | verbose.
+Decreases | increases
+.Nm Ap
+s verbosity, i.e. which messages are sent to stderr.
+The default verbosity is 1.
+Currently supported verbosity levels:
+.Bl -tag -width x
+.It 0
+Only write alerts and fatal errors.
+.It 1
+Write alerts, warnings and fatal errors.
+.El
+.It Fl l Ar linelimit
+If a log line is longer than
+.Ar linelimit
+bytes, split it by inserting a newline after the
+.Ar linelimit Ns
+th byte.
+After the split, the remainder of the line will also be processed, so
+it will go through the selection process, timestamping, etc.
+.Ar linelimit
+cannot be less than 48, unless it is 0 (which means infinite).
+The default is 8192 bytes.
+Setting
+.Ar linelimit
+to 0 ensures that lines will never be split; this may cause important
+memory consumption by
+.Nm
+if it is fed extremely long lines, so use with caution.
+.El
+.Sh EXAMPLES
+.Dl s6-log -b n20 s1000000 t /var/log/services/stuff
+.Pp
+Logs all of stdin, prepending every line with a TAI64N[2] timestamp, into
+the
+.Pa /var/log/services/stuff
+logdir, with a maximum archive of 20 log files of 1 MB each; makes
+sure every line has been written before reading the next one.
+.Pp
+.Dl s6-log n30 E500 - +fatal: 2 - +^STAT =/var/log/foobard/status f s10000000 S15000000 T !"gzip -nq9" /var/log/foobard
+.Bl -bullet -width x
+.It
+Sends alerts to stderr with the 500 first bytes of lines containing
+.Dq fatal: .
+.It
+Maintains the
+.Pa /var/log/foobard/status
+file at 1001 bytes, updating it when it finds a log line starting with
+.Dq STAT .
+.It
+Logs all other lines to logdir
+.Pa /var/log/foobard ,
+prepending them with an ISO 8601 timestamp.
+When
+.Pa current
+reaches at least 9998 kB (i.e. 10 MB filesise minus 2kB tolerance),
+pipe it through
+.Ql gzip -nq9
+and save the result into a timestamped archive file, with a maximum of
+30 such files or a total of 15 MB of compressed archive files.
+.El
+.Sh SEE ALSO
+.Xr execlineb 1 ,
+.Xr ucspilogd 8
+.Pp
+[1]
+.Lk https://cr.yp.to/daemontools/multilog.html
+.Pp
+[2]
+.Lk https://skarnet.org/software/skalibs/libstddjb/tai.html
+.Pp
+[3]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html#tag_09_04
+.Pp
+[4]
+.Lk https://en.wikipedia.org/wiki/ISO_8601
+.Pp
+[5]
+.Lk https://skarnet.org/software/execline/
+.Pp
+[6]
+.Lk https://blog.gerhards.net/2007/08/why-doesworld-need-another-syslogd.html
+.Pp
+[7]
+.Lk https://busybox.net/
+.Pp
+[8]
+.Lk https://skarnet.org/software/s6/s6-svscan-1.html#log
+.Pp
+[9]
+.Lk https://cr.yp.to/daemontools/readproctitle.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-log.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

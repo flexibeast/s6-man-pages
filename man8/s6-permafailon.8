@@ -1,0 +1,138 @@
+.Dd September 29, 2021
+.Dt S6-PERMAFAILON 8
+.Os
+.Sh NAME
+.Nm s6-permafailon
+.Nd read and analyse the death tally of a service (i.e. the recent process death events that happened), and if the death tally matches a given pattern, cause
+.Em permanent failure
+of the service, i.e. tells the supervisor not to try and restart it
+.Sh SYNOPSIS
+.Nm
+.Ar secs
+.Ar deathcount
+.Ar events
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+is meant to be used in the
+.Pa ./finish
+script of a service directory supervised by
+.Xr s6-supervise 8 .
+.Pp
+.Nm
+must have the service directory of the tested service as its current
+directory.
+This is the default if it is called from the
+.Pa finish
+script of the service.
+.Pp
+It reads the death tally of the service, which is maintained by
+.Xr s6-supervise 8 .
+.Pp
+If the supervised process has died at least
+.Ar deathcount
+times in the last
+.Ar secs
+seconds with a cause listed in
+.Ar events ,
+then
+.Nm
+exits 125.
+Else
+.Nm
+execs into
+.Ar prog... .
+.Pp
+.Ar events
+is a comma-separated list of events.
+An event can be one of the following:
+.Bl -bullet -width x
+.It
+An exit code, which is an integer between 0 and 255.
+Example:
+.Ql 1 .
+.It
+An exit code interval, which is two exit codes separated by a
+dash.
+Example:
+.Ql 1-50 .
+.It
+A signal name, or a signal number preceded by
+.Sq SIG .
+Examples:
+.Ql SIGTERM ,
+.Ql sigabrt ,
+.Ql sig11 .
+.El
+.Xr s6-supervise 8
+detects when the
+.Pa ./finish
+script of its service exits 125, and stops respawning the service.
+So, if the
+.Pa ./finish
+script is a chain-loading command line starting with a
+.Nm
+invocation (or containing such an invocation), when
+.Nm
+exits 125, then the
+.Pa ./finish
+script also exits 125 (because it is the same process), and the
+service is then marked as failing permanently.
+.Pp
+The
+.Pa ./finish
+script is
+.Em naturally
+a chain-loading command line if it is written in the execline[1]
+language.
+It can also be made into a chain-loading command line from a shell
+script by using
+.Ql exec s6-permafailon secs deathcount events rest-of-chainloading-cmdline...
+.Pp
+Multiple invocations of
+.Nm
+can be chained, in order to test several death patterns.
+.Pp
+If a permanent failure is triggered and
+.Ar secs
+is high, it is possible that when the administrator manually launches
+the service again, the next death triggers a permanent failure
+again.
+If this is not wanted, the administrator should clear the death tally
+with the
+.Xr s6-svdt-clear 8
+command.
+.Pp
+The current death tally can be viewed via the
+.Xr s6-svdt 8
+command.
+.Sh EXAMPLES
+.Dl s6-permafailon 60 5 1,101-103,SIGSEGV,SIGBUS prog...
+.Pp
+will exit 125 if the service has died 5 times in the last 60 seconds
+with an exit code of 1, 101, 102 or 103, a SIGSEGV or a SIGBUS.
+Else it will chainload into the
+.Ql prog...
+command line.
+.Sh SEE ALSO
+.Xr s6-notifyoncheck 8 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svc 8 ,
+.Xr s6-svdt 8 ,
+.Xr s6-svdt-clear 8 ,
+.Xr s6-svlisten 8 ,
+.Xr s6-svlisten1 8 ,
+.Xr s6-svok 8 ,
+.Xr s6-svscan 8 ,
+.Xr s6-svscanctl 8 ,
+.Xr s6-svstat 8 ,
+.Xr s6-svwait 8
+.Pp
+[1]
+.Lk https://skarnet.org/software/execline/
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-permafailon.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

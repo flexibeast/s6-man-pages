@@ -1,0 +1,278 @@
+.Dd September 29, 2021
+.Dt S6-SVSTAT 8
+.Os
+.Sh NAME
+.Nm s6-svstat
+.Nd print a short, human-readable or programmatically parsable summary of the state of a process monitored by
+.Xr s6-supervise 8
+.Sh SYNOPSIS
+.Nm
+.Op Fl uwNrpest | o No up,wantedup,normallyup,ready,paused,pid,exitcode,signal,signum,updownsince,readysince,updownfor,readyfor
+.Op Fl n
+.Ar servicedir
+.Sh DESCRIPTION
+.Nm
+gives information about the process being monitored at the
+.Ar servicedir
+.Xr s6-service-directory 7 ,
+then exits 0.
+.Pp
+When
+.Nm
+is invoked without options, or with only the
+.Fl n
+option, it prints a human-readable summary of all the available
+information on the service.
+In this case, the
+.Fl n
+option instructs it to print a signal number (instead of a signal
+name) if the supervised process was killed by a signal.
+The summary includes the following data:
+.Bl -bullet -width x
+.It
+whether the process is up or down, and if it's up, the number of
+seconds that it has been up.
+.It
+the process' pid, if it is up, or its last exit code or terminating
+signal, if it is down.
+.It
+what its default state is, if it is different from its current state.
+.It
+the number of seconds since it last changed states.
+.It
+whether the service is ready
+.Po
+cf.
+.Xr s6-notifywhenup 7
+.Pc
+as notified by the daemon itself, and if
+it is, the number of seconds that it has been.
+A service reported as down and ready simply means that it is ready to
+be brought up.
+A service is down and not ready when it is in the cleanup phase,
+i.e. the
+.Pa ./finish
+script is still being executed.
+.El
+.Pp
+When
+.Nm
+is invoked with one or several options other than
+.Fl n ,
+it outputs programmatically parsable information instead.
+The output is a series of space-separated values, one value per
+requested field.
+The valid options are as follows.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl o Ar fields
+List fields to print.
+.Ar fields
+is a list of comma-separated field names.
+The valid field names are the following:
+.Bl -tag -width x
+.It up
+Print
+.Ql true
+if the service is up and
+.Ql false
+if it is down.
+.It wantedup
+Print
+.Ql true
+if
+.Xr s6-supervise 8
+is currently instructed to (re)start the service when it is down, and
+.Ql false
+if
+.Xr s6-supervise 8
+is currently instructed to leave the service alone.
+.It normallyup
+Print
+.Ql true
+if the service is supposed to start when
+.Xr s6-supervise 8
+starts (i.e. no
+.Pa ./down
+file), and
+.Ql false
+if it is not (i.e. there is a
+.Pa ./down
+file).
+.It ready
+Print
+.Ql true
+if the service is ready, and
+.Ql false
+if it is not.
+Note that
+a service can be both down and ready: it simply means that it is ready
+to be started (i.e. no
+.Pa ./finish
+script is currently running).
+To check for service readiness, you should give this option along with
+.Ql up :
+the service is ready iff
+.Ql s6-svstat -o up,ready
+prints
+.Ql true true .
+(The
+.Ql true true
+case will never happen if the service does not support readiness
+notification.)
+.It paused
+Print
+.Ql true
+if the service is paused (i.e. the process is currently stopped) and
+.Ql false
+if it is not.
+It is a rare flag, you shouldn't normally need to use this option.
+.It pid
+Print the pid of the supervised process.
+If the service is currently down,
+.Ql -1
+is printed instead.
+.It exitcode
+Print the exit code of the last execution of
+.Pa ./run .
+If the service is currently up, or the last
+.Pa ./run
+process was killed by a signal,
+.Ql -1
+is printed instead.
+.It signal
+Print the name of the signal the last
+.Pa ./run
+process was killed with.
+If the service is currently up, or the last
+.Pa ./run
+process was not killed by a signal,
+.Ql NA
+is printed instead.
+.It signum
+Print the number of the signal the last
+.Pa ./run
+process was killed with.
+If the service is currently up, or the last
+.Pa ./run
+process was not killed by a signal,
+.Ql -1
+is printed instead.
+.It updownsince
+Print a TAI64N[1] label representing the absolute date when the
+service last changed states.
+.It readysince
+Print a TAI64N[1] label representing the absolute date when the
+service last became ready.
+Note that this can either mean
+.Dq service readiness
+(if the service is currently up and ready), or
+.Dq down readiness ,
+i.e. the last time when the service was down and ready to be started
+(if the service is
+.Em not
+currently up and ready).
+.It updownfor
+Print the number of seconds that have elapsed since the service last
+changed states.
+.It readyfor
+Print the number of seconds that have elapsed since the service last
+became ready (or ready to be started if it's currently not up and
+ready).
+.El
+.It Fl u
+Equivalent to
+.Ql -o up .
+.It Fl w
+Equivalent to
+.Ql -o wantedup .
+.It Fl N
+Equivalent to
+.Ql -o normallyup .
+.It Fl r
+Equivalent to
+.Ql -o ready .
+.It Fl p
+Equivalent to
+.Ql -o pid .
+.It Fl e
+Equivalent to
+.Ql -o exitcode .
+.It Fl s
+Equivalent to
+.Ql -o signal .
+.It Fl t
+Equivalent to
+.Ql -o updownfor .
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 1
+.Xr s6-supervise 8
+not running on
+.Ar servicedir .
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh EXAMPLES
+.Dl s6-svstat -o up,ready
+.Pp
+or its equivalent,
+.Ql s6-svstat -ur ,
+will print
+.Ql true true
+if the service is up and ready,
+.Ql true false
+if the service has been started but has not notified readiness yet,
+.Ql false true
+if it is down and can be started, and
+.Ql false false
+if it is down and there's a
+.Pa ./finish
+script running that needs to exit before the service can be restarted.
+.Pp
+.Dl s6-svstat -o pid,exitcode,signal
+.Pp
+or its equivalent,
+.Ql s6-svstat -pes ,
+will print
+.Ql 42 -1 NA
+if the service has been started and
+.Pa ./run Ap
+s pid is 42; it will print
+.Ql -1 0 NA
+if the service is down and
+.Pa ./run
+last exited 0; it will print
+.Ql -1 -1 SIGTERM
+if the service is down and
+.Pa ./run
+was last killed by a SIGTERM - as can happen, for instance, when you
+down the service via a call to
+.Ql s6-svc -d .
+.Sh SEE ALSO
+.Xr s6-notifyoncheck 8 ,
+.Xr s6-permafailon 8 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svc 8 ,
+.Xr s6-svdt 8 ,
+.Xr s6-svdt-clear 8 ,
+.Xr s6-svlisten 8 ,
+.Xr s6-svlisten1 8 ,
+.Xr s6-svok 8 ,
+.Xr s6-svscan 8 ,
+.Xr s6-svscanctl 8 ,
+.Xr s6-svwait 8
+.Pp
+[1]
+.Lk https://cr.yp.to/libtai/tai64.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-svstat.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

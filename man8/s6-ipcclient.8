@@ -1,0 +1,79 @@
+.Dd September 29, 2021
+.Dt S6-IPCCLIENT 8
+.Os
+.Sh NAME
+.Nm s6-ipcclient
+.Nd UCSPI client tool[1] for Unix domain sockets: connect to a socket, then execute into a program
+.Sh SYNOPSIS
+.Nm
+.Op Fl q | Q | v
+.Op Fl p Ar localpath
+.Op Fl l Ar localname
+.Ar path
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+connects to a Unix domain socket on
+.Ar path .
+.Pp
+It executes into
+.Ar prog...
+with descriptor 6 reading from the socket and descriptor 7 writing to
+it.
+.Pp
+.Nm
+is mostly used to connect a client to an
+.Xr s6-local-service 7
+without having to implement networking in the client.
+For instance, the
+.Xr s6-sudo 8
+program does this.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl q
+Be quiet.
+.It Fl Q
+Be normally verbose.
+This is the default.
+.It Fl v
+Be verbose.
+.It Fl p Ar localpath
+Bind the local socket to
+.Ar localpath
+before connecting to
+.Ar path .
+.It Fl l Ar localname
+Use
+.Ar localname
+as the value of the
+.Ev IPCLOCALPATH
+environment variable.
+.El
+.Sh ENVIRONMENT
+.Ar prog...
+is run with the following variables set:
+.Bl -tag -width x
+.It PROTO
+Always set to IPC.
+.It IPCLOCALPATH
+Set to the path associated with the local socket, if any.
+Be aware that it may contain arbitrary characters.
+.El
+.Sh SEE ALSO
+.Xr s6-accessrules-cdb-from-fs 8 ,
+.Xr s6-accessrules-fs-from-cdb 8 ,
+.Xr s6-connlimit 8 ,
+.Xr s6-ioconnect 8 ,
+.Xr s6-ipcserver 8 ,
+.Xr s6-ipcserver-access 8 ,
+.Xr s6-ipcserver-socketbinder 8 ,
+.Xr s6-ipcserverd 8
+.Pp
+[1]
+.Lk https://cr.yp.to/proto/ucspi.txt
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-ipcclient.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

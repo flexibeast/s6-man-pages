@@ -1,0 +1,62 @@
+.Dd September 29, 2021
+.Dt S6-FDHOLDER-LIST 8
+.Os
+.Sh NAME
+.Nm s6-fdholder-list
+.Nd list the descriptors currently held by
+.Xr s6-fdholderd 8
+.Sh SYNOPSIS
+.Nm
+.Op Fl t Ar timeout
+.Ar path
+.Sh DESCRIPTION
+.Nm
+connects to an
+.Xr s6-fdholderd 8
+server process listening on
+.Ar path .
+.Pp
+It gets the list of identifiers corresponding to the currently held
+file descriptors.
+It prints this list to stdout, one per line.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl t Ar timeout
+If the operation cannot be processed in
+.Ar timeout
+milliseconds, then fail with an error message.
+Communications with the server should be near-instant, so this option
+is only here to protect users against programming errors (connecting
+to the wrong socket, for instance).
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 1
+The server denied the operation.
+The meanings of the error messages are explained in
+.Xr s6-fdholder-error-codes 7 .
+.It 100
+Wrong usage.
+.It 111
+System call failed - this includes attempting to connect to a
+nonexistent socket, or one where no
+.Xr s6-fdholderd 8
+daemon is listening.
+.El
+.Sh SEE ALSO
+.Xr s6-fdholder-daemon 8 ,
+.Xr s6-fdholder-delete 8 ,
+.Xr s6-fdholder-getdump 8 ,
+.Xr s6-fdholder-retrieve 8 ,
+.Xr s6-fdholder-setdump 8 ,
+.Xr s6-fdholder-store 8 ,
+.Xr s6-fdholder-transferdump 8 ,
+.Xr s6-fdholderd 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-fdholder-list.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

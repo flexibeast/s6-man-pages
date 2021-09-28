@@ -1,0 +1,249 @@
+.Dd September 29, 2021
+.Dt S6-IPCSERVER-ACCESS 8
+.Os
+.Sh NAME
+.Nm s6-ipcserver-access
+.Nd control tool for Unix domain sockets on systems where the
+.Fn getpeereid
+system call can be implemented
+.Sh SYNOPSIS
+.Nm
+.Op Fl v Ar verbosity
+.Op Fl E | e
+.Op Fl l Ar localname
+.Op Fl i Ar rulesdir | Fl x Ar rulesfile
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+is meant to be run after
+.Xr s6-ipcserverd 8
+and before the application program on the
+.Xr s6-ipcserver 8
+command line.
+.Pp
+.Nm
+checks it is run under a UCSPI server tool such as
+.Xr s6-ipcserver 8 .
+.Pp
+It checks that the remote end of the connection fits the accepted
+criteria defined by the database contained in
+.Ar rulesdir
+or
+.Ar rulesfile .
+If the database tells it to reject the connection, the program exits
+1.
+.Pp
+It sets up a few additional environment variables.
+.Pp
+It executes into
+.Ar prog... ,
+unless the first matching rule in the rule database includes
+instructions to override
+.Ar prog... .
+.Ss Access rule checking
+.Nm
+checks its client connection against a ruleset.
+This ruleset can be implemented:
+.Bl -bullet -width x
+.It
+either in the filesystem as an arborescence of directories and files,
+if the
+.Fl i
+option has been given.
+This option is the most flexible one: the directory format is simple
+enough for scripts to understand and modify it, and the ruleset can be
+changed dynamically.
+This is practical, for instance, for roaming users.
+.It
+or in a CDB[1] file, if the
+.Fl x
+option has been given.
+This option is the most efficient one if the ruleset is static enough:
+a lot less system calls are needed to perform searches in a CDB than
+in the filesystem.
+.El
+.Pp
+The exact format of the ruleset is described in the
+.Xr s6-accessrules-cdb-from-fs 8
+page.
+.Pp
+.Nm
+first reads the client UID
+.Em uid
+and GID
+.Em gid
+from the
+.Ev ${PROTO}REMOTEEUID
+and
+.Ev ${PROTO}REMOTEEGID
+environment variables, and checks them with the
+.Fn s6_accessrules_keycheck_uidgid
+function - refer to
+.Xr s6-accessrules 7 .
+In other words, it tries to match:
+.Bl -bullet -width x
+.It
+(if the client's effective uid is the same as
+.Sm off
+.Nm Ap
+.Sm on
+effective uid)
+.Pa uid/self
+.It
+.Sm off
+.Pa uid/
+.Em uid
+.Sm on
+.It
+(if the client's effective gid is the same as
+.Sm off
+.Nm Ap
+.Sm on
+effective gid)
+.Pa gid/self
+.It
+.Sm off
+.Pa gid/
+.Em gid
+.Sm on
+.It
+.Pa uid/default
+.El
+.Pp
+in that order.
+If no
+.Dv S6_ACCESSRULES_ALLOW
+result can be obtained, the connection is denied.
+.Ss Environment and executable modifications
+.Nm
+interprets non-empty
+.Pa env
+subdirectories and
+.Pa exec
+files it finds in the first matching rule of the ruleset, as explained
+in the
+.Xr s6-accessrules-cdb-from-fs 8
+page.
+.Bl -bullet -width x
+.It
+An
+.Pa env
+subdirectory is interpreted as if the
+.Xr s6-envdir 8
+command had been called before executing
+.Ar prog :
+the environment is modified according to the contents of
+.Pa env .
+.It
+An
+.Pa exec
+file containing
+.Em newprog
+completely bypasses the rest of
+.Sm off
+.Nm Ap
+.Sm on
+command line.
+After environment modifications, if any,
+.Nm
+execs into
+.Ql execlineb -c newprog .
+Please be aware that the
+.Pa exec
+file functionality is only supported when s6 has been built with
+execline support.
+Otherwise, a warning message is printed and executable diversion is
+not performed.
+.El
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl v Ar verbosity
+Be more or less verbose, i.e. print more or less information to stderr:
+.Bl -tag -width x
+.It 0
+Only log error messages.
+.It 1
+Only log error and warning messages, and accepted connections.
+This is the default.
+.It 2
+Also log rejected connections and more warning messages.
+.El
+.It Fl E
+No environment.
+All environment variables potentially set by
+.Nm ,
+as well as those set by
+.Xr s6-ipcserver 8 ,
+will be unset instead.
+.It Fl e
+Set up environment variables normally.
+This is the default.
+.It Fl l Ar localname
+Use
+.Ar localname
+as the value for the
+.Ev ${PROTO}LOCALPATH
+environment variable, instead of looking it up via
+.Xr getsockname 2 .
+.It Fl i Ar rulesdir
+Check client credentials against a filesystem-based database in the
+.Ar rulesdir
+directory.
+.It Fl x Ar rulesfile
+Check client credentials against a CDB[1] database in the
+.Ar rulesfile
+file.
+.Fl i
+and
+.Fl x
+are mutually exclusive.
+If none of those options is given, no credential checking will be
+performed, and a warning will be emitted on every connection if
+.Ar verbosity
+is 2 or more.
+.El
+.Sh ENVIRONMENT
+.Nm
+expects to inherit some environment variables from its parent:
+.Bl -tag -width x
+.It PROTO
+Normally IPC, but could be anything else, like UNIX.
+.It ${PROTO}REMOTEEUID
+The effective UID of the client program connecting to the socket.
+.It ${PROTO}REMOTEEGID
+The effective GID of the client program connecting to the socket.
+.El
+.Pp
+Additionally, it exports the following variable before executing into
+.Ar prog... :
+.Bl -tag -width x
+.It ${PROTO}LOCALPATH
+Set to the local
+.Dq address
+of the socket, as reported by the
+.Xr getsockname 2
+system call, truncated to 99 characters max.
+.El
+.Pp
+Also, the access rules database can instruct
+.Nm
+to set up, or unset, more environment variables, depending on the
+client address.
+.Sh SEE ALSO
+.Xr s6-accessrules-cdb-from-fs 8 ,
+.Xr s6-accessrules-fs-from-cdb 8 ,
+.Xr s6-connlimit 8 ,
+.Xr s6-ioconnect 8 ,
+.Xr s6-ipcclient 8 ,
+.Xr s6-ipcserver 8 ,
+.Xr s6-ipcserver-socketbinder 8 ,
+.Xr s6-ipcserverd 8
+.Pp
+[1]
+.Lk https://en.wikipedia.org/wiki/Cdb_(software)
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-ipcserver-access.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

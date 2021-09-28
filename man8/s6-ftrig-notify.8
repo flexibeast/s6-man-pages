@@ -1,0 +1,37 @@
+.Dd September 29, 2021
+.Dt S6-FTRIG-NOTIFY 8
+.Os
+.Sh NAME
+.Nm s6-ftrig-notify
+.Nd send a series of events to an
+.Xr s6-fifodir 7
+.Sh SYNOPSIS
+.Nm
+.Ar fifodir
+.Ar message
+.Sh DESCRIPTION
+.Nm
+notifies all the current listeners in
+.Ar fifodir
+with all the characters in
+.Ar message .
+.Pp
+.Nm
+cannot be used to send the null character (event 0x00).
+If you need to send the null character, use the C API:
+.Fn ftrigw_notify . Refer to
+.Xr s6-ftrigw 7
+for details.
+.Sh SEE ALSO
+.Xr s6-cleanfifodir 8 ,
+.Xr s6-ftrig-listen 8 ,
+.Xr s6-ftrig-listen1 8 ,
+.Xr s6-ftrig-wait 8 ,
+.Xr s6-ftrigrd 8 ,
+.Xr s6-mkfifodir 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-ftrig-notify.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

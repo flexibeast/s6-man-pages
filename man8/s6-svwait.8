@@ -1,0 +1,171 @@
+.Dd September 29, 2021
+.Dt S6-SVWAIT 8
+.Os
+.Sh NAME
+.Nm s6-svwait
+.Nd monitor one or more
+.Xr s6-service-directory 7 Ns s
+given as its arguments, waiting for a state (ready, up or down) to
+happen
+.Sh SYNOPSIS
+.Nm
+.Op Fl U | u | D | d | r | R
+.Op Fl a | o
+.Op Fl t Ar timeout
+.Ar servicedir...
+.Sh DESCRIPTION
+.Nm
+only waits for notifications; it never polls.
+.Pp
+.Nm
+should be given one or more
+.Em service directories
+as arguments, not an
+.Xr s6-scan-directory 7 .
+If you need to wait for a whole scan directory, give all its contents
+as arguments to
+.Nm s6-svwait .
+.Pp
+.Nm
+will only work on service directories that are already active,
+i.e. have an
+.Xr s6-supervise 8
+process running on them.
+It will not work on a service directory where
+.Xr s6-supervise 8
+has not been started yet.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl u
+Up.
+.Nm
+will wait until the services are up, as reported by
+.Xr s6-supervise 8 .
+This is the default; it is not reliable, but it does not depend on
+specific support in the service programs.
+See
+.Xr s6-notifywhenup 7
+for details.
+.It Fl U
+Really up.
+.Nm
+will wait until the services are up and ready as reported by the
+services themselves.
+This requires specific support in the service programs, and the use of
+the
+.Pa notification-fd
+file in the
+.Xr s6-service-directory 7 .
+See the explanation in
+.Xr s6-notifywhenup 7 .
+.It Fl d
+Down.
+.Nm
+will wait until the services are down.
+.It Fl D
+Really down.
+.Nm
+will wait until the services are down and the cleanup scripts in
+.Sm off
+.Ar servicedir /
+.Pa finish
+.Sm on
+for every
+.Ar servicedir
+have finished executing (or have timed out and been killed).
+.It Fl r
+Restart.
+.Nm
+will wait until the services are down, then until they are up.
+If the
+.Fl o
+option is given, it waits until
+.Em all
+services are down and
+.Em one
+service is up; otherwise it waits until
+.Em all
+the services have restarted.
+.It Fl R
+Restart and ready.
+.Nm
+will wait until the services are down, then until they are up and
+ready.
+If the
+.Fl o
+option is given, it waits until
+.Em all
+services are down and
+.Em one
+service is up and ready; otherwise it waits until
+.Em all
+the services have restarted and are ready.
+.It Fl o
+Or.
+.Nm
+will wait until
+.Em one
+of the given services comes up or down.
+.It Fl a
+And.
+.Nm
+will wait until
+.Em all
+of the given services come up or down.
+This is the default.
+.It Fl t Ar timeout
+If the requested events have not happened after timeout milliseconds,
+.Nm
+will print a message to stderr and exit 99.
+By default,
+.Ar timeout
+is 0, which means no time limit.
+.El
+.Sh IMPLEMENTATION NOTES
+.Nm
+spawns an
+.Xr s6-ftrigrd 8
+child to listen to notifications sent by
+.Xr s6-supervise 8 .
+It also checks
+.Pa supervise/status
+files to get the current service states, so it is immune to race
+conditions.
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success, the wanted state has been reached.
+.It 99
+Timed out.
+.It 100
+Wrong usage.
+.It 102
+The
+.Xr s6-supervise 8
+process monitoring the service died.
+.It 111
+System call failed.
+.It Em n
+Services were expected to come up, but
+.Em n
+of them reported permanent failure.
+.El
+.Sh SEE ALSO
+.Xr s6-notifyoncheck 8 ,
+.Xr s6-permafailon 8 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svc 8 ,
+.Xr s6-svdt 8 ,
+.Xr s6-svdt-clear 8 ,
+.Xr s6-svlisten 8 ,
+.Xr s6-svlisten1 8 ,
+.Xr s6-svok 8 ,
+.Xr s6-svscan 8 ,
+.Xr s6-svscanctl 8 ,
+.Xr s6-svstat 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-svwait.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

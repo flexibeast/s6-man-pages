@@ -1,0 +1,152 @@
+.Dd September 29, 2021
+.Dt S6-SVSCANCTL 8
+.Os
+.Sh NAME
+.Nm s6-svscanctl
+.Nd send commands to a running
+.Xr s6-svscan 8
+process
+.Sh SYNOPSIS
+.Nm
+.Op Fl zabhitqnN
+.Ar scandir
+.Sh DESCRIPTION
+.Nm
+sends the given series of commands to the
+.Xr s6-svscan 8
+process monitoring the
+.Ar scandir
+directory, then exits 0.
+It exits 111 if it cannot send a command, or
+100 if no
+.Xr s6-svscan 8
+process is running on
+.Ar scandir .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl a
+Alarm.
+.Xr s6-svscan 8
+will immediately perform a scan of
+.Ar scandir
+to check for services.
+.It Fl z
+Destroy zombies.
+Immediately triggers
+.Xr s6-svscan 8 Ap
+s reaper mechanism.
+.It Fl b
+Abort.
+.Xr s6-svscan 8
+will exec into its finishing procedure.
+It will not kill any of the maintained
+.Xr s6-supervise 8
+processes, unless a
+.Fl t
+or
+.Fl q
+option is also present before the
+.Fl b
+option in the
+.Nm
+invocation.
+.It Fl h
+Reload configuration.
+.Xr s6-svscan 8
+will perform a scan, and destroy inactive services.
+Equivalent to
+.Fl an .
+.Fl i
+Equivalent to
+.Fl t
+below.
+.It Fl t
+Terminate.
+.Xr s6-svscan 8
+will send a
+.Dv SIGTERM
+to all the
+.Xr s6-supervise 8
+processes supervising a service and a
+.Dv SIGHUP
+to all the
+.Xr s6-supervise 8
+processes supervising a logger, then exec into its finish
+procedure.
+This means that services will be brought down but loggers will exit
+naturally on EOF, and
+.Xr s6-svscan 8
+will wait for them to exit before exec'ing into
+.Pa .s6-svscan/finish
+or exiting itself: it's a clean shutdown with no loss of logs.
+.It Fl q
+Quit.
+.Xr s6-svscan 8
+will send all its
+.Xr s6-supervise 8
+processes a
+.Dv SIGTERM ,
+then exec into its finish procedure.
+This is different from
+.Fl t
+in that services
+.Em and
+loggers will be forcibly killed, so the quit procedure may be faster
+but in-flight logs may be lost.
+.It Fl n
+Nuke.
+.Xr s6-svscan 8
+will kill all the
+.Xr s6-supervise 8
+processes it has launched but that did not match a service directory
+last time
+.Ar scandir
+was scanned, i.e. it prunes the supervision tree so that it matches
+exactly what was in
+.Ar scandir
+at the time of the last scan.
+A SIGTERM is sent to the
+.Xr s6-supervise 8
+processes supervising services and a SIGHUP is sent to the
+.Xr s6-supervise 8
+processes supervising loggers.
+.It Fl N
+Really nuke.
+Does the same thing as
+.Fl n ,
+except that SIGTERM is sent to all the relevant
+.Xr s6-supervise 8
+processes, even if they are supervising loggers.
+This is not recommended in a situation where you do not need to tear
+down the supervision tree.
+.El
+.Sh IMPLEMENTATION NOTES
+.Nm
+writes control commands into the
+.Pa scandir/.s6-svscan/control
+FIFO.
+An
+.Xr s6-svscan 8
+process running on
+.Ar scandir
+will be listening to this FIFO, and will read and interpret those
+commands.
+.Sh SEE ALSO
+.Xr s6-notifyoncheck 8 ,
+.Xr s6-permafailon 8 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svc 8 ,
+.Xr s6-svdt 8 ,
+.Xr s6-svdt-clear 8 ,
+.Xr s6-svlisten 8 ,
+.Xr s6-svlisten1 8 ,
+.Xr s6-svok 8 ,
+.Xr s6-svscan 8 ,
+.Xr s6-svstat 8 ,
+.Xr s6-svwait 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-svscanctl.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

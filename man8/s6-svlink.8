@@ -1,0 +1,194 @@
+.Dd September 29, 2021
+.Dt S6-SVLINK 8
+.Os
+.Sh NAME
+.Nm s6-svlink
+.Nd integrate service directories into an existing service manager sequence and eliminate race conditions
+.Sh SYNOPSIS
+.Nm
+.Op Fl d | Fl D
+.Op Fl P
+.Op Fl f
+.Op Fl t Ar timeout
+.Ar scandir
+.Ar servicedir
+.Op Ar name
+.Sh DESCRIPTION
+.Nm
+creates, in an
+.Xr s6-scan-directory 7 ,
+a symlink to an
+.Xr s6-service-directory 7 ,
+and notifies
+.Xr s6-svscan 8
+that a new service has been registered.
+It waits until an
+.Xr s6-supervise 8
+supervisor process has been spawned to manage the new service, then exits.
+.Bl -bullet -width x
+.It
+.Nm
+expects a running
+.Xr s6-svscan 8
+process on
+.Ar scandir
+and a fully functional, but unsupervised,
+.Xr s6-service-directory 7
+in
+.Ar servicedir .
+.It
+It symlinks
+.Ar servicedir
+into
+.Ar scandir .
+The symbolic link is named
+.Ar name ;
+if no
+.Ar name
+argument has been given, the name given to the symbolic link is the
+basename of
+.Ar servicedir .
+.It
+It sends a command to
+.Xr s6-svscan 8
+to signal it that a new service is available.
+.It
+It waits for an
+.Xr s6-supervise 8
+process to be spawned on
+.Ar servicedir .
+.It
+It exits 0.
+.El
+.Pp
+Using
+.Nm
+to start services is a suboptimal pattern: it requires precise
+manipulations involving use of
+.Xr s6-ftrigrd 8
+in order to avoid race conditions, so it is relatively expensive.
+The simpler, more efficient pattern is to have all the supervisors
+already started at boot time, so the existence of the supervisor can
+be relied on, and starting the service becomes a trival and instant
+operation - this is, for instance, how the s6-rc service manager[1]
+behaves.
+However, it can be difficult to implement this pattern with other
+services managers such as OpenRC; in those cases,
+.Nm ,
+which starts the supervisors one at a time, can be used instead.
+.Pp
+If
+.Ar servicedir
+is logged, i.e.\&
+.Ql Pa servicedir Ns /log
+is also a valid service directory, then
+.Nm
+will wait until supervisors have been spawned for both the service and
+its logger.
+.Pp
+.Nm
+sends an
+.Ql s6-svscanctl -a
+command to
+.Ar scandir ,
+which means that the system's view of services will be refreshed.
+Depending on what links exist in
+.Ar scandir ,
+other services than
+.Ar servicedir
+may also appear.
+.Pp
+The symmetrical program to
+.Nm
+is named
+.Xr s6-svunlink 8 .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl d
+Down.
+The supervisor will be started, but the service itself will remain down.
+Any
+.Ql Pa servicedir Ns /down
+file will be deleted.
+By default, if neither the
+.Fl d
+nor
+.Fl D
+options have been given, the supervisor auto-starts the service as
+soon as it runs.
+.It Fl D
+Down, and stay down.
+The supervisor will be started, but the service itself will remain down.
+A
+.Ql Pa servicedir Ns /down
+file will be created.
+By default, if neither the
+.Fl d
+nor
+.Fl D
+options have been given, the supervisor auto-starts the service as
+soon as it runs.
+.It Fl P
+Public.
+If
+.Ql Pa servicedir Ns /event
+does not exist, it will be created as public, i.e. anyone will be able
+to subscribe to this
+.Xr s6-fifodir 7 .
+By default, it will be created as private, i.e. only processes running
+with the same gid as the
+.Xr s6-svscan 8
+process will be able to subscribe to it.
+.It Fl f
+Force permissions.
+The presence or absence of the
+.Fl P
+option (i.e. the public or private state of
+.Ql Pa servicedir Ns /event )
+will be enforced even if
+.Ql Pa servicedir Ns /event
+already exists.
+By default,
+.Nm
+exits with an error message if
+.Ql Pa servicedir Ns /event
+exists and its public/private state mismatches what is requested.
+.It Fl t Ar timeout
+If the supervisor has not started after
+.Ar timeout
+milliseconds,
+.Nm
+will print a message to stderr and exit 99.
+By default,
+.Ar timeout
+is 0, which means no time limit.
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 99
+Timeout while waiting for the supervisor to start.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+.Xr s6-fifodir 7 ,
+.Xr s6-scan-directory 7 ,
+.Xr s6-service-directory 7 ,
+.Xr s6-ftrigrd 8 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svscan 8 ,
+.Xr s6-svscanctl 8 ,
+.Xr s6-svunlink 8
+.Pp
+[1]
+.Lk https://skarnet.org/software/s6-rc/
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-svlink.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

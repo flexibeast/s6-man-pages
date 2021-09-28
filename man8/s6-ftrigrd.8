@@ -1,0 +1,102 @@
+.Dd September 29, 2021
+.Dt S6-FTRIGRD 8
+.Os
+.Sh NAME
+.Nm s6-ftrigrd
+.Nd helper program that manages a set of subscriptions to
+.Xr s6-fifodir 7 Ns s
+as well as regular expressions on events
+.Sh SYNOPSIS
+.Nm
+.Sh DESCRIPTION
+.Nm
+takes orders from its client program that controls it via
+.Xr s6-ftrigr 7 ,
+and notifies it when desired events happen.
+.Nm
+is not meant to be called directly.
+.Bl -bullet -width x
+.It
+If the client program uses
+.Fn ftrigr_startf ,
+it spawns an instance of
+.Nm
+as a child.
+.Nm s6-ftrigrd Ap
+s stdin is a pipe reading from the client; its stdout is a pipe
+writing to the client; its stderr is the same as the client's; and
+there's an additional pipe from
+.Nm
+to the client, used for asynchronous notifications.
+.It
+If the client program uses
+.Fn ftrigr_start ,
+then it tries to connect to a Unix domain socket.
+An
+.Nm
+local service should be listening to that socket, i.e. a Unix domain
+super-server such as
+.Xr s6-ipcserver 8
+spawning an
+.Nm
+program on every connection.
+Then an
+.Nm
+instance is created for the client.
+.It
+When the client uses
+.Fn ftrigr_end , or closes
+.Nm s6-ftrigrd Ap
+s stdin in any way,
+.Nm
+exits 0.
+.El
+.Pp
+.Nm
+handles the grunt work of creating fifos in a fifodir for a
+subscriber.
+It also wakes up on every event, and compares the chain of events it
+received on a given fifodir with the client-provided regexp.
+If the chain of events matches the regexp, it notifies the client.
+.Pp
+The connection management between the client and
+.Nm
+is entirely done by the textclient library from skalibs[1].
+.Pp
+.Nm
+is entirely asynchronous.
+It stores unread notifications into heap memory; it can grow in size
+if there are a lot of events and the client fails to read them.
+To avoid uncontrolled growth, make sure your client calls
+.Fn ftrigr_update
+as soon as
+.Fn ftrigr_fd
+becomes readable.
+.Pp
+An
+.Nm
+instance can only handle up to
+.Dv FTRIGRD_MAX
+.Po
+defined in
+.Pa s6/ftrigr.h
+.Pc
+subscriptions at once.
+By default, this number is 1000, which is more than enough for any
+reasonable system.
+.Sh SEE ALSO
+.Xr s6-cleanfifodir 8 ,
+.Xr s6-ftrig-listen 8 ,
+.Xr s6-ftrig-listen1 8 ,
+.Xr s6-ftrig-notify 8 ,
+.Xr s6-ftrig-wait 8 ,
+.Xr s6-mkfifodir 8
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/libs6/s6-ftrigrd.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

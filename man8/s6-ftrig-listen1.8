@@ -1,0 +1,103 @@
+.Dd September 29, 2021
+.Dt S6-FTRIG-LISTEN1 8
+.Os
+.Sh NAME
+.Nm s6-ftrig-listen1
+.Nd subscribe to an
+.Xr s6-fifodir 7 ,
+then spawn a program, waiting for a pattern of events to occur on the
+fifodir
+.Sh SYNOPSIS
+.Nm
+.Op Fl t Ar timeout
+.Ar fifodir
+.Ar regexp
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+acts just as
+.Xr s6-ftrig-wait 8 ,
+except it can make sure that the process sending the notifications is
+actually started after there is a listener for those events.
+.Pp
+.Nm
+subscribes to
+.Ar fifodir .
+.Pp
+It then forks and execs
+.Ar prog...
+with all its arguments.
+.Pp
+It waits for the series of events received on
+.Ar fifodir
+to match
+.Ar regexp .
+.Ar regexp
+must be an Extended Regular Expression[1].
+.Pp
+When the series of read events matches
+.Ar regexp ,
+.Nm
+prints the last event it received to stdout (one byte followed by a newline),
+then exits 0.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl t Ar timeout
+If the events on
+.Ar fifodir
+have not matched
+.Ar regexp
+after
+.Ar timeout
+milliseconds, print an error message on stderr and exit 1.
+By default,
+.Nm
+waits indefinitely for a matching series of events.
+.El
+.Sh EXAMPLES
+The following sequence of shell commands has a race condition.
+.Pp
+In terminal 1:
+.Bd -literal -offset indent
+s6-mkfifodir /tmp/toto
+s6-ftrig-wait /tmp/toto "message"
+.Ed
+.Pp
+Then in terminal 2:
+.Bd -literal -offset indent
+s6-ftrig-notify /tmp/toto message
+.Ed
+.Pp
+Depending on the operating system's scheduler, there is the
+possibility that the
+.Xr s6-ftrig-notify 8
+process starts sending
+.Dq message
+.Em before
+the
+.Xr s6-ftrig-wait 8
+process has actually subscribed to
+.Pa /tmp/toto ,
+in which case the notification will be missed.
+The following sequence of shell commands accomplishes the same goal in
+a reliable way, without the race condition:
+.Bd -literal -offset indent
+s6-mkfifodir /tmp/toto
+s6-ftrig-listen1 /tmp/toto "message" s6-ftrig-notify /tmp/toto message
+.Ed
+.Sh SEE ALSO
+.Xr s6-cleanfifodir 8 ,
+.Xr s6-ftrig-listen 8 ,
+.Xr s6-ftrig-notify 8 ,
+.Xr s6-ftrig-wait 8 ,
+.Xr s6-ftrigrd 8 ,
+.Xr s6-mkfifodir 8
+.Pp
+[1]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html#tag_09_04
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-ftrig-listen1.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

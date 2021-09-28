@@ -1,0 +1,37 @@
+.Dd September 29, 2021
+.Dt S6-SVOK 8
+.Os
+.Sh NAME
+.Nm s6-svok
+.Nd check whether an
+.Xr s6-service-directory 7
+is currently supervised
+.Sh SYNOPSIS
+.Nm
+.Ar servicedir
+.Sh DESCRIPTION
+.Nm
+checks whether an
+.Xr s6-supervise 8
+process is currently monitoring
+.Ar servicedir .
+It exits 0 if there is one, or 1 if there is none.
+.Sh SEE ALSO
+.Xr s6-notifyoncheck 8 ,
+.Xr s6-permafailon 8 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svc 8 ,
+.Xr s6-svdt 8 ,
+.Xr s6-svdt-clear 8 ,
+.Xr s6-svlisten 8 ,
+.Xr s6-svlisten1 8 ,
+.Xr s6-svscan 8 ,
+.Xr s6-svscanctl 8 ,
+.Xr s6-svstat 8 ,
+.Xr s6-svwait 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-svok.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

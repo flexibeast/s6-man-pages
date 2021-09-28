@@ -1,0 +1,333 @@
+.Dd September 29, 2021
+.Dt S6-SUDOD 8
+.Os
+.Sh NAME
+.Nm s6-sudod
+.Nd receive command-line arguments, environment variables and standard descriptors from a peer
+.Xr s6-sudoc 8
+program over a Unix socket, then fork another program
+.Sh SYNOPSIS
+.Nm
+.Op Fl 0
+.Op Fl 1
+.Op Fl 2
+.Op Fl d
+.Op Fl t Ar timeout
+.Op Ar sargv...
+.Sh DESCRIPTION
+.Nm
+gets 3 file descriptors via fd-passing over a Unix socket that must be
+open on its descriptors 0 and 1.
+(The received descriptors will be the stdin, stdout and stderr of the
+server program.)
+It expects an
+.Xr s6-sudoc 8
+process to be sending them on the client side.
+.Pp
+It also receives a list of command-line arguments
+.Ar cargv... ,
+and an environment
+.Ar clientenv .
+.Nm
+forks and executes
+.Ar sargv... cargv... .
+The client command line is appended to the server command line.
+.Nm
+waits for its child to exit and transmits its exit code to the peer
+.Xr s6-sudoc 8
+process.
+It then exits 0.
+.Pp
+If the
+.Fl d
+option to
+.Nm
+has not been given, and
+.Xr s6-sudoc 8
+is killed (or exits after
+.Ar timeoutrun
+milliseconds) while the server program is still running,
+.Nm
+will send a SIGTERM and a SIGCONT to its child, then exit 1.
+However, sending a SIGTERM to the child does not guarantee that it
+will die; and if it keeps running, it might still read from the file
+that was
+.Xr s6-sudoc 8 Ap
+s stdin, or write to the files that were
+.Xr s6-sudoc 8 Ap
+s stdout or stderr.
+.Sy This is a potential security risk.
+Administrators should audit their server programs to make sure this
+does not happen.
+.Pp
+More generally, anything using signals or terminals will not be
+handled transparently by the
+.Xr s6-sudoc 8
++
+.Nm
+mechanism.
+The mechanism was designed to allow programs to gain privileges in
+specific situations: short-lived, simple, noninteractive processes.
+It was not designed to emulate the full suid functionality and will
+not go out of its way to do so.
+.Pp
+Administrators should also make sure that it's not a problem if
+.Nm Ap
+s child keeps running after the
+.Xr s6-sudoc 8
+client exits, if they have given the
+.Fl d
+option to
+.Nm .
+In particular, they should study what happens if another connection to
+the same service occurs while an instance is still running.
+.Pp
+.Ar sargv
+may be empty.
+In that case, the client is in complete control of the command line
+executed as
+.Va serveruser .
+This setup is permitted by
+.Nm ,
+but it is very dangerous, and extreme attention should be paid to the
+construction of the
+.Xr s6-ipcserver-access 8
+rules.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl 0
+Do not inherit stdin from
+.Xr s6-sudoc 8 .
+The child will be run with its stdin pointing to
+.Pa /dev/null
+instead.
+.It Fl 1
+Do not inherit stdout from
+.Xr s6-sudoc 8 .
+The child will be run with its stdout pointing to
+.Pa /dev/null
+instead.
+.It Fl 2
+Do not inherit stderr from
+.Xr s6-sudoc 8 .
+The child will be run with its stderr being a copy of
+.Nm Ap
+s stderr instead.
+(This is useful to still log the child's error messages without
+sending them to the client.)
+.It Fl d
+Detach.
+The child will keep running until it naturally exits, even if the
+client disconnects.
+Setting this option also enforces
+.Fl 0 ,
+.Fl 1
+and
+.Fl 2 .
+Bear in mind that this option relinquishes a lot of control over the
+child, and administrators should make sure it is appropriately
+short-lived.
+.It Fl t Ar timeout
+If
+.Nm
+has not received all the needed data from the client after
+.Ar timeout
+milliseconds, it will exit without spawning a child.
+By default,
+.Ar timeout
+is 0, meaning infinite.
+This mechanism exists to protect the server from malicious or buggy
+clients that would uselessly consume resources.
+.El
+.Sh ENVIRONMENT
+.Nm
+transmits its own environment to its child, plus the environment sent
+by
+.Xr s6-sudoc 8 ,
+filtered in the following manner: for every variable sent by
+.Xr s6-sudoc 8 ,
+if the variable is
+.Sy present but empty
+in
+.Nm Ap
+s environment, then its value is overridden by the value given by
+.Xr s6-sudoc 8 .
+A variable that is already nonempty, or that doesn't exist, in
+.Nm Ap
+s environment, will not be transmitted to the child.
+In other words:
+.Bl -bullet -width x
+.It
+If there's no variable
+.Va X
+in
+.Nm Ap
+s environment, the child will have no variable
+.Va X
+defined.
+.It
+If there's a non-empty variable
+.Va X
+in
+.Nm Ap
+s environment, the child will inherit that variable, with its value,
+from
+.Nm .
+.It
+If there's an empty variable
+.Va X
+in
+.Nm Ap
+s environment, and
+.Xr s6-sudoc 8
+transmits variable
+.Va X ,
+then the child will inherit that variable with the value from
+.Xr s6-sudoc 8 .
+(If
+.Xr s6-sudoc 8
+does not transmit
+.Va X ,
+the variable will be present, but empty, in the child's environment.)
+.El
+.Sh EXAMPLES
+The typical use of
+.Nm
+is in a local service with a
+.Xr s6-ipcserver 8
+process listening on a Unix socket, an
+.Xr s6-ipcserver-access 8
+process performing client authentication and access control, and
+possibly an
+.Xr s6-envdir 8
+process setting up the environment variables that will be accepted by
+.Nm .
+The following script, meant to be a run script in a service directory,
+will set up a privileged program:
+.Bd -literal -offset indent
+#!/command/execlineb -P
+fdmove -c 2 1
+fdmove 1 3
+s6-envuidgid serveruser
+s6-ipcserver -U -1 -- serversocket
+s6-ipcserver-access -v2 -l0 -i rules --
+exec -c
+s6-envdir env
+s6-sudod
+sargv
+.Ed
+.Bl -bullet -width x
+.It
+.Xr execlineb 1
+executes the script.
+.It
+.Xr fdmove 1
+makes sure the script's error messages are sent to the service's
+logger.
+.It
+.Xr fdmove 1
+redirects the script's stdout to file descriptor 3. This is useful if
+the service directory contains a
+.Pa notification-fd
+file containing 3, so the daemon can perform readiness notification
+.Po
+cf.
+.Xr s6-notifywhenup 7
+.Pc
+by writing a newline to its stdout.
+(The
+.Fl 1
+option to
+.Xr s6-ipcserver 8
+tells it to do this.)
+.It
+.Xr s6-envuidgid 8
+sets the
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+environment variables for
+.Xr s6-ipcserver 8
+to interpret.
+.It
+.Xr s6-ipcserver 8
+binds to
+.Va serversocket ,
+drops its privileges to those of
+.Va serveruser ,
+and announces its readiness.
+Then, for every client connecting to
+.Va serversocket :
+.Bl -bullet -width x
+.It
+.Xr s6-ipcserver-access 8
+checks the client's credentials according to the rules in directory
+.Va rules .
+.It
+.Ql exec -c
+.Po
+cf.\&
+.Xr exec 1
+.Pc
+clears the environment.
+.It
+.Xr s6-envdir 8
+sets environment variables according to the directory
+.Va env .
+You can make sure that a variable
+.Va VAR
+will be present but empty by performing
+.Ql echo > env/ Ns Va VAR .
+(A single newline is interpreted by
+.Xr s6-envdir 8
+as an empty variable; whereas if
+.Pa env/VAR
+is totally empty, then the
+.Va VAR
+variable will be removed from the environment.)
+.It
+.Nm
+reads a command line
+.Ar cargv ,
+a client environment and file descriptors over the socket.
+.It
+.Nm
+spawns
+.Ar sargv cargv .
+.El
+.Pp
+(Actually,
+.Xr s6-ipcserver 8
+does not do this itself: it executes into other programs that each do
+one of the tasks.
+But for our example, it does not matter.)
+.El
+.Pp
+This means that user
+.Va clientuser
+running
+.Ql s6-sudo Va serversocket Ar cargv
+will be able, if authorized by the configuration in
+.Va rules ,
+to run
+.Ar sargv cargv
+as user
+.Va serveruser ,
+with stdin, stdout, stderr and the environment variables properly
+listed in
+.Va env
+transmitted to
+.Ar sargv .
+.Sh SEE ALSO
+.Xr exec 1 ,
+.Xr execlineb 1 ,
+.Xr fdmove 1 ,
+.Xr s6-sudo 8 ,
+.Xr s6-sudoc 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-sudod.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

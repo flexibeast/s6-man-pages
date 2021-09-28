@@ -1,0 +1,107 @@
+.Dd September 29, 2021
+.Dt S6-FDHOLDER-RETRIEVE 8
+.Os
+.Sh NAME
+.Nm s6-fdholder-retrieve
+.Nd connect to an
+.Xr s6-fdholderd 8
+daemon listening on a Unix domain socket, retrieve a file descriptor
+from this daemon, then execute a program with this file descriptor as
+the program's standard input
+.Sh SYNOPSIS
+.Nm
+.Op Fl D
+.Op Fl t Ar timeout
+.Ar path
+.Ar id
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+connects to an
+.Xr s6-fdholderd 8
+server process listening on
+.Ar path .
+.Pp
+It attempts to retrieve a copy of the file descriptor that has been
+stored into that daemon under identifier
+.Ar id .
+.Pp
+It then executes into
+.Ar prog... ,
+with the retrieved file descriptor as standard input.
+.Pp
+To execute
+.Ar prog
+with the newly retrieved file descriptor as number
+.Em n
+while preserving stdin, use the following construct:
+.Pp
+.Dl fdmove n 0 s6-fdholder-retrieve path id fdswap 0 n prog....
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl D
+Delete the file descriptor from the server's storage after
+retrieval.
+This option requires writing rights over the given identifier as well
+as reading rights: check the server's configuration.
+Refer to
+.Xr s6-fdholder 7
+for details.
+.It Fl t Ar timeout
+If the operation cannot be processed in
+.Ar timeout
+milliseconds, then fail with an error message.
+Communications with the server should be near-instant, so this option
+is only here to protect users against programming errors (connecting
+to the wrong socket, for instance).
+.El
+.Sh EXIT STATUS
+On success, the program doesn't exit; instead, it execs into
+.Ar prog... .
+.Bl -tag -width x
+.It 1
+The server denied the operation.
+The meanings of the error messages are explained in
+.Xr s6-fdholder-error-codes 7 .
+.It 100
+Wrong usage.
+.It 111
+System call failed - this includes attempting to connect to a
+nonexistent socket, or one where no
+.Xr s6-fdholderd 8
+daemon is listening.
+.El
+.Sh EXAMPLES
+.Dl s6-fdholder-retrieve /service/fdholderd/s MYSOCKET s6-ipcserverd cat
+.Pp
+will retrieve a file descriptor stored under the
+.Ql MYSOCKET
+identifier in the
+.Xr s6-fdholderd 8
+daemon listening on the
+.Pa /service/fdholderd/s
+socket, and execute into
+.Ql s6-ipcserverd cat
+with this file descriptor as stdin.
+In this case, if
+.Ql MYSOCKET
+referred to a Unix domain socket,
+.Xr s6-ipcserverd 8
+will then accept client connections on it and spawn a
+.Ql cat
+program for every connection.
+.Sh SEE ALSO
+.Xr s6-fdholder-daemon 8 ,
+.Xr s6-fdholder-delete 8 ,
+.Xr s6-fdholder-getdump 8 ,
+.Xr s6-fdholder-list 8 ,
+.Xr s6-fdholder-setdump 8 ,
+.Xr s6-fdholder-store 8 ,
+.Xr s6-fdholder-transferdump 8 ,
+.Xr s6-fdholderd 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-fdholder-retrieve.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

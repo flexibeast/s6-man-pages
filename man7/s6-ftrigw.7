@@ -1,0 +1,119 @@
+.Dd September 29, 2021
+.Dt S6-FTRIGW 7
+.Os
+.Sh NAME
+.Nm s6-ftrigw
+.Nd API for notifiers, i.e. programs that want to regularly announce what they're doing
+.Sh DESCRIPTION
+Notifiers should create an
+.Xr s6-fifodir 7
+in a hardcoded place in the filesystem, and document its
+location.
+Listeners will then be able to subscribe to that
+.Xr s6-fifodir 7 ,
+and receive the events.
+.Pp
+Check the
+.Pa s6/ftrigw.h
+header for the exact function prototypes.
+.Ss Creating a fifodir
+.Bd -literal -offset indent
+char const *path = "/var/lib/myservice/fifodir" ;
+gid_t gid = -1 ;
+int forceperms = 0 ;
+int r = ftrigw_fifodir_make(path, gid, forceperms) ;
+.Ed
+.Pp
+.Fn ftrigw_fifodir_make
+creates an
+.Xr s6-fifodir 7
+at the
+.Va path
+location.
+It returns 0, and sets errno, if an error occurs.
+It returns 1 if it succeeds.
+.Pp
+If an
+.Xr s6-fifodir 7 ,
+owned by the user, already exists at
+.Va path ,
+and
+.Va forceperms
+is zero, then
+.Fn ftrigw_fifodir_make
+immediately returns success.
+If
+.Va forceperms
+is nonzero, then it tries to adjust
+.Va path
+.Ap s
+permissions before returning.
+.Pp
+If
+.Va gid
+is negative, then
+.Va path
+is created
+.Dq public .
+Any listener will be able to subscribe to
+.Va path .
+If
+.Va gid
+is nonnegative, then
+.Va path
+is created
+.Dq private .
+Only processes belonging to group
+.Va gid
+will be able to subscribe to
+.Va path .
+.Ss Sending an event
+.Bd -literal -offset indent
+char event = 'a' ;
+r = ftrigw_notify(path, event) ;
+.Ed
+.Pp
+.Fn ftrigw_notify
+sends
+.Va event
+to all the processes that are currently subscribed to
+.Va path .
+It returns -1 if an error occurs, or the number of successfully
+notified processes.
+.Ss Cleaning up
+When stray KILL signals hit
+.Xr s6-ftrigrd 8
+processes,
+.Bl -enum -width x
+.It
+it's a sign of incorrect system administration,
+.It
+they can leave unused named pipes in the
+.Xr s6-fifodir 7 .
+.El
+.Pp
+It's the
+.Xr s6-fifodir 7 Ap
+s owner's job, i.e. the notifier's job, to periodically do some
+housecleaning and remove those unused pipes.
+.Bd -literal -offset indent
+r = ftrigw_clean(path) ;
+.Ed
+.Pp
+.Fn ftrigw_clean
+cleans
+.Va path .
+It returns 0, and sets errno, if it encounters an error.
+It returns 1 if it succeeds.
+.Sh SEE ALSO
+.Xr s6-accessrules 7 ,
+.Xr s6-fdholder 7 ,
+.Xr s6-ftrigr 7 ,
+.Xr s6-libs6 7 ,
+.Xr s6-s6lock 7
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/libs6/ftrigw.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

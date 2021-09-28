@@ -1,0 +1,108 @@
+.Dd September 29, 2021
+.Dt S6-SUDOC 8
+.Os
+.Sh NAME
+.Nm s6-sudoc
+.Nd talk to a peer
+.Xr s6-sudod 8
+program over a Unix socket, passing it command-line arguments,
+environment variables and standard descriptors
+.Sh SYNOPSIS
+.Nm
+.Op Fl e
+.Op Fl t Ar timeoutconn
+.Op Fl T Ar timeoutrun
+.Op Ar args...
+.Sh DESCRIPTION
+.Nm
+transmits its standard input, standard output and standard error via
+fd-passing over a Unix socket that must be open on its descriptors 6
+and 7.
+It expects an
+.Xr s6-sudod 8
+process to be receiving them on the other side.
+.Pp
+It also transmits its command-line arguments
+.Ar args... ,
+and also its environment by default.
+Note that
+.Xr s6-sudod 8
+will not necessarily accept all the environment variables that
+.Nm
+tries to transmit.
+.Pp
+.Nm
+waits for the server program run by
+.Xr s6-sudod 8
+to finish.
+It exits the same exit code as the server program.
+If the server program is killed by a signal,
+.Nm
+kills itself with the same signal.
+.Pp
+If
+.Nm
+is killed, or exits after
+.Ar timeoutrun
+milliseconds, while the server program is still running,
+.Xr s6-sudod 8
+will send a SIGTERM and a SIGCONT to the server program - but this
+does not guarantee that it will die.
+If the server program keeps running, it might still read from the file
+that was
+.Nm Ap
+s stdin, or write to the files that were
+.Nm Ap
+s stdout or stderr.
+.Sy This is a potential security risk.
+Administrators should audit their server programs to make sure this
+does not happen.
+.Pp
+More generally, anything using signals or terminals will not be
+handled transparently by the
+.Nm
++
+.Xr s6-sudod 8
+mechanism.
+The mechanism was designed to allow programs to gain privileges in
+specific situations: short-lived, simple, noninteractive processes.
+It was not designed to emulate the full suid functionality and will
+not go out of its way to do so.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl e
+Do not attempt to transmit any environment variables to
+.Xr s6-sudod 8 .
+.It Fl t Ar timeoutconn
+If
+.Xr s6-sudod 8
+has not managed to process the given information and start the server
+program after
+.Ar timeoutconn
+milliseconds, give up.
+By default,
+.Ar timeoutconn
+is 0, meaning infinite.
+Note that there is no reason to set up a nonzero
+.Ar timeoutconn
+with a large value:
+.Xr s6-sudod 8
+is not supposed to block.
+The option is only there to protect against ill-written services.
+.It Fl T Ar timeoutrun
+If the server program has not exited after
+.Ar timeoutrun
+milliseconds, give up.
+By default,
+.Ar timeoutrun
+is 0, meaning infinite.
+.El
+.Sh SEE ALSO
+.Xr s6-sudo 8 ,
+.Xr s6-sudod 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-sudoc.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

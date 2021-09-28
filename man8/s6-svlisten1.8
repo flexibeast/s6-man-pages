@@ -1,0 +1,144 @@
+.Dd September 29, 2021
+.Dt S6-SVLISTEN1 8
+.Os
+.Sh NAME
+.Nm s6-svlisten1
+.Nd run a program while listening on notifications from a supervised service, and block until said service goes up, or down
+.Sh SYNOPSIS
+.Nm
+.Op Fl U | u | D | d | r | R
+.Op Fl t Ar timeout
+.Ar servicedir
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+only waits for notifications; it never polls.
+.Nm
+checks the state of the
+.Ar servicedir
+.Xr s6-service-directory 7
+and monitors its state changes.
+.Pp
+It spawns
+.Ar prog...
+as a child right after getting the initial state of the service.
+.Pp
+It then blocks until the wanted state happens.
+.Pp
+.Nm
+is the service-specific version of
+.Xr s6-ftrig-listen1 8 .
+The point of
+.Nm
+is to use it to spawn a program such as
+.Xr s6-svc 8 ,
+in order to send signals to a service while making sure to catch its
+state changes - thus avoiding the race condition that occurs when
+running
+.Xr s6-svc 8
+then
+.Xr s6-svwait 8
+sequentially.
+.Pp
+The
+.Xr s6-svlisten 8
+program is an extension of
+.Nm .
+It can watch the state of several services at once; however, its
+syntax makes it best used in execline[1] scripts only.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl u
+Up.
+.Nm
+will wait until the service is up, as reported by
+.Xr s6-supervise 8 .
+This is the default; it is not reliable, but it does not depend on
+specific support in the service programs.
+See
+.Xr s6-notifywhenup 7
+for details.
+.It Fl U
+Really up.
+.Nm
+will wait until the service is up and ready as reported by the daemon
+itself.
+This requires specific support in the service programs, and the use of
+the
+.Pa notification-fd
+file in the
+.Xr s6-service-directory 7 .
+See the explanation in
+.Xr s6-notifywhenup 7 .
+.It Fl d
+Down.
+.Nm
+will wait until the service is down.
+.It Fl D
+Really down.
+.Nm
+will wait until the service is down and the cleanup script in
+.Sm off
+.Ar servicedir /
+.Pa finish
+.Sm on
+has finished executing (or has timed out and been killed).
+.It Fl r
+Restart.
+.Nm
+will wait until the service has been started or restarted, i.e. they
+have been in the down state, then the up state.
+.It Fl R
+Restart and ready.
+.Nm
+will wait until the service has been started or restarted and has
+notified readiness.
+.It Fl t Ar timeout
+If the requested event has not happened after
+.Ar timeout
+milliseconds,
+.Nm
+will print a message to stderr and exit 99.
+By default,
+.Ar timeout
+is 0, which means no time limit.
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success, the wanted state has been reached.
+.It 1
+The service was supposed to go up, but reported permanent failure.
+.It 99
+Timed out.
+.It 100
+Wrong usage.
+.It 102
+The
+.Xr s6-supervise 8
+process monitoring the service died.
+.It 111
+System call failed
+.El
+.Sh SEE ALSO
+.Xr s6-notifyoncheck 8 ,
+.Xr s6-permafailon 8 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svc 8 ,
+.Xr s6-svdt 8 ,
+.Xr s6-svdt-clear 8 ,
+.Xr s6-svlisten 8 ,
+.Xr s6-svok 8 ,
+.Xr s6-svscan 8 ,
+.Xr s6-svscanctl 8 ,
+.Xr s6-svstat 8 ,
+.Xr s6-svwait 8
+.Pp
+[1]
+.Lk https://skarnet.org/software/execline/
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-svlisten1.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

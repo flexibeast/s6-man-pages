@@ -1,0 +1,237 @@
+.Dd September 29, 2021
+.Dt S6-FDHOLDER 7
+.Os
+.Sh NAME
+.Nm s6-fdholder
+.Nd API for clients wanting to communicate with an
+.Xr s6-fdholderd 8
+daemon
+.Sh DESCRIPTION
+Check the
+.Pa s6/s6-fdholder.h
+header for the exact function prototypes.
+.Ss A programming example
+The
+.Pa src/fdholder/s6-fdholder-*.c
+files in the s6 package, for instance, illustrate how to use the
+.Nm
+library.
+.Ss Synchronous functions with a specified maximum execution time
+The explanation given in
+.Xr s6-ftrigr 7
+applies here too: the functions documented in this page are
+synchronous, but can return early if the deadline is reached, in which
+case the connection to the server should be closed immediately because
+no protocol consistency is guaranteed.
+.Pp
+The
+.Xr s6-fdholderd 8
+server should be very quick to answer queries, so this mechanism is
+provided as a simple security against programming errors - for
+instance, connecting to the wrong daemon.
+.Ss Starting and ending a session
+.Bd -literal -offset indent
+s6_fdholder_t a = S6_FDHOLDER_ZERO ;
+int fd = 6 ;
+
+tain_now_g() ;
+
+s6_fdholder_init(&a, fd) ;
+(...)
+s6_fdholder_free(&a) ;
+.Ed
+.Pp
+.Fn s6_fdholder_init
+assumes that
+.Va fd
+is a socket already connected to an
+.Xr s6-fdholderd 8
+daemon.
+The
+.Va a
+structure must be initialized to
+.Dv S6_FDHOLDER_ZERO
+before use.
+.Pp
+.Fn tain_now_g
+initializes a global variable that keeps track of the current time,
+for use with later functions.
+.Pp
+.Fn s6_fdholder_free
+frees the resources occupied by
+.Va a .
+It does not, however, close
+.Va fd .
+You should manually close it to end the connection to the server.
+Note that if your program has been started by
+.Xr s6-ipcclient 8 ,
+both fds 6 and 7 are open (and refer to the same socket), so you
+should close both.
+.Pp
+Alternatively, if your connection to
+.Xr s6-fdholderd 8
+has not been created yet, you can use the following functions:
+.Bl -bullet -width x
+.It
+.Ft int
+.Fn s6_fdholder_start "s6_fdholder_t *a" "char const *path" "tain_t const *deadline" "tain_t *stamp"
+.Pp
+Starts a session with an
+.Xr s6-fdholderd 8
+instance listening on
+.Va path .
+.Va a
+must be initialized to
+.Dv S6_FDHOLDER_ZERO
+before calling this function.
+On success, returns nonzero and
+.Va a
+can be used as a handle for the next
+.Fn s6_fdholder_*
+function calls.
+On failure, returns 0, and sets errno.
+.It
+.Ft void
+.Fn s6_fdholder_end "s6_fdholder_t *a"
+.Pp
+Ends the current session and frees all allocated resources.
+If needed,
+.Va a
+is immediately reusable for another
+.Fn s6_fdholder_start
+call.
+.El
+.Ss Storing an fd
+.Bd -literal -offset indent
+int r ;
+int fd ;
+tain_t limit = TAIN_INFINITE ;
+char const *id = "my_identifier" ;
+r = s6_fdholder_store_g(&a, fd, id, &limit, &deadline) ;
+.Ed
+.Pp
+.Fn s6_fdholder_store
+(and its variant
+.Fn s6_fdholder_store_g
+that uses the global timestamp variable) attempts to store a copy of
+descriptor
+.Va fd
+into
+.Xr s6-fdholderd 8 ,
+using identifier
+.Va id ,
+with an expiration date of
+.Va limit .
+In this example,
+.Va limit
+is
+.Dv TAIN_INFINITE ,
+which means no expiration date.
+The operation should return before
+.Va deadline ,
+else it will automatically return 0
+.Dv ETIMEDOUT .
+The result is 1 on success and 0 on failure, with an appropriate errno
+code; refer to
+.Xr s6-fdholder-error-codes 7 .
+.Ss Deleting an fd
+.Dl fd = s6_fdholder_delete_g(&a, id, &deadline) ;
+.Pp
+.Fn s6_fdholder_delete
+attempts to delete the file descriptor identified by
+.Va id .
+It returns 1 on success and 0 on failure, with an appropriate errno
+code; refer to
+.Xr s6-fdholder-error-codes 7 .
+.Ss Retrieving an fd
+.Dl fd = s6_fdholder_retrieve_g(&a, id, &deadline) ;
+.Pp
+.Fn s6_fdholder_retrieve
+attempts to retrieve the file descriptor identified by
+.Va id .
+It returns a valid fd number on success, and -1 on failure, with an
+appropriate errno code; refer to
+.Xr s6-fdholder-error-codes 7 .
+.Pp
+.Fn s6_fdholder_retrieve_delete
+performs a retrieval and a deletion at the same time, if the client is
+authorized to do so.
+.Ss Listing the identifiers held by the server
+.Bd -literal -offset indent
+stralloc list = STRALLOC_ZERO ;
+int n ;
+n = s6_fdholder_list_g(&a, &list, &deadline) ;
+.Ed
+.Pp
+.Fn s6_fdholder_list
+gets the list of all identifiers currently held by the server.
+It stores it into the stralloc[1]
+.Va list ,
+as a series of null-terminated strings, one after the other.
+There are
+.Va n
+such strings.
+The function returns
+.Va n
+on success, or -1 on failure, with an appropriate errno code; refer to
+.Xr s6-fdholder-error-codes 7 .
+.Ss Reading a dump
+.Bd -literal -offset indent
+genalloc dump = GENALLOC_ZERO ;
+r = s6_fdholder_getdump_g(&a, &dump, &deadline) ;
+.Ed
+.Pp
+.Fn s6_fdholder_getdump
+attempts to retrieve the whole set of descriptors from the server.
+It returns 1 on success, and 0 on failure, with an appropriate errno
+code; refer to
+.Xr s6-fdholder-error-codes 7 .
+The set is stored into the genalloc[2]
+.Va dump ,
+which is to be interpreted as a stralloc containing an array of
+.Vt s6_fdholder_fd_t .
+.Pp
+.Ql genalloc_s(s6_fdholder_fd_t, &dump)
+is a pointer to this array, and
+.Ql genalloc_len(s6_fdholder_fd_t, &dump)
+is the number of elements in the array.
+An
+.Vt s6_fdholder_fd_t
+contains at least a descriptor number, an identifier, and an
+expiration date; see the
+.Pa s6/s6-fdholder.h
+header file.
+.Ss Writing a dump
+.Bd -literal -offset indent
+unsigned int dumplen ;
+s6_fdholder_fd_t const *dumparray ;
+r = s6_fdholder_setdump_g(&a, &dumparray, dumplen, &deadline) ;
+.Ed
+.Pp
+.Fn s6_fdholder_setdump
+attempts to send a set of descriptors to the server.
+The descriptors are contained in the array
+.Va dumparray
+of length
+.Va dumplen .
+The function returns 1 on success, and 0 on failure, with an
+appropriate errno code; refer to
+.Xr s6-fdholder-error-codes 7 .
+.Sh SEE ALSO
+.Xr s6-accessrules 7 ,
+.Xr s6-ftrigr 7 ,
+.Xr s6-ftrigw 7 ,
+.Xr s6-libs6 7 ,
+.Xr s6-s6lock 7
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/libstddjb/stralloc.html
+.Pp
+[2]
+.Lk https://skarnet.org/software/skalibs/libstddjb/genalloc.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/libs6/s6-fdholder.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

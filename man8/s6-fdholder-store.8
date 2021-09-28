@@ -1,0 +1,97 @@
+.Dd September 29, 2021
+.Dt S6-FDHOLDER-STORE 8
+.Os
+.Sh NAME
+.Nm s6-fdholder-store
+.Nd connect to an
+.Xr s6-fdholderd 8
+daemon listening on a Unix domain socket, and give it a copy of one of
+its open file descriptors for the daemon to hold
+.Sh SYNOPSIS
+.Nm
+.Op Fl d Ar fd
+.Op Fl T Ar fdtimeout
+.Op Fl t Ar timeout
+.Ar path
+.Ar id
+.Sh DESCRIPTION
+.Nm
+connects to an
+.Xr s6-fdholderd 8
+server process listening on
+.Ar path .
+.Pp
+It attempts to pass a copy of its standard input, or of its descriptor
+.Ar fd ,
+to the server, with identifier
+.Ar id .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl d Ar fd
+Store descriptor number
+.Ar fd .
+By default,
+.Ar fd
+is 0 (i.e. the program's stdin will be stored).
+.It Fl T Ar fdtimeout
+The descriptor is stored with an expiration time of
+.Ar fdtimeout
+milliseconds, which means the
+.Xr s6-fdholderd 8
+daemon will close and get rid of the descriptor after this time.
+By default,
+.Ar fdtimeout
+is 0, which means infinite - no expiration time.
+.It Fl t Ar timeout
+If the operation cannot be processed in
+.Ar timeout
+milliseconds, then fail with an error message.
+Communications with the server should be near-instant, so this option
+is only here to protect users against programming errors (connecting
+to the wrong socket, for instance).
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 1
+The server denied the operation.
+The meanings of the error messages are explained in
+.Xr s6-fdholder-error-codes 7 .
+.It 100
+Wrong usage.
+.It 111
+System call failed - this includes attempting to connect to a
+nonexistent socket, or one where no
+.Xr s6-fdholderd 8
+daemon is listening.
+.El
+.Sh EXAMPLES
+.Dl s6-ipcserver-socketbinder /tmp/mysocket s6-fdholder-store /service/fdholderd/s MYSOCKET
+.Pp
+will open a Unix domain socket, bind it to
+.Pa /tmp/mysocket
+and listen to incoming connections, then give it to an
+.Xr s6-fdholderd 8
+instance listening on
+.Pa /service/fdholderd/s ,
+with no expiration date, with the
+.Dq MYSOCKET
+identifier.
+Another program will be able to retrieve the socket later, using
+.Xr s6-fdholder-retrieve 8 .
+.Sh SEE ALSO
+.Xr s6-fdholder-daemon 8 ,
+.Xr s6-fdholder-delete 8 ,
+.Xr s6-fdholder-getdump 8 ,
+.Xr s6-fdholder-list 8 ,
+.Xr s6-fdholder-retrieve 8 ,
+.Xr s6-fdholder-setdump 8 ,
+.Xr s6-fdholder-transferdump 8 ,
+.Xr s6-fdholderd 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-fdholder-store.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

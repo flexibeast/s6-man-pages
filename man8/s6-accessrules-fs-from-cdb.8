@@ -1,0 +1,75 @@
+.Dd September 29, 2021
+.Dt S6-ACCESSRULES-FS-FROM-CDB 8
+.Os
+.Sh NAME
+.Nm s6-accessrules-fs-from-cdb
+.Nd decompile a CDB[1] database containing a ruleset suitable for
+.Xr s6-ipcserver-access 8
+or
+.Xr s6-tcpserver-access 8
+and that has been compiled with
+.Xr s6-accessrules-cdb-from-fs 8
+.Sh SYNOPSIS
+.Nm
+.Ar dir
+.Ar cdbfile
+.Sh DESCRIPTION
+.Nm
+decompiles the CDB[1] file
+.Ar cdbfile
+into the directory
+.Ar dir ,
+then exits 0.
+.Pp
+.Ar dir
+must not exist prior to the decompilation.
+.Pp
+.Ar dir
+must be considered a work in progress as long as
+.Nm
+is running.
+It is only safe to use
+.Ar dir
+as a ruleset once the program has exited.
+.Pp
+If
+.Nm
+fails at some point, the partial arborescence at
+.Ar dir
+is removed.
+However, this doesn't happen if
+.Nm
+is interrupted by a signal.
+.Pp
+After the program successfully completes, if
+.Ar cdbfile
+was a suitable candidate for the
+.Fl x
+option of
+.Xr s6-ipcserver-access 8
+or
+.Xr s6-tcpserver-access 8 ,
+then
+.Ar dir
+will be a suitable candidate for the
+.Fl i
+option of the same program, implementing the same ruleset.
+.Sh SEE ALSO
+.Xr s6-accessrules-cdb-from-fs 8 ,
+.Xr s6-connlimit 8 ,
+.Xr s6-ioconnect 8 ,
+.Xr s6-ipcclient 8 ,
+.Xr s6-ipcserver 8 ,
+.Xr s6-ipcserver-access 8 ,
+.Xr s6-ipcserver-socketbinder 8 ,
+.Xr s6-ipcserverd 8 ,
+.Xr s6-tcpserver-access 8
+.Pp
+[1]
+.Lk https://en.wikipedia.org/wiki/Cdb_(software)
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-accessrules-fs-from-cdb.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

@@ -1,0 +1,487 @@
+.Dd September 29, 2021
+.Dt S6-USERTREE-MAKER 8
+.Os
+.Sh NAME
+.Nm s6-usertree-maker
+.Nd create an
+.Xr s6-service-directory 7
+implementing a service that runs an
+.Xr s6-svscan 8
+instance owned by a given user, on an
+.Xr s6-scan-directory 7
+belonging to that user
+.Sh SYNOPSIS
+.Nm
+.Op Fl d Ar userscandir
+.Op Fl p Ar path
+.Op Fl E Ar envdir Op Fl e Ar var Fl e Ar var ...
+.Op Fl r Ar service Ns / Ns Ar logger Ns Op / Ns Ar pipeline
+.Op Fl l Ar loguser
+.Op Fl t Ar stamptype
+.Op Fl n Ar nfiles
+.Op Fl s Ar filesize
+.Op Fl S Ar maxsize
+.Ar user
+.Ar logdir
+.Ar dir
+.Sh DESCRIPTION
+.Nm
+is meant to help admins deploy systems where each user has their own
+supervision subtree, rooted in the main supervision tree owned by
+root.
+.Pp
+Alternatively,
+.Nm
+can create source definition directories for the s6-rc[1] service
+manager.
+.Pp
+.Nm
+creates an
+.Xr s6-service-directory 7
+in
+.Ar dir ,
+that launches a supervision tree as user
+.Ar user
+on
+.Xr s6-scan-directory 7
+.Ar userscandir ,
+with a catch-all logger logging the tree's output via
+.Xr s6-log 8
+to the
+.Ar logdir
+directory.
+.Pp
+.Nm
+makes use of the fact that execline[2] scripts are much easier to
+generate programmatically and to harden than shell scripts, so it is
+only built if s6 is built with execline support - i.e. the
+.Ql --disable-execline
+switch has
+.Em not
+been given to
+.Pa configure .
+.Pp
+For the admin who wants to automate user tree management,
+.Nm
+is a
+.Em building block
+meant to be used in scripts, not a complete turnkey solution.
+For instance,
+.Nm
+does not create
+.Ar userscandir
+for a user: it assumes that that
+.Xr s6-scan-directory 7
+is already in place.
+It does not create
+.Ar logdir
+either:
+.Ar logdir ,
+or at least its parent directory, must already exist before the logger
+is run, else
+.Xr s6-log 8
+will fail repeatedly.
+Make sure that all the data and metadata referenced by the service's
+and the logger's run scripts are actually present and valid before
+starting the service.
+.Pp
+If
+.Nm
+encounters failure (and exits 111), it does not clean up the
+directories it created.
+Make sure to always test
+.Nm Ap
+s return code and clean up after it if needed.
+.Ss Operation of the service
+When the service is started, its
+.Pa run
+script will execute the following operations:
+.Bl -bullet -width x
+.It
+Clear all its environment variables, except
+.Ev PATH .
+This prevents any data leak from the parent supervision tree into the
+user subtree.
+.It
+Fill its environment with data related to
+.Ar user :
+.Bl -bullet -width x
+.It
+.Ev USER
+is set to
+.Ar user .
+.It
+.Ev HOME
+is set to
+.Ar user Ap
+s home directory.
+.It
+.Ev UID
+is set to
+.Ar user Ap
+s uid.
+.It
+.Ev GID
+is set to
+.Ar user Ap
+s primary gid.
+.It
+.Ev GIDLIST
+is set to
+.Ar user Ap
+s supplementary groups list.
+.El
+.It
+If the service has been created with the
+.Fl E
+option to
+.Nm :
+.Bl -bullet -width x
+.It
+Add all the variables defined in
+.Ar envdir
+to its environment.
+.It
+For every variable
+.Ar var
+given via a
+.Fl e
+option, subject
+.Ar var
+to substitution with the
+.Ev USER ,
+.Ev HOME ,
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+variables (see below).
+.El
+.It
+Set the
+.Ev PATH
+environment variable to
+.Ar path ,
+subjected to variable substitution.
+.It
+Execute into
+.Xr s6-svscan 8 ,
+running in
+.Ar userscandir
+(which is first subjected to variable substitution).
+.El
+.Pp
+The service is logged: its stderr and stdout are piped to an
+.Xr s6-log 8
+process running as
+.Ar loguser
+and writing to the
+.Ar logdir
+directory.
+This logger is the catch-all logger for the supervision tree owned by
+.Ar user ;
+it is recommended to make
+.Ar loguser
+distinct from
+.Ar user ,
+and to have
+.Ar logdir
+in a place that is
+.Sy not
+under the control of
+.Ar user .
+.Pp
+If
+.Ar user
+wants to keep control of their logs, they can declare a logger for
+each of their services.
+.Ss Variable substitution
+When the service starts, the
+.Ev USER ,
+.Ev HOME ,
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+environment variables are deduced from
+.Ar user Ap
+s identity.
+The value of those variables may be used in a few configuration knobs:
+.Bl -bullet -width x
+.It
+The value of
+.Ar userscandir :
+it is likely that the
+.Xr s6-scan-directory 7
+belonging to
+.Ar user
+resides under
+.Ar user Ap
+s home directory.
+Or under
+.Pa /run/user/${UID} ,
+or some similar scheme.
+.It
+The
+.Ev PATH
+environment variable, declared in
+.Ar path :
+it is often useful to prepend the default system
+.Ev PATH
+with a user-specific directory that hosts that user's binaries.
+For instance, you may want the
+.Ev PATH
+to be set as something like
+.Pa ${HOME}/bin:/usr/bin:/bin .
+.It
+Any variable declared in
+.Ar envdir
+and given as an argument to an
+.Fl e
+option to
+.Nm .
+If
+.Ar envdir
+is a template valid for all users, it may contain variables that
+depends on user-specific data: for instance, the
+.Ev XDG_CONFIG_HOME
+variable may be
+set to
+.Pa ${HOME}/.config .
+.El
+.Pp
+When the strings
+.Ql ${USER} ,
+.Ql ${HOME} ,
+.Ql ${UID} ,
+.Ql ${GID} , or
+.Ql ${GIDLIST}
+appear in the value for
+.Ar userscandir ,
+.Ar path ,
+or any of the
+.Ar var
+variables, they are substituted with the corresponding value of the
+.Ev USER ,
+.Ev HOME ,
+.Ev UID ,
+.Ev GID ,
+or
+.Ev GIDLIST
+environment variable instead.
+.Pp
+For instance, if no
+.Fl d
+option is provided, the default value for
+.Ar userscandir
+is
+.Pa ${HOME}/service .
+If the provided
+.Ar user
+is
+.Ql ska
+and ska's home directory is
+.Pa /home/ska ,
+then
+.Xr s6-svscan 8
+will be run on
+.Pa /home/ska/service .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl d Ar userscandir
+The supervision tree will be run on the
+.Ar userscandir
+directory.
+.Ar userscandir
+is subject to variable substitution (see above).
+Default is
+.Pa ${HOME}/service .
+.It Fl p Ar path
+The supervision tree will be run with a
+.Ev PATH
+environment variable set to
+.Ar path .
+.Ar path
+is subject to variable substitution.
+Default is
+.Pa /usr/bin:/bin ,
+or whatever has been given to the
+.Ql --with-default-path
+option to skalibs'
+.Pa configure
+script.
+.It Fl E Ar envdir
+The supervision tree will be run with the environment variables
+defined in the directory
+.Ar envdir ,
+which will be read via
+.Xr s6-envdir 8
+without options.
+By default, no envdir is defined and the supervision tree will only be
+run with the basic environment variables listed below.
+.It Fl e Ar var
+Perform variable substitution on
+.Ar var .
+This option is repeatable, and only makes sense when the
+.Fl E
+option is also given.
+For every
+.Ar var
+listed via an
+.Fl e
+option, the contents of
+.Ar var
+will be subjected to variable substitution before the supervision tree
+is run.
+This is only useful if
+.Ar var
+is defined in
+.Ar envdir ,
+as a template, that is then instanced for
+.Ar user
+when the service is run.
+By default, only the
+.Ev PATH
+environment variable, customizable via
+.Fl p ,
+is subjected to variable substitution.
+.It Fl r Ar service Ns / Ns Ar logger Ns / Ns Ar pipeline
+Create an s6-rc[1] source definition directory.
+When this option is given,
+.Ar dir
+is not created as an
+.Xr s6-service-directory 7 ,
+but as a directory containing two services:
+.Ar dir Ns / Ns Ar service
+and
+.Ar dir Ns / Ns Ar logger ,
+and
+.Ar dir
+is suitable as a source argument to s6-rc-compile[3].
+The
+.Ql / Ns Ar pipeline
+part can be omitted, but if it is present,
+.Ar pipeline
+is used as a name for a bundle containing both
+.Ar service
+and
+.Ar logger .
+When this option is not given,
+.Ar dir
+is a regular service directory for direct inclusion (or linking) in
+the parent scan directory
+.Po
+and the catch-all logger for the user subtree is declared in
+.Ar dir Ns / Ns log
+.Pc .
+.It Fl l Ar loguser
+Run the catch-all logger of the user subdirectory as user
+.Ar loguser .
+Default is
+.Ql root .
+.It Fl t Ar stamptype
+How logs are timestamped by the catch-all logger.
+.Ql 0
+means no timestamp,
+.Ql 1
+means external TAI64N format[4],
+.Ql 2
+means ISO 8601 format[5], and
+.Ql 3
+means both.
+Default is
+.Ql 1 .
+.It Fl n Ar nfiles
+Maximum number of archive files in
+.Ar logdir .
+Default is
+.Ql 10 .
+.It Fl s Ar filesize
+Maximum size of the
+.Pa current
+file (and archive files) in
+.Ar logdir .
+Default is
+.Ql 1000000 .
+.It Fl S Ar maxsize
+Maximum total size of the archives in the
+.Ar logdir .
+Default is
+.Ql 0
+meaning no limits apart from those enforced by the
+.Fl n
+and
+.Fl s
+options.
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh EXAMPLES
+.Dl s6-usertree-maker -d '/run/user/${UID}/service' -p '${HOME}/bin:/usr/bin:/bin' -E /etc/user-env -e XDG_CONFIG_HOME -l catchlog ska /var/log/usertree/ska usertree-ska
+.Pp
+creates a service directory in
+.Ql usertree-ska
+declaring a service that starts a supervision tree on
+.Pa /run/user/1000/service
+if ska has uid 1000, with
+.Pa /home/ska/bin:/usr/bin/bin
+as its
+.Ev PATH
+if ska's home directory is
+.Pa /home/ska ,
+and with all the environment variables declared in
+.Pa /etc/user-env ,
+among which the
+.Ev XDG_CONFIG_HOME
+variable is processed for variable substitution.
+The supervision tree has a catch-all logger running as user catchlog,
+and storing its data in the
+.Pa /var/log/usertree/ska
+directory.
+.Pp
+Note that simple quotes are used here to prevent the shell from interpreting
+.Ql ${UID}
+and
+.Ql ${HOME} .
+.Pp
+.Dl s6-usertree-maker -d '/run/user/${UID}/service' -p '${HOME}/bin:/usr/bin:/bin' -E /etc/user-env -e XDG_CONFIG_HOME -l catchlog -r usertree-ska/usertree-ska-log/usertree-ska-pipeline ska /var/log/usertree/ska usertree
+.Pp
+Same as above, except it does not create a service directory -
+instead, it creates a
+.Ql usertree
+directory containing two subdirectories:
+.Ql usertree-ska ,
+the s6-rc[1] source definition directory for the service, and
+.Ql usertree-ska-log ,
+the source definition directory for its logger.
+It also creates an implicit
+.Ql usertree-ska-pipeline
+bundle containing both the service and the logger.
+.Sh SEE ALSO
+[1]
+.Lk https://skarnet.org/software/s6-rc/
+.Pp
+[2]
+.Lk https://skarnet.org/software/execline/
+.Pp
+[3]
+.Lk https://skarnet.org/software/s6-rc/s6-rc-compile.html
+.Pp
+[4]
+.Lk https://cr.yp.to/libtai/tai64.html
+.Pp
+[5]
+.Lk https://www.iso.org/iso/home/standards/iso8601.htm
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-usertree-maker.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

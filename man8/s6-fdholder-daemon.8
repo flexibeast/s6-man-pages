@@ -1,0 +1,225 @@
+.Dd September 29, 2021
+.Dt S6-FDHOLDER-DAEMON 8
+.Os
+.Sh NAME
+.Nm s6-fdholder-daemon
+.Nd fd-holding daemon
+.Sh SYNOPSIS
+.Nm
+.Op Fl 1
+.Op Fl v Ar verbosity
+.Op Fl d | D
+.Op Fl c Ar maxconn
+.Op Fl n Ar maxfds
+.Op Fl b Ar backlog
+.Op Fl G Ar gidlist
+.Op Fl g Ar gid
+.Op Fl u Ar uid
+.Op Fl U
+.Op Fl t Ar clienttimeout
+.Op Fl T Ar lameducktimeout
+.Op Fl i Ar rulesdir | Fl x Ar rulesfile
+.Ar path
+.Sh DESCRIPTION
+.Nm
+listens on a Unix domain socket, then accepts client connections; it
+stores file descriptors on behalf of clients, along with an identifier
+for every file descriptor stored, and possibly an expiration date
+(after which the file descriptor will be forgotten).
+It also allows clients to retrieve a file descriptor by its
+identifier.
+.Pp
+.Nm
+parses the options and arguments it is given, and builds a new command
+line with them.
+It then executes into that new command line.
+.Pp
+The first program
+.Nm
+executes into is
+.Xr s6-ipcserver-socketbinder 8 .
+It will create and bind a Unix domain socket to
+.Ar path ,
+then execute into the rest of the command line.
+.Pp
+If a privilege-dropping operation has been requested, the program that
+.Xr s6-ipcserver-socketbinder 8
+executes into is
+.Xr s6-applyuidgid 8 .
+It will drop root privileges, then execute into the rest of the
+command line.
+.Pp
+The last program in the chain is
+.Xr s6-fdholderd 8 .
+It is executed into by
+.Xr s6-applyuidgid 8 ,
+or directly by
+.Xr s6-ipcserver-socketbinder 8
+if no privilege-dropping operation has been requested.
+.Xr s6-fdholderd 8
+is the long-lived process, the daemon itself, performing fd holding
+and accepting connections from clients.
+.Pp
+.Nm
+does not interpret its options itself.
+It just dispatches them to the appropriate program on the command line
+that it builds.
+.Pp
+From the user's point of view,
+.Nm
+behaves like a long-lived process, even if the long-lived process
+itself is called
+.Xr s6-fdholderd 8 .
+Every operational detail of
+.Xr s6-fdholderd 8
+applies to
+.Nm
+as well; in particular, make sure to properly configure the clients'
+access rights, as described in
+.Xr s6-fdholderd 8 .
+.Pp
+.Nm
+is meant to be used in an s6 run script, as a supervised local
+service.
+It does not fork itself or write to syslog.
+However, it can be run under any infrastructure, including other
+supervision infrastructures, OpenRC, systemd, or SysV scripts.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl 1
+Write a newline to stdout, before closing it, right after binding and
+listening to the Unix socket.
+If stdout is suitably redirected, this can be used by monitoring
+programs to check when the server is ready to accept connections.
+.It Fl v Ar verbosity
+Be quiet, normally verbose, or more verbose, depending on if verbosity
+is 0, 1, or more.
+The default is 1.
+.It Fl d
+Allow instant rebinding to the same path even if it has been used not
+long ago - this is the
+.Dv SO_REUSEADDR
+flag to
+.Xr setsockopt 2
+and is generally used with server programs.
+This is the default.
+Note that
+.Ar path
+will be deleted if it already exists at program start time.
+.It Fl D
+Disallow instant rebinding to the same path.
+.It Fl c Ar maxconn
+Accept at most
+.Ar maxconn
+concurrent client connections.
+Default is 16.
+It is impossible to set it higher than the value of the
+.Dv S6_FDHOLDER_MAX
+macro, which is 256.
+Client connections to this server are short-lived, so this number
+needs not be too high.
+Every client connection eats up one available file descriptor, so it
+is best for
+.Ar maxconn
+to be as small as possible.
+.It Fl n Ar maxfds
+Store at most
+.Ar maxfds
+file descriptors.
+Default is 1000.
+It is impossible to set it higher than the number of files that can be
+opened by the
+.Nm
+process minus a few descriptors needed for correct
+.Xr s6-fdholderd 8
+operation.
+Before running
+.Nm ,
+make sure to properly adjust, via
+.Xr s6-softlimit 8 ,
+the number of openable files[1] of the current process.
+.It Fl b Ar backlog
+Set a maximum of
+.Ar backlog
+backlog connections on the socket.
+Extra connection attempts will rejected by the kernel.
+.It Fl G Ar gidlist
+Change
+.Nm Ap
+s supplementary group list to
+.Ar gidlist
+after binding the socket.
+This is only valid when run as root.
+.Ar gidlist
+must be a comma-separated list of numerical group IDs.
+.It Fl g Ar gid
+Change
+.Nm Ap
+s groupid to
+.Ar gid
+after binding the socket.
+This is only valid when run as root.
+.It Fl u Ar uid
+Change
+.Nm Ap
+s userid to
+.Ar uid
+after binding the socket.
+This is only valid when run as root.
+.It Fl U
+Change
+.Nm Ap
+s user id, group id and supplementary group list according to the
+values of the
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+environment variables after binding the socket.
+This is only valid when run as root.
+This can be used with the
+.Xr s6-envuidgid 8
+program to easily script a service that binds to a privileged socket
+then drops its privileges to those of a named non-root account.
+.It Fl t Ar clienttimeout
+Disconnect a client if it's in the middle of an operation and it has
+not written or read any data in
+.Ar clienttimeout
+milliseconds.
+By default,
+.Ar clienttimeout
+is 0, which means infinite.
+.It Fl T Ar lameducktimeout
+Give clients
+.Ar lameducktimeout
+milliseconds to finish their current operation before exiting after
+.Xr s6-fdholderd 8
+has received a SIGTERM.
+By default,
+.Ar lameducktimeout
+is 0, which means infinite.
+.It Fl x Ar rulesfile
+Read access rights configuration from CDB file
+.Ar rulesfile .
+.It Fl i Ar rulesdir
+Read access rights configuration from the filesystem in directory
+.Ar rulesdir .
+.El
+.Sh SEE ALSO
+.Xr s6-fdholder-delete 8 ,
+.Xr s6-fdholder-getdump 8 ,
+.Xr s6-fdholder-list 8 ,
+.Xr s6-fdholder-retrieve 8 ,
+.Xr s6-fdholder-setdump 8 ,
+.Xr s6-fdholder-store 8 ,
+.Xr s6-fdholder-transferdump 8 ,
+.Xr s6-fdholderd 8
+.Pp
+[1]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_resource.h.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-fdholder-daemon.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

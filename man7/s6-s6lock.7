@@ -1,0 +1,276 @@
+.Dd September 29, 2021
+.Dt S6-S6LOCK 7
+.Os
+.Sh NAME
+.Nm s6-s6lock
+.Nd C interface to timed locks
+.Sh DESCRIPTION
+Unix natively provides locks, but the locking primitives are
+synchronous, so either they are unbounded in execution time or they
+require polling.
+.Nm
+provides poll-free locks that can timeout during attempted
+acquisition.
+.Pp
+Check the
+.Pa s6/s6lock.h
+header for the prototypes.
+The functions documented here are often simplified macros, for
+instance relying on the
+.Dv STAMP
+global variable to hold the current time.
+Fully reentrant functions with more control options are usually
+available.
+.Pp
+Given the nature of the
+.Nm
+library, it makes sense to use an
+.Xr s6lockd 8
+.Xr s6-local-service 7
+concurrently accessed by several applications using such locks to gate
+shared resources.
+.Pp
+If you're not using an
+.Xr s6lockd 8
+.Xr s6-local-service 7 ,
+make sure your application is not disturbed by children it doesn't
+know it has.
+Using nonblocking waits, ignoring pids you don't know, and using a
+self-pipe[1] if your application is built around an event loop, are good
+programming practices.
+.Ss Starting and ending a session
+.Bd -literal -offset indent
+s6lock_t a = S6LOCK_ZERO ;
+tain_t deadline ;
+
+tain_now_g() ;
+tain_addsec_g(&deadline, 2)
+
+char const *path = S6LOCK_IPCPATH ;
+s6lock_start_g(&a, path, &deadline) ;
+// char const *lockdir = "/tmp/lock" ;
+// s6lock_startf_g(&a, lockdir, &deadline) ;
+.Ed
+.Pp
+.Fn s6lock_start_g
+starts a session by connecting to an
+.Xr s6lockd 8
+service listening on
+.Va path .
+The working directory is set by the administrator of the service.
+.Pp
+.Fn s6lock_startf_g
+starts a session with an
+.Xr s6lockd 8
+process as a child, using
+.Va lockdir
+as its working directory.
+.Pp
+.Va a
+is an
+.Vt s6lock_t
+structure that must be declared in the stack and initialized to
+.Dv S6LOCK_ZERO .
+If the session initialization fails, the function returns 0 and errno
+is set; else the function returns 1.
+.Pp
+If the absolute time
+.Va deadline
+is reached and the function has not returned yet, it immediately
+returns 0 with errno set to
+.Dv ETIMEDOUT .
+Only local interprocess communications are involved; unless your
+system is heavily overloaded, the function should return
+near-instantly.
+One or two seconds of delay between the current time and
+.Va deadline
+should be enough: if the function takes more than that to return, then
+there is a problem with the underlying processes.
+.Pp
+You can have more than one session open in parallel, by declaring
+several distinct
+.Vt s6lock_t
+structures and calling
+.Fn s6lock_startf_g
+.Po
+or
+.Fn s6lock_start_g
+.Pc
+more than once.
+However, one single session can handle virtually as many concurrent
+locks as your application needs, so opening several sessions is only
+useful if you need to acquire locks in various distinct lock
+directories.
+.Pp
+.Dl s6lock_end(&a) ;
+.Pp
+.Fn s6lock_end
+frees all the resources used by the session.
+The
+.Va a
+structure is then reusable for another session.
+.Ss Acquiring and releasing locks
+.Bd -literal -offset indent
+uint16_t id ;
+char const *file = "lockfile" ;
+tain_t limit ;
+tain_t deadline ;
+
+int r = s6lock_acquire_sh_g (&a, &id, file, &limit, &deadline) ;
+/* int r = s6lock_acquire_ex_g (&a, &id, file, &limit, &deadline) ; */
+r = s6lock_release_g(&a, id, &deadline) ;
+.Ed
+.Pp
+.Fn s6lock_acquire_sh_g
+instructs the
+.Xr s6lockd 8
+daemon, related to the open session represented by the
+.Va a
+handle, to try and acquire a shared lock on the
+.Va file
+file located under that daemon's working directory
+.Po
+typically
+.Pa /var/lock
+.Pc .
+.Va file
+will be interpreted as relative to the daemon's working directory even
+if it starts with a slash; however, slashes in the middle of
+.Va file
+are likely to result in an error.
+.Pp
+.Va limit
+and
+.Va deadline
+are two absolute dates.
+.Va deadline
+is a deadline for the execution of the function: if by
+.Va deadline
+the function has not returned, then it instantly returns 0 and sets
+errno to
+.Dv ETIMEDOUT .
+The function is normally near-instantaneous, so
+.Va deadline
+can be very close in the future and serves only as a protection
+against malicious servers.
+.Va limit
+is the acquisition deadline: if by
+.Va limit
+the daemon still has not been able to acquire a lock on
+.Va file ,
+then it will report a timeout to the client.
+.Pp
+The function returns 1 in case of success, or 0 if an error occurs,
+with errno set to a suitable value.
+If it succeeds, then a 16-bit number is stored into
+.Va *id ;
+this number serves as an identifier for this lock.
+.Pp
+.Fn s6lock_acquire_ex_g
+works just like
+.Fn s6lock_acquire_sh_g ,
+except that the daemon tries to acquire an exclusive lock.
+.Pp
+.Fn s6lock_release_g
+releases the lock identified by
+.Va id .
+It normally returns 1.
+It can return 0 with errno set to a suitable value if it fails.
+.Va id
+is not valid after the corresponding lock has been released.
+The function normally returns instantly, with
+.Va deadline
+as a safeguard.
+.Ss Asynchronously waiting for locks
+.Em (From now on, the functions are listed with their prototypes instead of usage examples.)
+.Bl -tag -width x
+.It Ft int Fn s6lock_fd "s6lock_t const *a"
+.Pp
+Returns a file descriptor to select on for reading.
+Do not
+.Xr read 2
+it though.
+.It Ft int Fn s6lock_update "s6lock_t *a"
+.Pp
+Call this function whenever the fd checks readability: it will update
+.Va a Ap
+s internal structures with information from the
+.Xr s6lockd 8
+daemon.
+It returns -1 if an error occurs; in case of success, it returns the
+number of identifiers for which something happened.
+.Pp
+When
+.Fn s6lock_update
+returns,
+.Ql genalloc_s(uint16_t, &a->list)
+points to an array of
+.Ql genalloc_len(uint16_t, &a->list)
+16-bit unsigned integers.
+Those integers are ids waiting to be passed to
+.Fn s6lock_check .
+.It Ft int Fn s6lock_check "s6lock_t *a" "uint16_t id" "char *what"
+.Pp
+Checks whether the lock identified by
+.Va id
+has been acquired.
+Use after a call to
+.Fn s6lock_update .
+.Bl -bullet -width x
+.It
+If an error occurred, returns -1 and sets errno.
+The error number may have been transmitted from
+.Xr s6lockd 8 .
+.It
+If the lock has not been acquired yet, returns 0.
+.It
+If the lock has been acquired, returns 1.
+.El
+.El
+.Ss Synchronously waiting for locks
+.Bl -tag -width x
+.It Ft int Fn s6lock_wait_or_g "s6lock_t *a" "uint16_t const *idlist" "unsigned int n" "tain_t const *deadline"
+.Pp
+Synchronously waits for one of the locks represented by the array
+pointed to by
+.Va idlist
+of length
+.Va n
+to be acquired.
+Returns -1 if it fails, or a nonnegative number on success, which is
+the index in
+.Va idlist
+of the acquired lock's id.
+If no result has been obtained by
+.Va deadline ,
+the function returns -1
+.Dv ETIMEDOUT .
+.It Ft int Fn s6lock_wait_and_g "s6lock_t *a" "uint16_t const *idlist" "unsigned int n" "tain_t const *deadline"
+.Pp
+Synchronously waits for all of the locks represented by the array
+pointed to by
+.Va idlist
+of length
+.Va n
+to be acquired.
+Returns -1 if it fails and 0 if it succeeds.
+If no result has been obtained by
+.Va deadline ,
+the function returns -1
+.Dv ETIMEDOUT .
+.El
+.Sh SEE ALSO
+.Xr s6-accessrules 7 ,
+.Xr s6-fdholder 7 ,
+.Xr s6-ftrigr 7 ,
+.Xr s6-ftrigw 7 ,
+.Xr s6-libs6 7
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/libstddjb/selfpipe.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/libs6/s6lock.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

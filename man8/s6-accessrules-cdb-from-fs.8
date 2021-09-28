@@ -1,0 +1,179 @@
+.Dd September 29, 2021
+.Dt S6-ACCESSRULES-CDB-FROM-FS 8
+.Os
+.Sh NAME
+.Nm s6-accessrules-cdb-from-fs
+.Nd compile a directory containing a ruleset suitable for
+.Xr s6-ipcserver-access 8
+or
+.Xr s6-tcpserver-access 8
+into a CDB[1] file
+.Sh SYNOPSIS
+.Nm
+.Ar cdbfile
+.Ar dir
+.Sh DESCRIPTION
+.Nm
+compiles the
+.Ar dir
+directory containing a ruleset into a CDB[1] file
+.Ar cdbfile
+then exits 0.
+.Ss Ruleset directory format
+To be understood by
+.Nm ,
+.Xr s6-ipcserver-access 8 ,
+or
+.Xr s6-tcpserver-access 8 ,
+.Ar dir
+must have a specific format.
+.Pp
+.Ar dir
+contains a series of directories:
+.Bl -bullet -width x
+.It
+.Pa ip4
+for rules on IPv4 addresses.
+.It
+.Pa ip6
+for rules on IPv6 addresses.
+.It
+.Pa reversedns
+for rules on host names.
+.It
+.Pa uid
+for rules on user IDs.
+.It
+.Pa gid
+for rules on group IDs.
+.El
+.Pp
+Depending on the application, other directories can appear in
+.Ar dir
+and be compiled into
+.Ar cdbfile ,
+but
+.Xr s6-tcpserver-access 8
+only uses the first three, and
+.Xr s6-ipcserver-access 8
+only uses the last two.
+.Pp
+Each of those directories contains a set of rules.
+A rule is a subdirectory named after the set of keys it matches, and
+containing actions that will be executed if the rule is the first
+matching rule for the tested key.
+.Pp
+The syntax for the rule name is dependent on the nature of keys, and
+fully documented in
+.Xr s6-accessrules 7 .
+For instance, a subdirectory named 192.168.0.0_27 in the
+.Pa ip4
+directory will match every IPv4 address in the 192.168.0.0/27 network
+that does not match a more precise rule.
+.Pp
+The syntax for the actions, however, is the same for every type of
+key.
+A rule subdirectory can contain the following elements:
+.Bl -bullet -width x
+.It
+A file (that can be empty) named
+.Pa allow .
+If such a file exists, a key matching this rule will be immediately
+accepted.
+.It
+A file (that can be empty) named
+.Pa deny .
+If such a file exists and no
+.Pa allow
+file exists, a key matching this rule will be immediately denied.
+.It
+A subdirectory named
+.Pa env .
+If such a directory exists along with an
+.Pa allow
+file, then its contents represent environment modifications that will
+be applied after accepting the connection and before executing the
+next program in the chain, as if the
+.Xr s6-envdir 8
+program, without options, was applied to
+.Pa env .
+.Pa env
+has exactly the same format as a directory suitable for
+.Xr s6-envdir 8 ;
+however, if the modifications take up more than 4096 bytes when
+compiled into
+.Ar cdbfile ,
+then
+.Nm
+will complain and exit 100.
+.It
+A file named
+.Pa exec .
+If such a file exists along with an
+.Pa allow
+file, then its contents represent a command line that, interpreted by
+the
+.Xr execlineb 1
+launcher, will be executed after accepting the connection, totally
+bypassing the original command line.
+.Nm
+truncates the
+.Pa exec
+file to 4096 bytes max when embedding it into
+.Ar cdbfile ,
+so make sure it is not larger than that.
+.El
+.Pp
+.Ar cdbfile
+can exist prior to, and during, the compilation, which actually works
+in a temporary file in the same directory as
+.Ar cdbfile
+and performs an atomic replacement when it is done.
+So it is not necessary to interrupt a running service during the
+compilation.
+.Pp
+If
+.Nm
+fails at some point, the temporary file is removed.
+However, this doesn't happen if
+.Nm
+is interrupted by a signal.
+.Pp
+After the program successfully completes, if
+.Ar dir
+was a suitable candidate for the
+.Fl i
+option of
+.Xr s6-ipcserver-access 8
+or
+.Xr s6-tcpserver-access 8 ,
+then
+.Ar cdbfile
+will be a suitable candidate for the
+.Fl x
+option of the same program, implementing the same ruleset.
+.Pp
+.Ar cdbfile
+can be decompiled by the
+.Xr s6-accessrules-fs-from-cdb 8
+program.
+.Sh SEE ALSO
+.Xr execlineb 1 ,
+.Xr s6-accessrules-fs-from-cdb 8 ,
+.Xr s6-connlimit 8 ,
+.Xr s6-ioconnect 8 ,
+.Xr s6-ipcclient 8 ,
+.Xr s6-ipcserver 8 ,
+.Xr s6-ipcserver-access 8 ,
+.Xr s6-ipcserver-socketbinder 8 ,
+.Xr s6-ipcserverd 8 ,
+.Xr s6-tcpserver-access 8
+.Pp
+[1]
+.Lk https://en.wikipedia.org/wiki/Cdb_(software)
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-accessrules-cdb-from-fs.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

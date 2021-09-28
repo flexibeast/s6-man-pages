@@ -1,0 +1,56 @@
+.Dd September 29, 2021
+.Dt S6-SETUIDGID 8
+.Os
+.Sh NAME
+.Nm s6-setuidgid
+.Nd execute a program as another user
+.Sh SYNOPSIS
+.Nm
+.Ar account
+.Ar prog...
+.Sh DESCRIPTION
+If
+.Ar account
+contains a colon, it is interpreted as
+.Sm off
+.So
+.Em uid :
+.Em gid
+.Sc
+.Sm on ,
+else it is interpreted as a username and looked up by name in the
+account database.
+.Pp
+If
+.Ar account
+is unknown,
+.Nm
+exits 1.
+.Nm
+sets its (real and effective) uid and gid to those of
+.Ar account .
+It also sets the list of supplementary groups to the correct one for
+.Ar account
+according to the group database.
+.Pp
+Then it executes into
+.Ar prog... .
+.Pp
+.Nm
+can only be run as root.
+Its main use is to drop root privileges before starting a daemon.
+.Sh SEE ALSO
+.Xr s6-applyuidgid 8 ,
+.Xr s6-envdir 8 ,
+.Xr s6-envuidgid 8 ,
+.Xr s6-fghack 8 ,
+.Xr s6-setsid 8 ,
+.Xr s6-softlimit 8 ,
+.Xr s6-tai64n 8 ,
+.Xr s6-tai64nlocal 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-setuidgid.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

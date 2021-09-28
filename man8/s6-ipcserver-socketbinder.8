@@ -1,0 +1,117 @@
+.Dd September 29, 2021
+.Dt S6-IPCSERVER-SOCKETBINDER 8
+.Os
+.Sh NAME
+.Nm s6-ipcserver-socketbinder
+.Nd bind a Unix domain socket, then execute a program
+.Sh SYNOPSIS
+.Nm
+.Op Fl d | D
+.Op Fl b Ar backlog
+.Op Fl M | m
+.Op Fl a Ar perms
+.Op Fl B
+.Ar path
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+creates a Unix domain socket and binds it to
+.Ar path .
+It prepares the socket to accept connections by calling
+.Xr listen 2 .
+.Pp
+It then execs into
+.Ar prog...
+with the open socket as its standard input.
+.Pp
+The socket is provided
+.Sy non-blocking by default .
+.Pp
+.Nm
+is part of a set of basic blocks used to build a flexible Unix
+super-server.
+It normally should be given a command line crafted to make it execute
+into
+.Xr s6-ipcserverd 8
+to accept connections from clients, or into a program such as
+.Xr s6-applyuidgid 8
+to drop privileges before doing so.
+.Pp
+The
+.Xr s6-ipcserver 8
+program does exactly this.
+It implements a full Unix super-server by building a command line
+starting with
+.Nm
+and ending with
+.Xr s6-ipcserverd 8
+followed by the application program, and executing into it.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl d
+Allow instant rebinding to the same path even if it has been used not
+long ago - this is the
+.Dv SO_REUSEADDR
+flag to
+.Xr setsockopt 2
+and is generally used with server programs.
+This is the default.
+Note that
+.Ar path
+will be deleted if it already exists at program start time.
+.It Fl D
+Disallow instant rebinding to the same path.
+.It Fl b Ar backlog
+Set a maximum of
+.Ar backlog
+backlog connections on the socket - extra connection attempts will
+rejected by the kernel.
+The default is
+.Dv SOMAXCONN ,
+i.e. the maximum number allowed by the system.
+If backlog is 0, then the socket will be created, but it
+.Sy will not be listening .
+.It Fl M
+The type of the socket will be
+.Dv SOCK_STREAM .
+This is the default.
+.It Fl m
+The type of the socket will be
+.Dv SOCK_DGRAM .
+Note that by default
+.Dv SOCK_DGRAM
+sockets are not connection-mode, and
+.Xr listen 2
+will fail - so you should always give the
+.Fl b0
+option to
+.Nm
+along with
+.Fl m .
+.It Fl a Ar perms
+Create the socket with permissions
+.Ar perms ,
+which is an octal number from 0000 to 0777.
+Default is 0777, meaning everyone can connect to it.
+0700 means only processes having the same uid as the
+.Nm
+process can connect to it.
+.It Fl B
+The socket will be blocking.
+The default is nonblocking.
+.El
+.Sh SEE ALSO
+.Xr s6-accessrules-cdb-from-fs 8 ,
+.Xr s6-accessrules-fs-from-cdb 8 ,
+.Xr s6-connlimit 8 ,
+.Xr s6-ioconnect 8 ,
+.Xr s6-ipcclient 8 ,
+.Xr s6-ipcserver 8 ,
+.Xr s6-ipcserver-access 8 ,
+.Xr s6-ipcserverd 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-ipcserver-socketbinder.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

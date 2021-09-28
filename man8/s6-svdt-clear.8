@@ -1,0 +1,59 @@
+.Dd September 29, 2021
+.Dt S6-SVDT-CLEAR 8
+.Os
+.Sh NAME
+.Nm s6-svdt-clear
+.Nd clear the recorded death tally of a service
+.Sh SYNOPSIS
+.Nm
+.Ar servicedir
+.Sh DESCRIPTION
+.Nm
+clears the recorded death tally of the service being currently
+supervised at the
+.Ar servicedir
+.Xr s6-service-directory 7 .
+.Pp
+Use of
+.Nm
+impacts the listings obtained by the
+.Xr s6-svdt 8
+command.
+.Pp
+It also impacts the behaviour of the
+.Xr s6-permafailon 8
+command.
+This is the main reason to use
+.Nm :
+once a service has failed permanently due to an excessive number of
+deaths in a given time, it can be useful to erase that record of
+deaths before starting the service again, in order to avoid
+permanently failing again too fast.
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+.Xr s6-notifyoncheck 8 ,
+.Xr s6-permafailon 8 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svc 8 ,
+.Xr s6-svdt 8 ,
+.Xr s6-svlisten 8 ,
+.Xr s6-svlisten1 8 ,
+.Xr s6-svok 8 ,
+.Xr s6-svscan 8 ,
+.Xr s6-svscanctl 8 ,
+.Xr s6-svstat 8 ,
+.Xr s6-svwait 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-svdt-clear.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

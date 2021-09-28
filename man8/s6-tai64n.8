@@ -1,0 +1,43 @@
+.Dd September 29, 2021
+.Dt S6-TAI64N 8
+.Os
+.Sh NAME
+.Nm s6-tai64n
+.Nd read from stdin and write to stdout, prepending lines with a TAI64N timestamp[1] and a space
+.Sh SYNOPSIS
+.Nm
+.Sh DESCRIPTION
+.Nm
+exits 0 when it sees the end of stdin.
+If there's an unfinished line,
+.Nm
+processes it, adds a newline character to it, and writes it before
+exiting.
+.Pp
+.Nm
+does neither
+.Dq line buffering
+nor
+.Dq block buffering .
+It does optimal buffering, i.e. it flushes its output buffer every
+time it risks blocking on input.
+Every filter should behave this way, whether its output is a tty or
+not: it's simpler and more efficient in every case.
+.Sh SEE ALSO
+.Xr s6-applyuidgid 8 ,
+.Xr s6-envdir 8 ,
+.Xr s6-envuidgid 8 ,
+.Xr s6-fghack 8 ,
+.Xr s6-setsid 8 ,
+.Xr s6-setuidgid 8 ,
+.Xr s6-softlimit 8 ,
+.Xr s6-tai64nlocal 8
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/libstddjb/tai.html#timestamp
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-tai64n.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

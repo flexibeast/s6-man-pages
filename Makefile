@@ -1,68 +1,6 @@
 MANPATH ?= /usr/share/man
-man1 = $(MANPATH)/man1/
 man7 = $(MANPATH)/man7/
-
-man1_targets = \
-	s6-accessrules-cdb-from-fs.1 \
-	s6-accessrules-fs-from-cdb.1 \
-	s6-applyuidgid.1 \
-	s6-cleanfifodir.1 \
-	s6-connlimit.1 \
-	s6-envdir.1 \
-	s6-envuidgid.1 \
-	s6-fdholder-daemon.1 \
-	s6-fdholder-delete.1 \
-	s6-fdholder-getdump.1 \
-	s6-fdholder-list.1 \
-	s6-fdholder-retrieve.1 \
-	s6-fdholder-setdump.1 \
-	s6-fdholder-store.1 \
-	s6-fdholder-transferdump.1 \
-	s6-fdholderd.1 \
-	s6-fghack.1 \
-	s6-ftrig-listen.1 \
-	s6-ftrig-listen1.1 \
-	s6-ftrig-notify.1 \
-	s6-ftrig-wait.1 \
-	s6-ftrigrd.1 \
-	s6-ioconnect.1 \
-	s6-ipcclient.1 \
-	s6-ipcserver-access.1 \
-	s6-ipcserver-socketbinder.1 \
-	s6-ipcserver.1 \
-	s6-ipcserverd.1 \
-	s6-log.1 \
-	s6-mkfifodir.1 \
-	s6-notifyoncheck.1 \
-	s6-permafailon.1 \
-	s6lockd.1 \
-	s6-setlock.1 \
-	s6-setsid.1 \
-	s6-setuidgid.1 \
-	s6-socklog.1 \
-	s6-softlimit.1 \
-	s6-sudo.1 \
-	s6-sudoc.1 \
-	s6-sudod.1 \
-	s6-supervise.1 \
-	s6-svc.1 \
-	s6-svdt-clear.1 \
-	s6-svdt.1 \
-	s6-svlink.1 \
-	s6-svlisten.1 \
-	s6-svlisten1.1 \
-	s6-svok.1 \
-	s6-svperms.1 \
-	s6-svscan.1 \
-	s6-svscanctl.1 \
-	s6-svstat.1 \
-	s6-svunlink.1 \
-	s6-svwait.1 \
-	s6-tai64n.1 \
-	s6-tai64nlocal.1 \
-	s6-usertree-maker.1 \
-	s6lockd-helper.1 \
-	ucspilogd.1
+man8 = $(MANPATH)/man8/
 
 man7_targets = \
 	s6-accessrules.7 \
@@ -79,14 +17,76 @@ man7_targets = \
 	s6-scan-directory.7 \
 	s6-service-directory.7
 
+man8_targets = \
+	s6-accessrules-cdb-from-fs.8 \
+	s6-accessrules-fs-from-cdb.8 \
+	s6-applyuidgid.8 \
+	s6-cleanfifodir.8 \
+	s6-connlimit.8 \
+	s6-envdir.8 \
+	s6-envuidgid.8 \
+	s6-fdholder-daemon.8 \
+	s6-fdholder-delete.8 \
+	s6-fdholder-getdump.8 \
+	s6-fdholder-list.8 \
+	s6-fdholder-retrieve.8 \
+	s6-fdholder-setdump.8 \
+	s6-fdholder-store.8 \
+	s6-fdholder-transferdump.8 \
+	s6-fdholderd.8 \
+	s6-fghack.8 \
+	s6-ftrig-listen.8 \
+	s6-ftrig-listen1.8 \
+	s6-ftrig-notify.8 \
+	s6-ftrig-wait.8 \
+	s6-ftrigrd.8 \
+	s6-ioconnect.8 \
+	s6-ipcclient.8 \
+	s6-ipcserver-access.8 \
+	s6-ipcserver-socketbinder.8 \
+	s6-ipcserver.8 \
+	s6-ipcserverd.8 \
+	s6-log.8 \
+	s6-mkfifodir.8 \
+	s6-notifyoncheck.8 \
+	s6-permafailon.8 \
+	s6lockd.8 \
+	s6-setlock.8 \
+	s6-setsid.8 \
+	s6-setuidgid.8 \
+	s6-socklog.8 \
+	s6-softlimit.8 \
+	s6-sudo.8 \
+	s6-sudoc.8 \
+	s6-sudod.8 \
+	s6-supervise.8 \
+	s6-svc.8 \
+	s6-svdt-clear.8 \
+	s6-svdt.8 \
+	s6-svlink.8 \
+	s6-svlisten.8 \
+	s6-svlisten1.8 \
+	s6-svok.8 \
+	s6-svperms.8 \
+	s6-svscan.8 \
+	s6-svscanctl.8 \
+	s6-svstat.8 \
+	s6-svunlink.8 \
+	s6-svwait.8 \
+	s6-tai64n.8 \
+	s6-tai64nlocal.8 \
+	s6-usertree-maker.8 \
+	s6lockd-helper.8 \
+	ucspilogd.8
+
 all: install
 
 install:
-	install -D -m 644 -t $(man1) $(man1_targets)
-	install -D -m 644 -t $(man7) $(man7_targets)
+	cd man7; install -D -m 644 -t $(man7) $(man7_targets)
+	cd man8; install -D -m 644 -t $(man8) $(man8_targets)
 
 uninstall:
-	cd $(man1); rm -f $(man1_targets)
 	cd $(man7); rm -f $(man7_targets)
+	cd $(man8); rm -f $(man8_targets)
 
 .PHONY: all install uninstall

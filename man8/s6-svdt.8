@@ -1,0 +1,93 @@
+.Dd September 29, 2021
+.Dt S6-SVDT 8
+.Os
+.Sh NAME
+.Nm s6-svdt
+.Nd print the recorded death tally of a service, i.e. a list of the times the process died, with the cause of death
+.Sh SYNOPSIS
+.Nm
+.Op Fl S | s
+.Op Fl n Ar maxlines
+.Ar servicedir
+.Sh DESCRIPTION
+.Nm
+prints the contents of the recorded death tally of the service being
+currently supervised at the
+.Ar servicedir
+.Xr s6-service-directory 7 ,
+then exits 0.
+.Pp
+For each recorded death,
+.Nm
+prints one line.
+This line contains the following fields, separated with spaces:
+.Bl -bullet -width x
+.It
+A TAI64N[1] timestamp.
+.It
+The word
+.Sq signal
+if the death was caused by a signal, or the word
+.Sq exitcode
+if the death was a normal exit.
+.It
+The name of the signal that caused the death, or the exit code of the
+process.
+.El
+.Pp
+To obtain human-readable local time or GMT time instead of TAI64N
+timestamps, simply pipe
+.Nm Ap
+s output into
+.Xr s6-tai64nlocal 8 .
+.Pp
+Process deaths are recorded up to a default maximum of 100.
+This default can be modified via the
+.Pa max-death-tally
+file in the
+.Xr s6-service-directory 7 .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl S
+Print signal names.
+This is the default.
+.It Fl s
+Print signal numbers.
+The numerical value of the signal will be printed instead of the
+signal name.
+.It Fl n Ar maxlines
+Limit the output to at most the latest
+.Ar maxlines
+deaths.
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+.Xr s6-notifyoncheck 8 ,
+.Xr s6-permafailon 8 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svc 8 ,
+.Xr s6-svdt-clear 8 ,
+.Xr s6-svlisten 8 ,
+.Xr s6-svlisten1 8 ,
+.Xr s6-svok 8 ,
+.Xr s6-svscan 8 ,
+.Xr s6-svscanctl 8 ,
+.Xr s6-svstat 8 ,
+.Xr s6-svwait 8
+.Pp
+[1]
+.Lk https://cr.yp.to/daemontools/tai64n.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-svdt.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

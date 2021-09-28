@@ -1,0 +1,183 @@
+.Dd September 29, 2021
+.Dt S6-SVPERMS 8
+.Os
+.Sh NAME
+.Nm s6-svperms
+.Nd allows the user to see, or modify, for a given
+list of services: who can read their states, who can send them control
+commands, and who can subscribe to up/down events for those services
+.Sh SYNOPSIS
+.Nm
+.Op Fl v
+.Op Fl u | Fl g Ar group | Fl G Ar group | Fl o | Fl O Ar group
+.Op Fl e | Fl E Ar group
+.Ar servicedirs...
+.Sh DESCRIPTION
+Without options, or with only the
+Fl v
+option,
+.Nm
+prints 3 lines to stdout for every service directory listed in
+.Ar servicedirs .
+Every line contains the name of the service directory, then the
+following information:
+.Bl -tag -width x
+.It status:
+Indicates who is allowed to read status information on the service,
+with commands such as
+.Xr s6-svstat 8
+or
+.Xr s6-svdt 8 .
+The values can be
+.Ql owner ,
+for only the owner of the service;
+.Ql group: Ns Ar name ,
+for the owner and members of group
+.Ar name ;
+or
+.Ql public ,
+for all users.
+.It control:
+Indicates who is allowed to send control commands to the service, with
+commands such as
+.Xr s6-svc 8 .
+The values can be
+.Ql owner ,
+for only the owner of the service; or
+.Ql group: Ns Ar name ,
+for the owner and members of group
+.Ar name .
+.It events:
+Indicates who is allowed to subscribed to events sent by
+.Xr s6-supervise 8
+for this service, with commands such as
+.Xr s6-svwait 8
+or
+.Xr s6-svlisten1 8 .
+The values can be
+.Ql group: Ns Ar name ,
+for the owner and members of group
+.Ar name ;
+or
+.Ql public ,
+for all users.
+.El
+.Pp
+If something goes wrong while reading a part of the configuration of a
+service directory,
+.Nm
+does not print the corresponding line to stdout; instead, it prints a
+warning message to stderr.
+.Pp
+When invoked with other options,
+.Nm
+modifies the permissions of the service directories listed in
+.Ar servicedirs...
+as specified by the options.
+The same permissions will be applied to all the services listed in
+.Ar servicedirs... .
+.Pp
+The default (restrictive) permissions are safe.
+.Pp
+Unless operation of a service is restricted information, it is also
+safe to make
+.Ql status\&:
+more permissive.
+.Pp
+Opening
+.Ql control\&:
+to a group can be useful for instance in a shared administration
+situation when individual administrators are not given full root
+powers.
+.Pp
+Making
+.Ql events\&:
+public bears a small risk of a local DoS attack preventing more
+subscriptions to events, so it is not recommended for supervision
+trees where such subscriptions are critical to operations - such as a
+set of root services managed by s6-rc[1].
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl v
+Re-read the permissions after writing them, and print them to stdout.
+.It Fl u
+Restrict the
+.Ql status\&:
+and
+.Ql control\&:
+permissions to
+.Ql owner :
+only the owner of a service directory will be able to read its state
+or control the service.
+This is the default when
+.Xr s6-supervise 8
+starts a service for the first time.
+.It Fl g Ar group
+Allow members of group
+.Ar group
+to read the status of the service, but not to control it - control
+will be restricted to the owner.
+.It Fl G Ar group
+Allow members of group
+.Ar group
+to read
+.Em and
+control the service.
+.It Fl o
+Allow everyone to read the status of the service, but restrict
+.Ql control\&:
+to the owner.
+.It Fl O Ar group
+Allow everyone to read the status, and allow members of group
+.Ar group
+to control the service.
+.It Fl e
+Allow everyone to subscribe to events.
+.It Fl E Ar group
+Only allow members of group
+.Ar group
+to subscribe to events.
+This is the default when
+.Xr s6-supervise 8
+starts a service for the first time, with
+.Ar group
+being the primary group of the
+.Xr s6-supervise 8
+process
+.Po
+most likely
+.Ql root
+.Pc .
+.El
+.Pp
+.Ar group
+is normally a group name that will be searched in the group
+database.
+But if it starts with a colon
+.Po
+.Ql \&:
+.Pc ,
+the rest of
+.Ar group
+will be interpreted as a numerical gid, and the group database will
+not be read.
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 1
+Something went wrong when reading permissions in one of the service directories.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+[1]
+.Lk https://skarnet.org/software/s6-rc/
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-svperms.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

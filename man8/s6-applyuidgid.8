@@ -1,0 +1,82 @@
+.Dd September 29, 2021
+.Dt S6-APPLYUIDGID 8
+.Os
+.Sh NAME
+.Nm s6-applyuidgid
+.Nd execute a program with reduced privileges
+.Sh SYNOPSIS
+.Nm
+.Op Fl z
+.Op Fl u Ar uid
+.Op Fl g Ar gid
+.Op Fl G Ar gidlist
+.Op Fl U
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+sets its uid, gid and supplementary group list to the values given,
+then executes into
+.Ar prog .
+.Nm
+can only be run as root.
+Its main use is to drop root privileges before starting a daemon.
+.Nm
+is a more generic version of
+.Xr s6-setuidgid 8 .
+It is used as a command line building block by some programs that
+rewrite their command line, such as
+.Xr s6-tcpserver 8 .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl u Ar uid
+Set the process' user ID to
+.Ar uid .
+.It Fl g Ar gid
+Set the process' group ID to
+.Ar gid .
+.It Fl G Ar gidlist
+Set the process' supplementary group list to
+.Ar gidlist ,
+which must be given as a comma-separated list of numeric GIDs, without
+spaces.
+.It Fl U
+Set the process' user ID, group ID and supplementary group list to the
+values of the
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+environment variables.
+If a
+.Fl u ,
+.Fl g
+or
+.Fl G
+option is given after
+.Fl U ,
+the command line value overrides the environment variable.
+.It Fl z
+Unexport.
+The
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+variables will be removed from the process environment.
+.El
+.Sh SEE ALSO
+.Xr s6-envdir 8 ,
+.Xr s6-envuidgid 8 ,
+.Xr s6-fghack 8 ,
+.Xr s6-setsid 8 ,
+.Xr s6-setuidgid 8 ,
+.Xr s6-softlimit 8 ,
+.Xr s6-tai64n 8 ,
+.Xr s6-tai64nlocal 8 ,
+.Xr s6-tcpserver 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-applyuidgid.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

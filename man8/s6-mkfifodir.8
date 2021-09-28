@@ -1,0 +1,53 @@
+.Dd September 29, 2021
+.Dt S6-MKFIFODIR 8
+.Os
+.Sh NAME
+.Nm s6-mkfifodir
+.Nd create an
+.Xr s6-fifodir 7
+.Sh SYNOPSIS
+.Nm
+.Op Fl f
+.Op Fl g Ar gid
+.Ar fifodir
+.Sh DESCRIPTION
+.Nm
+creates
+.Ar fifodir ,
+belonging to the current user.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl f
+Force permissions.
+If
+.Ar fifodir
+already exists, change its permissions according to the
+.Fl g
+options.
+By default, if
+.Ar fifodir
+exists,
+.Nm
+does nothing.
+.It Fl g Ar gid
+Make
+.Ar fifodir
+only listenable by members of group
+.Ar gid .
+If this option is not given, the
+.Ar fifodir
+is made publically listenable.
+.El
+.Sh SEE ALSO
+.Xr s6-cleanfifodir 8 ,
+.Xr s6-ftrig-listen 8 ,
+.Xr s6-ftrig-listen1 8 ,
+.Xr s6-ftrig-notify 8 ,
+.Xr s6-ftrig-wait 8 ,
+.Xr s6-ftrigrd 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-mkfifodir.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

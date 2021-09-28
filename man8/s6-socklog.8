@@ -1,0 +1,247 @@
+.Dd September 29, 2021
+.Dt S6-SOCKLOG 8
+.Os
+.Sh NAME
+.Nm s6-socklog
+.Nd minimal syslog daemon
+.Sh SYNOPSIS
+.Nm
+.Op Fl d Ar notif
+.Op Fl r
+.Op Fl U | Fl u Ar uid Fl g Ar gid Fl G Ar gidlist
+.Op Fl l Ar linelen
+.Op Fl t Ar lameducktimeout
+.Op Fl x Ar unixsocket | Fl i Ar ipport
+.Sh DESCRIPTION
+.Nm
+is a reimplementation of the
+.Xr socklog 8
+program with a few more features.
+.Pp
+.Nm
+reads datagrams from the
+.Pa /dev/log
+Unix domain socket, or from a Unix domain or Internet domain socket of
+the user's choice, converts the encoded syslog facility and priority
+names to their human-readable equivalents, and prints the logs to its
+stdout.
+.Bl -bullet -width x
+.It
+.Nm
+binds to
+.Pa /dev/log .
+.It
+It drops its root privileges.
+.It
+For every datagram it reads, it turns its content into a log line:
+.Bl -bullet -width x
+.It
+Messages are truncated to 1024 characters.
+.It
+Trailing nulls or newlines are removed.
+.It
+Embedded nulls or newlines are converted to
+.Ql ~
+characters (tildes).
+.It
+A
+.Ql syslogcode
+at the beginning of the line is converted to
+.Ql facility.priority:\ \& .
+.El
+.It
+It prints the log line to its stdout, terminated by a newline.
+.It
+It exits 0 on a SIGTERM.
+.El
+.Ss Signals
+.Nm
+reacts to the following signals:
+.Bl -tag -width x
+.It SIGTERM
+Exit as soon as possible.
+.El
+.Ss Typical use
+.Nm
+can be paired with
+.Xr s6-log 8
+to implement
+.Ql syslogd
+functionality.
+.Nm
+acts as the
+.Em frontend :
+it reads the log lines and processes them, then pipes them
+to an
+.Xr s6-log 8
+instance that acts as the
+.Em backend ,
+i.e. sorts the log lines depending on regular expressions that
+typically involve the facility and priority names, then stores them
+into the filesystem.
+.Pp
+The pipe between
+.Nm
+and
+.Xr s6-log 8
+is typically a
+.Em logging pipe
+automatically provided by
+.Xr s6-svscan 8
+when the
+.Xr s6-log 8
+instance is declared as a logger service for the
+.Nm
+instance.
+.Pp
+The
+.Pa examples/
+subdirectory of the s6 package contains a turnkey
+.Ql syslogd
+service that implements this pattern.
+.Pp
+.Nm
+cannot be used under
+.Xr s6-ipcserver 8
+or another super-server.
+It does not implement the
+.Sq socklog ucspi functionality ,
+which is provided by the
+.Xr ucspilogd 8
+program instead.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl r
+Raw logging.
+.Ql <syslogcode>
+codes will not be converted to facility/priority names.
+.It Fl d Ar notif
+When ready (actually bound to its socket), write a newline to file
+descriptor
+.Ar notif
+then close it.
+This allows
+.Nm
+to use the
+.Xr s6-notifywhenup 7
+mechanism to notify readiness.
+.Ar notif
+cannot be less than 3.
+If this option is not given, no readiness notification is sent.
+.It Fl u Ar uid
+Drop user id to
+.Ar id .
+.It Fl g Ar gid
+Drop group id to
+.Ar gid .
+.It Fl G Ar gidlist
+Set supplementary group list to
+.Ar gidlist ,
+which must be given as a comma-separated list of numeric gids, without
+spaces.
+.It Fl U
+Set user id, group id and supplementary group list to the values of
+the
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+environment variables.
+If a
+.Fl u ,
+.Fl g
+or
+.Fl G
+option is given after
+.Fl U ,
+the command line value overrides the environment variable.
+.It Fl l Ar linelen
+Set the maximum datagram size to
+.Ar linelen .
+Default is 1024.
+It cannot be set to less than 80 or more than 1048576.
+If a datagram is bigger than
+.Ar linelen ,
+it will be truncated to
+.Ar linelen
+characters, and the logged line will end with a
+.Ql ...
+ellipsis to show the truncation.
+.It Fl t Ar lameducktimeout
+On receipt of a
+.Dv SIGTERM ,
+give
+.Nm
+a grace period of
+.Ar lameducktimeout
+milliseconds to flush any log lines that are still in its buffer.
+Default is 0, which means infinite: the program will only exit when
+its buffer is empty, and may wait forever.
+If
+.Ar lameducktimeout
+is nonzero and the timeout expires, the program will exit 99.
+.It Fl x Ar unixsocket
+Bind to a Unix domain socket at
+.Ar unixsocket .
+Default is
+.Pa /dev/log .
+.It Fl i Ar ipport
+Bind to a UDP socket.
+.Ar ipport
+is a combination of
+.Ar ip ,
+which must be an IPv4 or IPv6 address, and
+.Ar port ,
+which must be an integer.
+.Ar port
+may be omitted, in which case it defaults to 514.
+If
+.Ar port
+is given,
+.Ar ip
+and
+.Ar port
+must be separated by a
+.Ql _
+character (an underscore).
+If
+.Ar ip
+is IPv4, a
+.Ql \&:
+(colon) can be used instead of an underscore.
+When this option is used,
+.Nm
+will prepend every log line with
+.Sq Ar clientip Ns _  Ns Ar clientport:\ \& ,
+.Ar clientip
+and
+.Ar clientport
+being the IP address and port of the client that sent the log
+datagram.
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+.Dv SIGTERM
+received, clean exit.
+.It 99
+.Dv SIGTERM
+received but the buffer could not be flushed in time, some logs may be
+lost.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+.Xr s6-ipcserver 8 ,
+.Xr s6-log 8 ,
+.Xr s6-svscan 8 ,
+.Xr socklog 8 ,
+.Xr ucspilogd 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-socklog.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

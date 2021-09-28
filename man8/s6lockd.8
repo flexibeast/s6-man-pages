@@ -1,0 +1,79 @@
+.Dd September 29, 2021
+.Dt S6LOCKD 8
+.Os
+.Sh NAME
+.Nm s6lockd
+.Nd
+.Xr s6-s6lock 7
+daemon which manages a set of lock files in a given directory, and
+associated timeouts
+.Sh DESCRIPTION
+.Nm
+does not fork, does not background itself automatically, and does not
+use syslog.
+It is not meant to be run directly by the user: it will be spawned by
+the
+.Xr s6-s6lock 7
+client library.
+.Pp
+There are two ways to use
+.Nm :
+.Bl -enum -width x
+.It
+Use the
+.Fn s6lock_startf
+library call.
+An
+.Nm
+child will then be spawned from your calling process, and
+automatically reaped when you call
+.Fn s6lock_end .
+It requires care with applications that trap SIGCHLD.
+It also requires care with lock file permissions: an
+.Nm
+instance might not be able to open a lock file created by a former
+instance run by another client with different permissions.
+.It
+Use the
+.Fn s6lock_start
+library call, together with an
+.Nm
+.Xr s6-local-service 7 .
+For once,
+.Em this is the recommended setup :
+.Nm
+creates empty lock files, and having all
+.Nm
+instances run under the same user simplifies permissions management
+considerably.
+.El
+.Pp
+When run as a service,
+.Nm
+has no
+.Dq standalone
+mode: it is designed to work with a Unix domain super-server, like
+.Xr s6-ipcserver 8 .
+.Nm
+follows the UCSPI[1] interface; it can be directly executed from the
+super-server.
+.Pp
+Unix does not natively provide a way to stop blocking on a lock
+acquisition after a timeout.
+To emulate such behaviour,
+.Nm
+actually spawns an
+.Xr s6lockd-helper 8
+child per requested lock.
+.Sh SEE ALSO
+.Xr s6-setlock 8 ,
+.Xr s6lockd-helper 8
+.Pp
+[1]
+.Lk https://cr.yp.to/proto/ucspi.txt
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/libs6/s6lockd.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

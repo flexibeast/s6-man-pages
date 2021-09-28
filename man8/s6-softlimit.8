@@ -1,0 +1,96 @@
+.Dd September 29, 2021
+.Dt S6-SOFTLIMIT 8
+.Os
+.Sh NAME
+.Nm s6-softlimit
+.Nd change process limits, then execute into another program
+.Sh SYNOPSIS
+.Nm
+.Op Fl a Ar allmem
+.Op Fl c Ar core
+.Op Fl d Ar data
+.Op Fl f Ar fsize
+.Op Fl l Ar lock
+.Op Fl m Ar mem
+.Op Fl o Ar ofiles
+.Op Fl p Ar proc
+.Op Fl r Ar res
+.Op Fl s Ar stack
+.Op Fl t Ar cpusecs
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+parses its options and sets process (soft) resource limits accordingly.
+.Pp
+A value of
+.Ql =
+for any option means
+.Dq set that limit to the hard limit .
+.Pp
+Depending on your operating system, an option may do nothing.
+.Pp
+When
+.Nm
+has modified all the limits successfully, it executes into
+.Ar prog... .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl a Ar allmem
+Limit the total available memory to
+.Ar allmem
+bytes.
+.It Fl c Ar core
+Limit the core file size to
+.Ar core
+bytes.
+.It Fl d Ar data
+Limit the available heap memory to
+.Ar data
+bytes.
+.It Fl f Ar fsize
+Limit the file size to
+.Ar fsize
+bytes.
+.It Fl l Ar lock
+Limit the available locked memory to
+.Ar lock
+bytes.
+.It Fl m Ar mem
+Limit all types of memory to
+.Ar mem
+bytes.
+.It Fl o Ar ofiles
+Limit the number of open fds to
+.Ar ofiles .
+.It Fl p Ar proc
+Limit the number of processes to
+.Ar proc
+(per user).
+.It Fl r Ar res
+Limit the available physical memory to
+.Ar res
+bytes.
+.It Fl s Ar stack
+Limit the available stack memory to
+.Ar stack
+bytes.
+.It Fl t Ar cpusecs
+Limit the available CPU time to
+.Ar cpusecs
+seconds.
+.El
+.Sh SEE ALSO
+.Xr s6-applyuidgid 8 ,
+.Xr s6-envdir 8 ,
+.Xr s6-envuidgid 8 ,
+.Xr s6-fghack 8 ,
+.Xr s6-setsid 8 ,
+.Xr s6-setuidgid 8 ,
+.Xr s6-tai64n 8 ,
+.Xr s6-tai64nlocal 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-softlimit.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

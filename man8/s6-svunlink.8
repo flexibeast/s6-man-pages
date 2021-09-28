@@ -1,0 +1,121 @@
+.Dd September 29, 2021
+.Dt S6-SVUNLINK 8
+.Os
+.Sh NAME
+.Nm s6-svunlink
+.Nd integrate service directories into an existing service manager sequence and eliminate race conditions
+.Sh SYNOPSIS
+.Nm
+.Op Fl X
+.Op Fl t Ar timeout
+.Ar scandir
+.Ar name
+.Sh DESCRIPTION
+.Nm
+unlinks an
+.Xr s6-service-directory 7
+from an
+.Xr s6-scan-directory 7 ,
+then notifies
+.Xr s6-svscan 8
+that a service has been unregistered.
+It waits until the
+.Xr s6-supervise 8
+supervisor process managing the service has disappeared, then exits.
+.Bl -bullet -width x
+.It
+.Nm
+expects a running
+.Xr s6-svscan 8
+process on
+.Ar scandir
+and a fully functional supervised service on the
+.Xr s6-service-directory 7
+in
+.Ql Ar scandir Ns / Ns Ar name ,
+which must be a symbolic link to a real directory located somewhere
+else.
+.It
+It deletes the
+.Ql Ar scandir Ns / Ns Ar name
+symlink.
+.It
+It sends a command to
+.Xr s6-svscan 8
+to signal it that a service has disappeared.
+.It
+It waits for the
+.Xr s6-supervise 8
+process managing the service directory to exit.
+.It
+It exits 0.
+.El
+.Pp
+Using
+.Nm
+to stop services is a suboptimal pattern: starting and stopping
+supervisors is a heavier operation than just stopping services.
+The simpler, more efficient pattern is to simply perform
+.Ql s6-svc -dwD Ar scandir Ns / Ns Ar name ,
+which only commands, and waits for, the death of the service, without
+impacting the supervisor.
+Nevertheless, for symmetry with
+.Xr s6-svlink 8 ,
+this program is provided.
+.Pp
+.Nm
+is a destructor; as is, it returns 0 even in situations that are
+nominal failures.
+For instance, it returns 0 even if its timeout expires; the rationale
+is that there is no sensible action for the user to do if this error
+is reported.
+.Nm
+only reports errors when they uncover a deeper problem in the system.
+.Pp
+.Nm
+sends a
+.Ql s6-svscanctl -an
+command to
+.Ar scandir ,
+which means that the system's view of services will be refreshed and
+inactive services will be killed and unsupervised.
+Depending on what links exist in
+.Ar scandir ,
+new services may appear, and other services than
+.Ar name
+may disappear.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl X
+Don't wait.
+.Nm
+will exit right away, without waiting for the supervisor to exit first.
+.It Fl t Ar timeout
+If the supervisor has not exited after
+.Ar timeout
+milliseconds,
+.Nm
+will still exit.
+The default is 0, meaning no time limit.
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+.Xr s6-scan-directory 7 ,
+.Xr s6-service-directory 7 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svlink 8 ,
+.Xr s6-svscan 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-svunlink.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

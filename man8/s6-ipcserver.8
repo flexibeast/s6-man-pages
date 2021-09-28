@@ -1,0 +1,225 @@
+.Dd September 29, 2021
+.Dt S6-IPCSERVER 8
+.Os
+.Sh NAME
+.Nm s6-ipcserver
+.Nd UCSPI server tool[1] for Unix domain sockets, i.e. a super-server: accept connections from clients, and fork a program to handle each connection
+.Sh SYNOPSIS
+.Nm
+.Op Fl 1
+.Op Fl q | Q | v
+.Op Fl d | D
+.Op Fl P | p
+.Op Fl a Ar perms
+.Op Fl c Ar maxconn
+.Op Fl C Ar localmaxconn
+.Op Fl b Ar backlog
+.Op Fl G Ar gidlist
+.Op Fl g Ar gid
+.Op Fl u Ar uid
+.Op Fl U
+.Ar path
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+binds a Unix domain socket to
+.Ar path .
+.Pp
+It can drop its root privileges.
+.Pp
+It closes its stdin and stdout.
+.Pp
+For every client connection to this socket, it forks.
+The child sets some environment variables, then executes
+.Ar prog...
+with stdin reading from the socket and stdout writing to it.
+.Pp
+Depending on the verbosity level, it logs what it does to stderr.
+.Pp
+It runs until killed by a signal.
+Depending on the received signal, it may kill its children before
+exiting.
+.Pp
+.Nm
+actually doesn't do any of this itself.
+It is a wrapper, rewriting the command line and executing into a chain
+of programs that perform those duties.
+.Pp
+Previous versions of
+.Nm
+were monolithic: it did the work of
+.Xr s6-ipcserver-socketbinder 8 ,
+.Xr s6-applyuidgid 8
+and
+.Xr s6-ipcserverd 8
+itself.
+The functionality has now been split into several different programs
+because some service startup schemes require the daemon to get its
+socket from an external program instead of creating and binding it
+itself.
+The most obvious application of this is upgrading a long-lived
+process without losing existing connections.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl 1
+Write a newline to stdout, before closing it, right after binding and
+listening to the Unix socket.
+If stdout is suitably redirected, this can be used by monitoring
+programs to check when the server is ready to accept connections.
+.It Fl q
+Be quiet.
+.It Fl Q
+Be normally verbose.
+This is the default.
+.It Fl v
+Be verbose.
+.It Fl d
+Allow instant rebinding to the same path even if it has been used not
+long ago - this is the
+.Dv SO_REUSEADDR
+flag to
+.Xr setsockopt 2
+and is generally used with server programs.
+This is the default.
+Note that
+.Ar path
+will be deleted if it already exists at program start time.
+.It Fl D
+Disallow instant rebinding to the same path.
+.It Fl P
+Disable client credentials lookups.
+The
+.Ev IPCREMOTEEUID
+and
+.Ev IPCREMOTEEGID
+environment variables will be unset in every instance of
+.Ar prog... .
+This is the portable option, because not every system supports
+credential lookup across Unix domain sockets; but it is not as secure.
+.It Fl p
+Enable client credentials lookups.
+This is the default; it works at least on Linux, Solaris, and *BSD
+systems.
+On systems that do not support it, every connection attempt will fail
+with a warning message.
+.It Fl c Ar maxconn
+Accept at most
+.Ar maxconn
+concurrent connections.
+Default is 40.
+It is impossible to set it higher than 1000.
+.It Fl C Ar localmaxconn
+Accept at most
+.Ar localmaxconn
+connections from the same user ID.
+Default is 40.
+It is impossible to set it higher than
+.Ar maxconn .
+.It Fl b Ar backlog
+Set a maximum of
+.Ar backlog
+backlog connections on the socket.
+Extra connection attempts will rejected by the kernel.
+.It Fl a Ar perms
+Create the socket with permissions
+.Ar perms ,
+which is an octal number from 0000 to 0777.
+Default is 0777, meaning everyone can connect to it.
+0700 means only processes having the same uid as the
+.Nm
+process can connect to it.
+.It Fl G Ar gidlist
+Change
+.Nm Ap
+s supplementary group list to
+.Ar gidlist
+after binding the socket.
+This is only valid when run as root.
+.Ar gidlist
+must be a comma-separated list of numerical group IDs.
+.It Fl g Ar gid
+Change
+.Nm Ap
+s groupid to
+.Ar gid
+after binding the socket.
+This is only valid when run as root.
+.It Fl u Ar uid
+Change
+.Nm Ap
+s userid to
+.Ar uid
+after binding the socket.
+This is only valid when run as root.
+.It Fl U
+Change
+.Nm Ap
+s user id, group id and supplementary group list according to the
+values of the
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+environment variables after binding the socket.
+This is only valid when run as root.
+This can be used with the
+.Xr s6-envuidgid 8
+program to easily script a service that binds to a privileged socket
+then drops its privileges to those of a named non-root account.
+.El
+.Sh IMPLEMENTATION NOTES
+.Nm
+parses the options and arguments it is given, and builds a new command
+line with them.
+It then executes into that new command line.
+.Pp
+The first program
+.Nm s6-ipcserver
+executes into is
+.Xr s6-ipcserver-socketbinder 8 .
+It will create and bind a Unix domain socket to
+.Ar path ,
+then execute into the rest of the command line.
+.Pp
+If a privilege-dropping operation has been requested, the program that
+.Xr s6-ipcserver-socketbinder 8
+executes into is
+.Xr s6-applyuidgid 8 .
+It will drop the root privileges, then execute into the rest of the
+command line.
+.Pp
+The next program in the chain is
+.Xr s6-ipcserverd 8 .
+It is executed into by
+.Xr s6-applyuidgid 8 ,
+or directly by
+.Xr s6-ipcserver-socketbinder 8
+if no privilege-dropping operation has been requested.
+.Xr s6-ipcserverd 8
+is the long-lived process, the
+.Dq daemon
+itself, accepting connections from clients.
+.Pp
+For every client,
+.Xr s6-ipcserverd 8
+will spawn an instance of
+.Ar prog... ,
+the remainder of the command line.
+.Sh SEE ALSO
+.Xr s6-accessrules-cdb-from-fs 8 ,
+.Xr s6-accessrules-fs-from-cdb 8 ,
+.Xr s6-connlimit 8 ,
+.Xr s6-ioconnect 8 ,
+.Xr s6-ipcclient 8 ,
+.Xr s6-ipcserver-access 8 ,
+.Xr s6-ipcserver-socketbinder 8 ,
+.Xr s6-ipcserverd 8
+.Pp
+[1]
+.Lk https://cr.yp.to/proto/ucspi.txt
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-ipcserver.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

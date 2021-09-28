@@ -1,0 +1,99 @@
+.Dd September 29, 2021
+.Dt S6-FTRIG-LISTEN 8
+.Os
+.Sh NAME
+.Nm s6-ftrig-listen
+.Nd subscribe to several
+.Xr s6-fifodir 7 Ns s ,
+spawn a program, then wait for pattern of events to occur on the
+fifodirs
+.Sh SYNOPSIS
+In an
+.Xr execlineb 1
+script:
+.Pp
+.Nm
+.Op Fl a | o
+.Op Fl t Ar timeout
+.Bro
+.Ar fifodir-1
+.Ar regexp-1
+.Ar fifodir-2
+.Ar regexp-2
+.Brc
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+subscribes to
+.Ar fifodir1
+with the regexp
+.Ar regexp1 ,
+to
+.Ar fifodir2
+with the regexp
+.Ar regexp2 ,
+and so on.
+.Pp
+It then forks and execs
+.Ar prog...
+with all its arguments.
+.Pp
+It waits for the series of events received on
+.Ar fifodir Ns - Ns Em i
+to match
+.Ar regexp Ns - Ns Em i .
+.Ar regexp Ns - Ns Em i
+must be Extended Regular Expressions[1].
+.Pp
+When the series of read events matches the regexps,
+.Nm
+exits 0.
+.Nm
+can be used outside of an execlineb script by using the internal argv
+syntax, but this syntax is an implementation detail and is not
+documented as stable.
+In a shell script, use
+.Ql execlineb -Pc 's6-ftrig-listen ...'
+to get the benefits of the execlineb brace syntax.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl t Ar timeout
+If the events on the fifodirs have not matched the regexps after
+.Ar timeout
+milliseconds, print an error message on stderr and exit 1.
+By default,
+.Nm
+waits indefinitely for a matching series of events.
+.It Fl a
+And (conjunction).
+.Nm
+will only exit when all the
+.Ar fifodir Ns - Ns Em i
+have been notified with events matching the corresponding
+.Ar regexp Ns - Ns Em i .
+This is the default.
+.It Fl o
+Or (disjunction).
+.Nm
+will exit as soon as one of the
+.Ar fifodir Ns - Ns Em i
+has been notified with events matching its
+.Ar regexp Ns - Ns Em i .
+.El
+.Sh SEE ALSO
+.Xr execlineb 1 ,
+.Xr s6-cleanfifodir 8 ,
+.Xr s6-ftrig-listen1 8 ,
+.Xr s6-ftrig-notify 8 ,
+.Xr s6-ftrig-wait 8 ,
+.Xr s6-ftrigrd 8 ,
+.Xr s6-mkfifodir 8
+.Pp
+[1]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html#tag_09_04
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-ftrig-listen.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

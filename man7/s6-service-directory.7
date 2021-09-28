@@ -1,0 +1,515 @@
+.Dd September 29, 2021
+.Dt S6-SERVICE-DIRECTORY 7
+.Os
+.Sh NAME
+.Nm s6-service-directory
+.Nd directory containing all the information related to a service, i.e. a long-running process maintained and supervised by
+.Xr s6-supervise 8
+.Sh DESCRIPTION
+Strictly speaking, a
+.Em service
+is not always equivalent to a long-running process.
+Things like Ethernet interfaces fit the definition of
+.Em services
+one may want to supervise; however, s6 does not
+provide
+.Em service supervision ;
+it provides
+.Em process supervision ,
+and it is impractical to use the s6 architecture as is to supervise
+services that are not equivalent to one long-running process.
+However, we still use the terms
+.Em service
+and
+.Em service directory
+for historical and compatibility reasons.
+.Ss Directory contents
+A service directory foo may contain the following elements:
+.Bl -bullet -width x
+.It
+An executable file named
+.Pa run .
+It can be any executable file (such as a binary file or a link to any
+other executable file), but most of the time it will be a script,
+called
+.Em run script .
+This file is the most important one in your service directory: it
+contains the commands that will setup and run your
+.Em foo
+service.
+It is forked and executed by
+.Xr s6-supervise 8
+every time the service must be started, i.e. normally when
+.Xr s6-supervise 8
+starts, and whenever the service goes down when it is supposed to be
+up.
+A run script should normally:
+.Bl -bullet -width x
+.It
+adjust redirections for stdin, stdout and stderr.
+When a run script starts, it inherits its standard file descriptors
+from
+.Xr s6-supervise 8 ,
+which itself inherits them from
+.Xr s6-svscan 8 .
+stdin is normally
+.Pa /dev/null .
+If
+.Xr s6-svscan 8
+was launched by another init system, stdout and stderr likely point to
+that init system's default log (or
+.Pa /dev/null
+in the case of sysvinit).
+If
+.Xr s6-svscan 8
+is running as pid 1 via the help of software like s6-linux-init[1],
+then its stdout and stderr point to a catch-all logger, which catches
+and logs any output of the supervision tree that has not been caught
+by a dedicated logger.
+If the defaults provided by your installation are not suitable for
+your run script, then your run script should perform the proper
+redirections before executing into the final daemon.
+For instance, dedicated logging mechanisms, such as the
+.Pa log
+subdirectory (see below) or the s6-rc[2] pipeline feature, pipe your
+run script's stdout to the logging service, but chances are you want
+to log stderr as well, so the run script should make sure that its
+stderr goes into the log pipe.
+This is achieved by
+.Ql fdmove -c 2 1
+in execline[3], and
+.Ql exec 2>&1
+in shell[4].
+.It
+adjust the environment for your
+.Em foo
+daemon.
+Normally the run script inherits its environment from
+.Xr s6-supervise 8 ,
+which normally inherits its environment from
+.Xr s6-svscan 8 ,
+which normally inherits a minimal environment from the boot
+scripts.
+Service-specific environment variables should be set in the run
+script.
+.It
+adjust other parameters for the
+.Em foo
+daemon, such as its uid and gid.
+Normally the supervision tree, i.e.
+.Xr s6-svscan 8
+and the various
+.Xr s6-supervise 8
+processes, is run as root, so run scripts are also run as root;
+however, for security purposes, services should not run as root if
+they don't need to.
+You can use the
+.Xr s6-setuidgid 8
+utility in
+.Pa foo/run
+to lose privileges before executing into
+.Em foo Ap
+s long-lived process; or the
+.Xr s6-envuidgid 8
+utility if your long-lived process needs root privileges at start time
+but can drop them afterwards.
+.It
+execute into the long-lived process that is to be supervised by
+.Xr s6-supervise 8 ,
+i.e. the real
+.Em foo
+daemon.
+That process must not
+.Dq background itself :
+being run by a supervision tree already makes it a
+.Dq background task.
+.El
+.It
+An optional executable file named
+.Pa finish .
+Like
+.Pa run ,
+it can be any executable file.
+This
+.Em finish script ,
+if present, is executed everytime the
+.Pa run
+script dies.
+Generally, its main purpose is to clean up non-volatile data such as
+the filesystem after the supervised process has been killed.
+If the
+.Em foo
+service is supposed to be up,
+.Pa foo/run
+is restarted after
+.Pa foo/finish
+dies.
+.Bl -bullet -width x
+.It
+By default, a finish script must do its work and exit in less than 5
+seconds; if it takes more than that, it is killed.
+(The point is that the run script, not the finish script, should be
+running; the finish script should really be short-lived.)
+The maximum duration of a
+.Pa finish
+execution can be configured via the
+.Pa timeout-finish
+file, see below.
+.It
+The finish script is executed with two arguments: the exit code from
+the run script (resp. 256 if the run script was killed by a signal),
+and an undefined number (resp. the number of the signal that killed
+the run script).
+.It
+If the finish script exits 125, then
+.Xr s6-supervise 8
+interprets this as a permanent failure for the service, and does not
+restart it, as if an
+.Ql s6-svc -O
+command had been sent.
+.It
+If
+.Xr s6-supervise 8
+has been instructed to exit after the service dies, via an
+.Ql s6-svc -x
+command or a
+.Dv SIGHUP ,
+then the next invocation of
+.Pa finish
+will (obviously) be the last, and it will run with stdin and stdout
+pointing to
+.Pa /dev/null .
+.El
+.It
+A directory named
+.Pa supervise .
+It is automatically created by
+.Xr s6-supervise 8
+if it does not exist.
+This is where
+.Xr s6-supervise 8
+stores its information.
+The directory must be writable.
+.It
+An optional, empty, regular file named
+.Pa down .
+If such a file exists, the default state of the service is considered
+down, not up:
+.Xr s6-supervise 8
+will not automatically start it until it receives a
+.Ql s6-svc -u
+command.
+If no
+.Pa down
+file exists, the default state of the service is up.
+.It
+An optional regular file named
+.Pa notification-fd .
+If such a file exists, it means that the service supports readiness
+notification; refer to
+.Xr s6-notifywhenup 7 .
+The file must only contain an unsigned integer, which is the number of
+the file descriptor that the service writes its readiness notification
+to.
+(For instance, it should be 1 if the daemon is
+.Xr s6-ipcserverd 8
+run with the
+.Fl 1
+option.)
+When a service is started, or restarted, by
+.Xr s6-supervise 8 ,
+if this file exists and contains a valid descriptor number,
+.Xr s6-supervise 8
+will wait for the notification from the service and broadcast
+readiness, i.e. any
+.Ql s6-svwait -U ,
+.Ql s6-svlisten1 -U
+or
+.Ql s6-svlisten -U
+processes will be triggered.
+.It
+An optional regular file named
+.Pa lock-fd .
+If such a file exists, it must contain an unsigned integer,
+representing a file descriptor that will be open in the service.
+The service
+.Em should not write to that descriptor
+and
+.Em should not close it .
+In other words, it should totally ignore it.
+That file descriptor holds a lock, that will naturally be released
+when the service dies.
+The point of this feature is to prevent
+.Xr s6-supervise 8
+from accidentally spawning several copies of the service in case
+something goes wrong: for instance, the service backgrounds itself
+(which it shouldn't do when running under a supervision suite), or
+.Xr s6-supervise 8
+is killed, restarted by
+.Xr s6-svscan 8 ,
+and attempts to start another copy of the service while the first copy
+is still alive.
+If
+.Xr s6-supervise 8
+detects that the lock is held when it tries to start the service, it
+will print a warning message and delay the starting attempt for 60
+seconds.
+.It
+An optional regular file named
+.Pa timeout-kill .
+If such a file exists, it must only contain an unsigned integer
+.Em t .
+If
+.Em t
+is nonzero, then on receipt of an
+.Ql s6-svc -d
+command, which sends a SIGTERM (by default, see down-signal below) and
+a SIGCONT to the service, a timeout of
+.Em t
+milliseconds is set; and if the service is still not dead after
+.Em t
+milliseconds, then it is sent a SIGKILL.
+If
+.Pa timeout-kill
+does not exist, or contains 0 or an invalid value, then the service is
+never forcibly killed (unless, of course, an
+.Ql s6-svc -k
+command is sent).
+.It
+An optional regular file named
+.Pa timeout-finish .
+If such a file exists, it must only contain an unsigned integer, which
+is the number of milliseconds after which the
+.Pa ./finish
+script, if it exists, will be killed with a SIGKILL.
+The default is 5000: finish scripts are killed if they're still alive
+after 5 seconds.
+A value of 0 allows finish scripts to run forever.
+.It
+An optional regular file named
+.Pa max-death-tally .
+If such a file exists, it must only contain an unsigned integer, which
+is the maximum number of service death events that
+.Xr s6-supervise 8
+will keep track of.
+If the service dies more than this number of times, the oldest events
+will be forgotten.
+Tracking death events is useful, for instance, when throttling service
+restarts.
+The value cannot be greater than 4096.
+If the file does not exist, a default of 100 is used.
+.It
+An optional regular file named
+.Pa down-signal .
+If such a file exists, it must only contain the name or number of a
+signal, followed by a newline.
+This signal will be used to kill the supervised process when a
+.Ql s6-svc -d
+or
+.Ql s6-svc -r
+command is used.
+If the file does not exist, SIGTERM will be used by default.
+.It
+A
+.Xr s6-fifodir 7
+named
+.Pa event .
+It is automatically created by
+.Xr s6-supervise 8
+if it does not exist.
+.Pa foo/event
+is the rendez-vous point for listeners, where
+.Xr s6-supervise 8
+will send notifications when the service goes up or down.
+.It
+An optional service directory named
+.Pa log .
+If it exists and
+.Em foo
+is in a
+.Xr s6-scan-directory 7 ,
+and
+.Xr s6-svscan 8
+runs on that scandir, then two services are monitored:
+.Em foo
+and
+.Pa foo/log .
+A pipe is open and maintained between
+.Em foo
+and
+.Pa foo/log ,
+i.e. everything that
+.Pa foo/run
+writes to its stdout will appear on
+.Pa foo/log/run Ap
+s stdin.
+The
+.Em foo
+service is said to be logged; the
+.Em foo/log
+service is called
+.Em foo Ap
+s logger.
+A logger service cannot be logged: if
+.Pa foo/log/log
+exists, nothing special happens.
+.El
+.Pp
+.Sy Stability
+.Pp
+With the evolution of s6, it is possible that
+.Xr s6-supervise 8
+configuration uses more and more files in the service directory.
+The
+.Pa notification-fd
+and
+.Pa timeout-finish
+files, for instance, have appeared in 2015; users who previously had
+files with the same name had to change them.
+There is no guarantee that
+.Xr s6-supervise 8
+will not use additional names in the service directory in the same
+fashion in the future.
+.Pp
+There is, however, a guarantee that
+.Xr s6-supervise 8
+will never touch subdirectories named
+.Pa data
+or
+.Pa env .
+So if you need to store user information in the service directory with
+the guarantee that it will never be mistaken for a configuration file,
+no matter the version of s6, you should store that information in the
+.Pa data
+or
+.Pa env
+subdirectories of the service directory.
+.Ss Where should I store my service directories?
+Service directories describe the way services are launched.
+Once they are designed, they have little reason to change on a given
+machine.
+They can theoretically reside on a read-only filesystem - for
+instance, the root filesystem, to avoid problems with mounting
+failures.
+.Pp
+However, two subdirectories - namely
+.Pa supervise
+and
+.Pa event
+- of every service directory need to be writable.
+So it has to be a bit more complex.
+Here are a few possibilities.
+.Bl -bullet -width x
+.It
+The laziest option: you're not using
+.Xr s6-svscan 8
+as process 1, you're only using it to start a collection of services,
+and your booting process is already handled by another init
+system.
+Then you can just store your service directories and your
+.Xr s6-scan-directory 7
+on some read-write filesystem such as
+.Pa /var ;
+and you tell your init system to launch (and, if possible, maintain)
+.Xr s6-svscan 8
+on the scan directory after that filesystem is mounted.
+.It
+The almost-as-lazy option: just have the service directories on the
+root filesystem.
+Then your service directory collection is for instance in
+.Pa /etc/services
+and you have a
+.Pa /service
+.Xr s6-scan-directory 7
+containing symlinks to that collection.
+This is the easy setup, not requiring an external init system to mount
+your filesystems - however, it requires your root filesystem to be
+read-write, which is unacceptable if you are concerned with
+reliability - if you are, for instance, designing an embedded
+platform.
+.It
+Some people[5] like to have their service directories in a read-only
+filesystem, with supervise symlinks pointing to various places in
+writable filesystems.
+This setup looks a bit complex to me: it requires careful handling of
+the writable filesystems, with not much room for error if the
+directory structure does not match the symlinks (which are then
+dangling).
+But it works.
+.It
+Service directories are usually small; most daemons store their
+information elsewhere.
+Even a complete set of service directories often amounts to less than
+a megabyte of data - sometimes much less.
+Knowing this, it makes sense to have an image of your service
+directories in the (possibly read-only) root filesystem, and copy it
+all to a
+.Xr s6-scan-directory 7
+located on a RAM filesystem that is mounted at boot time.
+This is the setup I recommend, and the one used by the s6-rc[2] service
+manager.
+It has several advantages:
+.Bl -bullet -width x
+.It
+Your service directories reside on the root filesystem and are not
+modified during the lifetime of the system.
+If your root filesystem is read-only and you have a working set of
+service directories, you have the guarantee that a reboot will set
+your system in a working state.
+.It
+Every boot system requires an early writeable filesystem, and many
+create it in RAM.
+You can take advantage of this to copy your service directories early
+and run
+.Xr s6-svscan 8
+early.
+.It
+No dangling symlinks or potential problems with unmounted filesystems:
+this setup is robust.
+A simple
+.Ql /bin/cp -a
+or
+.Ql tar -x
+is all it takes to get a working service infrastructure.
+.It
+You can make temporary modifications to your service directories
+without affecting the main ones, safely stored on the disk.
+Conversely, every boot ensures clean service directories - including
+freshly created
+.Pa supervise
+and
+.Pa event
+subdirectories.
+No stale files can make your system unstable.
+.El
+.El
+.Sh SEE ALSO
+s6-envuidgid 1 ,
+s6-ipcserverd 1 ,
+s6-setuidgid 1 ,
+s6-supervise 1 ,
+s6-svscan 1 ,
+s6-fifodir 7 ,
+s6-notifywhenup 7 ,
+s6-scan-directory 7
+.Pp
+[1]
+.Lk https://skarnet.org/software/s6-linux-init/
+.Pp
+[2]
+.Lk https://skarnet.org/software/s6-rc/
+.Pp
+[3]
+.Lk https://skarnet.org/software/execline/
+.Pp
+[4]
+.Lk https://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
+.Pp
+[5]
+.Lk https://code.dogmap.org/
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/servicedir.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

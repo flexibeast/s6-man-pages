@@ -1,0 +1,70 @@
+.Dd September 29, 2021
+.Dt S6-SUDO 8
+.Os
+.Sh NAME
+.Nm s6-sudo
+.Nd connect to a Unix domain socket and pass its standard file descriptors, command-line arguments and environment to a program running on the server side, potentially with different privileges
+.Sh SYNOPSIS
+.Nm
+.Op Fl q | Q | v
+.Op Fl p Ar bindpath
+.Op Fl l Ar localname
+.Op Fl e
+.Op Fl t Ar timeoutconn
+.Op Fl T Ar timeoutrun
+.Ar path
+.Op Ar args...
+.Sh DESCRIPTION
+.Nm
+executes into
+.Xr s6-ipcclient 8
+.Ar path
+.Xr s6-sudoc 8
+.Ar args... .
+It does nothing else: it is just a convenience program.
+The
+.Xr s6-ipcclient 8
+program connects to a Unix socket at
+.Ar path ,
+and the
+.Xr s6-sudoc 8
+program transmits the desired elements over the socket.
+.Pp
+It should be used to connect to an
+.Xr s6-local-service 7
+running the
+.Xr s6-sudod 8
+program, which will run a server program on the client's behalf.
+.Sh OPTIONS
+The
+.Fl q ,
+.Fl Q ,
+.Fl v ,
+.Fl p
+and
+.Fl l
+options are passed to
+.Xr s6-ipcclient 8 .
+.Pp
+The
+.Fl e ,
+.Fl t
+and
+.Fl T
+options are passed to
+.Xr s6-sudoc 8 .
+.Pp
+Command-line arguments, if any, are also passed to
+.Xr s6-sudoc 8 ,
+which will transmit them to
+.Xr s6-sudod 8
+over the socket.
+.Sh SEE ALSO
+.Xr s6-sudoc 8 ,
+.Xr s6-sudod 8
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-sudo.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

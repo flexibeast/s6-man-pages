@@ -1,0 +1,89 @@
+.Dd September 29, 2021
+.Dt S6-LIBS6 7
+.Os
+.Sh NAME
+.Nm s6-libs6
+.Nd collection of utility C interfaces, used in the s6 executables
+.Sh DESCRIPTION
+.Ss Compiling
+Make sure the s6 headers, as well as the skalibs headers, are visible
+in your header search path.
+.Pp
+Use
+.Ql #include <s6/s6.h> .
+.Ss Linking
+Make sure the s6 libraries, as well as the skalibs libraries, are
+visible in your library search path.
+.Pp
+Link against
+.Ql -ls6
+and
+.Ql -lskarnet .
+If you're using socket functions (which is the case with
+.Xr s6-ftrigr 7 ,
+for instance), add
+.Ql `cat $sysdeps/socket.lib`
+to your command line.
+If you're using timed functions involving TAI timestamps (which is
+also the case with
+.Xr s6-ftrigr 7 ,
+for instance), add
+.Ql `cat $sysdeps/sysclock.lib` .
+.Qq $sysdeps
+stands for your skalibs sysdeps directory.
+.Ss Programming
+The
+.Pa s6/s6.h
+header is actually a concatenation of other headers: libs6 is
+separated into several modules, each of them with its own header.
+.Bl -bullet -width x
+.It
+The
+.Pa s6/accessrules.h
+header provides functions to check credentials against configuration
+files.
+Refer to
+.Xr s6-accessrules 7 .
+.It
+The
+.Pa s6/ftrigr.h
+header provides functions to subscribe to
+.Xr s6-fifodir 7 Ns s
+and be notified of events.
+Refer to
+.Xr s6-ftrigr 7 .
+.It
+The
+.Pa s6/ftrigw.h
+header provides functions to manage
+.Xr s6-fifodir 7 Ns s
+and send notifications to them.
+Refer to
+.Xr s6-ftrigw 7 .
+.It
+The
+.Pa s6/s6lock.h
+header provides functions to acquire locks with a timeout.
+Refer to
+.Xr s6-s6lock 7 .
+.It
+The
+.Pa s6/s6-fdholder.h
+header provides functions to communicate with an
+.Xr s6-fdholderd 8
+server and exchange file descriptors with it.
+Refer to
+.Xr s6-fdholder 7 .
+.El
+.Sh SEE ALSO
+.Xr s6-accessrules 7 ,
+.Xr s6-fdholder 7 ,
+.Xr s6-ftrigr 7 ,
+.Xr s6-ftrigw 7 ,
+.Xr s6-s6lock 7
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/libs6/
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

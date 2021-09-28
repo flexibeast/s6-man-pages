@@ -1,0 +1,88 @@
+.Dd September 29, 2021
+.Dt S6-TAI64NLOCAL 8
+.Os
+.Sh NAME
+.Nm s6-tai64nlocal
+.Nd read from stdin and write to stdout, replacing every line beginning with a TAI64N timestamp[1] with a human-readable local date and time
+.Sh SYNOPSIS
+.Nm
+.Op Fl g
+.Sh DESCRIPTION
+.Nm
+exits 0 when it sees the end of stdin.
+If there's an unfinished line,
+.Nm
+processes it and writes it before exiting.
+.Pp
+The typical use case of
+.Nm
+is to read files that have been filtered through
+.Xr s6-tai64n 8 ,
+or log files that have been produced by
+.Xr s6-log 8
+with the
+.Fl t
+option.
+For instance, to read the latest httpd logs with human-readable
+timestamps,
+.Ql s6-tai64nlocal < /var/log/httpd/current | less
+is a possible command.
+.Pp
+.Nm
+does neither
+.Dq line buffering
+nor
+.Dq block buffering .
+It does optimal buffering, i.e. it flushes its output buffer every
+time it risks blocking on input.
+.Pp
+If
+.Nm
+does not appear to give the correct local time:
+.Bl -bullet -width x
+.It
+Check the compilation options that were used for the skalibs[2] libraries
+your
+.Nm s6-tai64nlocal
+program was linked against.
+In particular, check whether the
+.Ql --enable-tai-clock
+or
+.Ql --enable-right-tz
+configure options have been given.
+.It
+Compare these flags and their meanings with your current timezone.
+In particular, check
+.Pa /etc/localtime ,
+.Pa /etc/timezone ,
+.Pa /etc/TZ ,
+and the
+.Ev TZ
+environment variable.
+.El
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl g
+Print GMT time instead of local time.
+.El
+.Sh SEE ALSO
+.Xr s6-applyuidgid 8 ,
+.Xr s6-envdir 8 ,
+.Xr s6-envuidgid 8 ,
+.Xr s6-fghack 8 ,
+.Xr s6-setsid 8 ,
+.Xr s6-setuidgid 8 ,
+.Xr s6-softlimit 8 ,
+.Xr s6-tai64n 8
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/libstddjb/tai.html#timestamp
+.Pp
+[2]
+.Lk https://skarnet.org/software/skalibs/
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-tai64nlocal.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

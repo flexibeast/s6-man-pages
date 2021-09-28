@@ -1,0 +1,167 @@
+.Dd September 29, 2021
+.Dt S6-ENVUIDGID 8
+.Os
+.Sh NAME
+.Nm s6-envuidgid
+.Nd potentially set the
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+environment variables according to the options and arguments it is
+given, then execute into another program
+.Sh SYNOPSIS
+.Nm
+.Op Fl u | g | B
+.Op Fl n
+.Op Fl i | D Ar uid : Ns Ar gid : Ns Ar gidlist
+.Ar account
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+looks
+.Ar account
+up by name in the account database.
+.Pp
+It sets the UID environment variable to
+.Ar account Ap
+s uid, and the GID environment variable to
+.Ar account Ap
+s gid.
+.Pp
+It also sets the
+.Ev GIDLIST
+environment variable to a comma-separated list of supplementary group
+ids
+.Ar account
+is a member of according to the group database. (If
+.Ar account
+doesn't belong to any other group than its primary group,
+.Ev GIDLIST
+is still set, but empty.)
+.Pp
+Then it executes into
+.Ar prog... .
+.Pp
+.Nm
+without options behaves like envuidgid[1], except that the exit code is 1 if
+.Ar account
+doesn't exist, and it also exports supplementary groups.
+.Pp
+.Nm
+is useful when running a program that must start as root but can drop
+its privileges later.
+Such a program can read its new uid/gid/groups info from the
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+environment variables.
+Super-servers such as
+.Xr s6-tcpserver4 8
+make use of this.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl u
+User.
+.Ar account
+will be interpreted as a user name; the
+.Ev UID
+environment variable will be set to its numerical value, and the
+.Ev GID
+and
+.Ev GIDLIST
+variables will not be touched.
+.It Fl g
+Group.
+.Ar account
+will be interpreted as a group name instead of a user name; the
+.Ev GID
+environment variable will be set to its numerical value, and the
+.Ev UID
+and
+.Ev GIDLIST
+variables will not be touched.
+.It Fl B
+Both user and group.
+.Ar account
+will be interpreted as
+.Sm off
+.So
+.Em user :
+.Em group
+.Sc .
+.Sm on
+The
+.Ev GIDLIST
+variable will not be touched.
+If
+.Em user
+does not exist, the
+.Ev UID
+variable will be set to 0 unless a better default is provided with the
+.Fl D
+option.
+If
+.Em group
+does not exist, the
+.Ev GID
+variable will be set to 0 unless a better default is provided with the
+.Fl D
+option.
+.It Fl n
+Numerical fallback.
+If
+.Ar account
+cannot be found in the user or group database, try to interpret the
+given values literally.
+For instance,
+.Ql s6-envuidgid -B root:42
+will fail if there's no group named
+.Ql 42
+in the group database, but
+.Ql s6-envuidgid -nB root:42
+will set
+.Ev UID
+to 0 and
+.Ev GID
+to 42.
+.It Fl i
+Insist.
+If
+.Ar account
+is unknown, exit 1 with an error message.
+This is the default.
+.It Fl D Ar uid : Ns Ar gid : Ns Ar gidlist
+If
+.Ar account
+is unknown, use
+.Ar uid ,
+.Ar gid
+and
+.Ar gidlist
+as the values for
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST .
+.El
+.Sh SEE ALSO
+.Xr s6-applyuidgid 8 ,
+.Xr s6-envdir 8 ,
+.Xr s6-fghack 8 ,
+.Xr s6-setsid 8 ,
+.Xr s6-setuidgid 8 ,
+.Xr s6-softlimit 8 ,
+.Xr s6-tai64n 8 ,
+.Xr s6-tai64nlocal 8 ,
+.Xr s6-tcpserver4 8
+.Pp
+[1]
+.Lk https://cr.yp.to/daemontools/envuidgid.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6/s6-envuidgid.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)
