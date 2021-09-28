@@ -1,4 +1,4 @@
-.Dd January 21, 2021
+.Dd September 28, 2021
 .Dt S6-SUPERVISE 1
 .Os
 .Sh NAME
@@ -145,7 +145,10 @@ command had been received.
 .It Dv SIGQUIT
 Exit immediately without touching the service in any way.
 .It Dv SIGINT
-Send a SIGINT to the process group of the service, then exit immediately. (The point here is to correctly forward
+Send a
+.Dv SIGINT
+to the process group of the service, then exit immediately. (The point
+here is to correctly forward
 .Dv SIGINT
 in the case where
 .Nm
@@ -343,7 +346,8 @@ Nevertheless,
 .Nm Ap
 s handling of
 .Dv SIGINT
-ensures that its service is killed if you happen to run it in a terminal and send it a
+ensures that its service is killed if you happen to run it in a
+terminal and send it a
 .Ql ^C .
 .Pp
 You can use

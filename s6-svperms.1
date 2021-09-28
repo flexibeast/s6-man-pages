@@ -1,4 +1,4 @@
-.Dd January 21, 2021
+.Dd September 28, 2021
 .Dt S6-SVPERMS 1
 .Os
 .Sh NAME
@@ -23,7 +23,8 @@ Every line contains the name of the service directory, then the
 following information:
 .Bl -tag -width x
 .It status:
-Indicates who is allowed to read status information on the service, with commands such as
+Indicates who is allowed to read status information on the service,
+with commands such as
 .Xr s6-svstat 1
 or
 .Xr s6-svdt 1 .
@@ -37,7 +38,8 @@ or
 .Ql public ,
 for all users.
 .It control:
-Indicates who is allowed to send control commands to the service, with commands such as
+Indicates who is allowed to send control commands to the service, with
+commands such as
 .Xr s6-svc 1 .
 The values can be
 .Ql owner ,
@@ -84,14 +86,16 @@ more permissive.
 .Pp
 Opening
 .Ql control\&:
-to a group can be useful for instance in a shared administration situation when individual administrators are not given
-full root powers.
+to a group can be useful for instance in a shared administration
+situation when individual administrators are not given full root
+powers.
 .Pp
 Making
 .Ql events\&:
 public bears a small risk of a local DoS attack preventing more
 subscriptions to events, so it is not recommended for supervision
-trees where such subscriptions are critical to operations - such as a set of root services managed by s6-rc[1].
+trees where such subscriptions are critical to operations - such as a
+set of root services managed by s6-rc[1].
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl v

@@ -1,4 +1,4 @@
-.Dd January 26, 2021
+.Dd September 28, 2021
 .Dt S6-SERVICE-DIRECTORY 7
 .Os
 .Sh NAME
@@ -229,6 +229,33 @@ or
 processes will be triggered.
 .It
 An optional regular file named
+.Pa lock-fd .
+If such a file exists, it must contain an unsigned integer,
+representing a file descriptor that will be open in the service.
+The service
+.Em should not write to that descriptor
+and
+.Em should not close it .
+In other words, it should totally ignore it.
+That file descriptor holds a lock, that will naturally be released
+when the service dies.
+The point of this feature is to prevent
+.Xr s6-supervise 1
+from accidentally spawning several copies of the service in case
+something goes wrong: for instance, the service backgrounds itself
+(which it shouldn't do when running under a supervision suite), or
+.Xr s6-supervise 1
+is killed, restarted by
+.Xr s6-svscan 1 ,
+and attempts to start another copy of the service while the first copy
+is still alive.
+If
+.Xr s6-supervise 1
+detects that the lock is held when it tries to start the service, it
+will print a warning message and delay the starting attempt for 60
+seconds.
+.It
+An optional regular file named
 .Pa timeout-kill .
 If such a file exists, it must only contain an unsigned integer
 .Em t .
@@ -457,8 +484,14 @@ No stale files can make your system unstable.
 .El
 .El
 .Sh SEE ALSO
-.Xr s6-fifodir 7 ,
-.Xr s6-scan-directory 7
+s6-envuidgid 1 ,
+s6-ipcserverd 1 ,
+s6-setuidgid 1 ,
+s6-supervise 1 ,
+s6-svscan 1 ,
+s6-fifodir 7 ,
+s6-notifywhenup 7 ,
+s6-scan-directory 7
 .Pp
 [1]
 .Lk https://skarnet.org/software/s6-linux-init/

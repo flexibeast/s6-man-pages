@@ -39,6 +39,7 @@ man1_targets = \
 	s6-setlock.1 \
 	s6-setsid.1 \
 	s6-setuidgid.1 \
+	s6-socklog.1 \
 	s6-softlimit.1 \
 	s6-sudo.1 \
 	s6-sudoc.1 \
@@ -47,6 +48,7 @@ man1_targets = \
 	s6-svc.1 \
 	s6-svdt-clear.1 \
 	s6-svdt.1 \
+	s6-svlink.1 \
 	s6-svlisten.1 \
 	s6-svlisten1.1 \
 	s6-svok.1 \
@@ -54,6 +56,7 @@ man1_targets = \
 	s6-svscan.1 \
 	s6-svscanctl.1 \
 	s6-svstat.1 \
+	s6-svunlink.1 \
 	s6-svwait.1 \
 	s6-tai64n.1 \
 	s6-tai64nlocal.1 \
