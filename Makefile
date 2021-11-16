@@ -81,7 +81,8 @@ man8_targets = \
 	s6lockd-helper.8 \
 	ucspilogd.8
 
-all: install
+all:
+	@echo "Nothing to be done. Ready for 'make install'."
 
 install:
 	cd man7; install -D -m 0644 $(man7_targets) ${DESTDIR}${man7_dir}/

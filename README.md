@@ -6,7 +6,7 @@ suite](http://skarnet.org/software/s6/). The HTML version on the s6
 site is authoritative; in the event of semantic differences between an
 HTML original and its port, please open an issue in this repository.
 
-To install the man pages, run `make`.
+To install the man pages, run `make install`.
 
 The default installation directory is `/usr/share/man`, but this can
 be changed by setting the `MANPATH` environment variable prior to
