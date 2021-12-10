@@ -85,8 +85,8 @@ all:
 	@echo "Nothing to be done. Ready for 'make install'."
 
 install:
-	cd man7; install -D -m 0644 $(man7_targets) ${DESTDIR}${man7_dir}/
-	cd man8; install -D -m 0644 $(man8_targets) ${DESTDIR}${man8_dir}/
+	cd man7; install -D -m 0644 -t ${DESTDIR}${man7_dir} $(man7_targets)
+	cd man8; install -D -m 0644 -t ${DESTDIR}${man8_dir} $(man8_targets)
 
 uninstall:
 	cd $(man7_dir); rm -f $(man7_targets)
