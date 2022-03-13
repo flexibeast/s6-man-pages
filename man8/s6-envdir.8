@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd March 13, 2022
 .Dt S6-ENVDIR 8
 .Os
 .Sh NAME
@@ -9,6 +9,7 @@
 .Op Fl I | i
 .Op Fl n
 .Op Fl f
+.Op Fl L
 .Op Fl c Ar nullis
 .Ar dir
 .Ar prog...
@@ -38,8 +39,9 @@ to the environment (or replace
 if it already exists) with the first line of the contents of file
 .Pa f
 as value.
-Spaces and tabs at the end of this line are removed; null characters
-in this line are changed to newlines in the environment variable.
+Spaces and tabs at the end of this line are removed, as well as any
+trailing newline; null characters in this line are changed to newlines
+in the environment variable.
 .El
 .Pp
 .Nm
@@ -76,6 +78,19 @@ If the
 .Fl f
 option is not given, keep the trailing blanks at the end of the first
 line (but not the ending newline).
+.It Fl L
+Do not clamp.
+With this option,
+.Nm
+will process the whole first line of each file (if the
+.Fl f
+option hasn't been given) or read each file entirely (if the
+.Fl f
+option has been given), even if it means adding huge variables to the
+environment.
+Without this option,
+.Nm
+only reads the first 4096 bytes of each file.
 .It Fl c Ar nullis
 Replace null characters with the first character of
 .Ar nullis
