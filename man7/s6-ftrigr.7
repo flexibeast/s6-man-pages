@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd May 31, 2022
 .Dt S6-FTRIGR 7
 .Os
 .Sh NAME
@@ -237,8 +237,8 @@ unsigned int n = 1 ;
 char trigger ;
 list[0] = id ;
 
-// r = ftrigr_wait_and(&a, list, n, &deadline) ;
-r = ftrigr_wait_or(&a, list, n, &deadline, &trigger) ;
+// r = ftrigr_wait_and(&amp;a, list, n, &amp;deadline, &amp;stamp) ;
+r = ftrigr_wait_or(&amp;a, list, n, &amp;deadline, &amp;stamp, &amp;trigger) ;
 .Ed
 .Pp
 .Fn ftrigr_wait_and

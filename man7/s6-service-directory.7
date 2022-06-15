@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd June 15, 2022
 .Dt S6-SERVICE-DIRECTORY 7
 .Os
 .Sh NAME
@@ -252,8 +252,8 @@ is still alive.
 If
 .Xr s6-supervise 8
 detects that the lock is held when it tries to start the service, it
-will print a warning message and delay the starting attempt for 60
-seconds.
+will print a warning message; the new service instance will block
+until the lock is released, then proceed as usual.
 .It
 An optional regular file named
 .Pa timeout-kill .
