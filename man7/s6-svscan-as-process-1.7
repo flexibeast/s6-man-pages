@@ -1,0 +1,581 @@
+.Dd January 15, 2023
+.Dt S6-SVSCAN-AS-PROCESS-1 7
+.Os
+.Sh NAME
+.Nm s6-svscan-as-process-1
+.Nd running
+.Xr s6-svscan 8
+as process 1
+.Sh DESCRIPTION
+.Bf Em
+Since 2015-06-17, if you're a Linux user, you can use the
+s6-linux-init package[1] to help you do so!
+Please read this documentation page first, though, it will help you
+understand what s6-linux-init does.
+.Ef
+.Pp
+It is possible to run
+.Xr s6-svscan 8
+as process 1, i.e. the
+.Ql init
+process.
+However, that does not mean you can directly
+.Em boot
+on
+.Xr s6-svscan 8 ;
+that little program cannot do everything your stock init does.
+Replacing the
+.Ql init
+process requires a bit of understanding of what is going on.
+.Ss The three stages of init
+Okay, it's actually four, but the fourth stage is an implementation
+detail that users don't care about, so we'll stick with three.
+.Pp
+The life of a Unix machine has three stages.
+Yes, three.
+.Bl -enum -width x
+.It
+The
+.Em early initialization
+phase.
+It starts when the kernel launches the first userland process,
+traditionally called
+.Ql init .
+During this phase, init is the only lasting process; its duty is to
+prepare the machine for the start of
+.Em other
+long-lived processes, i.e. services.
+Work such as mounting filesystems, setting the system clock, etc. can
+be done at this point.
+This phase ends when process 1 launches its first services.
+.It
+The
+.Em cruising
+phase.
+This is the
+.Dq normal ,
+stable state of an up and running Unix machine.
+Early work is done, and init launches and maintains
+.Em services ,
+i.e. long-lived processes such as gettys, the ssh server, and so on.
+During this phase, init's duties are to reap orphaned zombies and to
+supervise services
+\(em
+also allowing the administrator to add or remove services.
+This phase ends when the administrator requires a shutdown.
+.It
+The
+.Em shutdown
+phase.
+Everything is cleaned up, services are stopped, filesystems are
+unmounted, the machine is getting ready to be halted.
+At the end of this phase, all processes are killed, first with a
+.Dv SIGTERM ,
+then with a
+.Dv SIGKILL
+.Po
+to catch processes that resist
+.Dv SIGTERM
+.Pc .
+The only processes that survive it are process 1; if this process is
+.Xr s6-svscan 8
+and its
+.Xr s6-scan-directory 7
+is not empty, then the supervision tree is restarted.
+.It
+The
+.Em hardware shutdown
+phase.
+The system clock is stored, filesystems are unmounted, and the system
+call that reboots the machine or powers it off is called.
+.El
+.Pp
+Unless you're implementing a shutdown procedure over a supervision
+tree, you can absolutely consider that the hardware shutdown is part of stage 3.
+.Pp
+As you can see, process 1's duties are
+.Em radically different
+from one stage to the next, and init has the most work when the
+machine is booting or shutting down, which means a normally negligible
+fraction of the time it is up.
+The only common thing is that at no point is process 1 allowed to
+exit.
+.Pp
+Still, all common init systems insist that the same
+.Ql init
+executable must handle these three stages.
+From System V init to launchd, via busybox init, you name it
+\(em
+one init program from bootup to shutdown.
+No wonder those programs, even basic ones, seem complex to write and
+complex to understand!
+.Pp
+Even the runit[2] program, designed with supervision in mind, remains
+as process 1 all the time; at least runit makes things simple by
+clearly separating the three stages and delegating every stage's work
+to a different script that is
+.Em not
+run as process 1.
+.Po
+Since runit does not distinguish between stage 3 and stage 4, it needs
+very careful handling of the
+.Ql kill -9 -1
+part of stage 3: getting
+.Pa /etc/runit/3
+killed before it unmounts the filesystems would be bad.
+.Pc
+.Pp
+One init to rule them all?
+It ain't necessarily so!
+.Ss The role of s6-svscan
+init does not have the right to die, but fortunately,
+.Bf Em
+it has the right to
+.Xr execve 3 !
+.Ef
+During stage 2, why use precious RAM, or at best, swap space, to store
+data that are only relevant to stages 1 or 3-4?
+It only makes sense to have an init process that handles stage 1, then
+executes into an init process that handles stage 2, and when told to
+shutdown, this
+.Dq stage 2
+init executes into a
+.Dq stage 3
+init which just performs shutdown.
+Just as runit does with the
+.Pa /etc/runit/[123]
+scripts, but
+.Xr exec 3 Ns
+ing the scripts as process 1 instead of forking them.
+.Pp
+It becomes clear now that
+.Xr s6-svscan 8
+is perfectly suited to exactly fulfill process 1's role
+.Em during stage 2 .
+.Bl -bullet -width x
+.It
+It does not die.
+.It
+The reaper takes care of every zombie on the system.
+.It
+The scanner maintains services alive.
+.It
+It can be sent commands via the
+.Xr s6-svscanctl 8
+interface.
+.It
+It
+.Xr exec 3 Ns
+s into a given script when told to.
+.El
+.Pp
+However, an init process for stage 1 and another one for stage 3 are
+still needed.
+Fortunately, those processes are very easy to design!
+The only difficulty here is that they're heavily system-dependent, so
+it's not possible to provide a stage 1 init and a stage 3 init that
+will work everywhere.
+s6 was designed to be as portable as possible, and it should run on
+virtually every Unix platform; but outside of stage 2 is where
+portability stops.
+.Pp
+The s6-linux-init package[1] provides a tool,
+.Ql s6-linux-init-maker ,
+to automatically create a suitable stage 1 init
+.Po
+so, the
+.Pa /sbin/init
+binary
+.Pc
+for Linux.
+It is also possible to write similar tools for other operating
+systems, but the details are heavily system-dependent.
+.Pp
+For the adventurous and people who need to do this by hand, though, here are
+are some general design tips.
+.Ss How to design a stage 1 init
+.Sy What stage 1 init must do
+.Bl -bullet -width x
+.It
+Prepare an initial
+.Xr s6-scan-directory 7 ,
+say in
+.Pa /run/service ,
+with a few vital services, such as
+.Xr s6-svscan 8 Ap
+s own logger, and an early getty (in case debugging is needed).
+That implies mounting a read-write filesystem, creating it in RAM if
+needed, if the root filesystem is read-only.
+.It
+Either perform all the one-time initialization, as stage 1 runit[2] does;
+.It
+or fork a process that will perform most of the one-time initialization once
+.Xr s6-svscan 8
+is in charge.
+.It
+Be extremely simple and not fail, because recovery is almost impossible
+here.
+.El
+.Pp
+Unlike the
+.Pa /etc/runit/1
+script, an init-stage1 script running as process 1 has nothing to back
+it up, and if it fails and dies, the machine crashes.
+Does that mean the runit approach is better?
+It's certainly safer, but not necessarily better, because init-stage1
+can be made
+.Em extremely small ,
+to the point it is practically failproof, and if it fails, it means
+something is so wrong that you would have had to reboot the machine
+with
+.Ql init=/bin/sh
+anyway.
+.Pp
+To make init-stage1 as small as possible, only this realization is
+needed: you do not need to perform all of the one-time initialization
+tasks before launching
+.Xr s6-svscan 8 .
+Actually, once init-stage1 has made it possible for
+.Xr s6-svscan 8
+to run, it can fork a background
+.Dq init-stage2
+process and
+.Xr exec 3
+into
+.Xr s6-svscan 8
+immediately!
+The
+.Dq init-stage2
+process can then pursue the one-time initialization, with a big
+advantage over the
+.Dq init-stage1
+process:
+.Xr s6-svscan 8
+is running, as well as a few vital services, and if something bad
+happens, there's a getty for the administrator to log on.
+No need to play fancy tricks with
+.Pa /dev/console
+anymore!
+Yes, the theoretical separation in 3 stages is a bit more flexible in
+practice: the
+.Dq stage 2
+process 1 can be already running when a part of the
+.Dq stage 1
+one-time tasks are still being run.
+.Pp
+Of course, that means that the scan directory is still incomplete when
+.Xr s6-svscan 8
+first starts, because most services can't yet be run, for
+lack of mounted filesystems, network etc.
+The
+.Dq init-stage2
+one-time initialization script must populate the scan directory when
+it has made it possible for all wanted services to run, and trigger
+the scanner.
+Once all the one-time tasks are done, the scan directory is fully
+populated and the scanner has been triggered, the machine is fully
+operational and in stage 2, and the
+.Dq init-stage2
+script can die.
+.Pp
+.Sy Is it possible to write stage 1 init in a scripting language?
+.br
+It is very possible, and if you are attempting to write your own stage
+1, I definitely recommend it.
+If you are using
+.Xr s6-svscan 8
+as stage 2 init, stage 1 init should be simple enough that it can be
+written in any scripting language you want, just as
+.Pa /etc/runit/1
+is if you're using runit.
+And since it should be so small, the performance impact will be
+negligible, while maintainability is enhanced.
+Definitely make your stage 1 init a script.
+.Pp
+Of course, most people will use the
+.Em shell
+as scripting language; however, I advocate the use of execline[3] for
+this, and not only for the obvious reasons.
+Piping
+.Xr s6-svscan 8 Ap
+s stderr to a logging service before said service is even up requires
+some tricky FIFO handling that execline can do and the shell cannot.
+.Ss  How to design a stage 3-4 init
+If you're using
+.Xr s6-svscan 8
+as stage 2 init on
+.Pa /run/service ,
+then stage 3 init is naturally the
+.Pa /run/service/.s6-svscan/finish
+program.
+Of course,
+.Pa /run/service/.s6-svscan/finish
+can be a symbolic link to anything else; just make sure it points to
+something in the root filesystem (unless your program is an execline
+script, in which case it is not even necessary).
+.Pp
+.Sy What stage 3-4 init must do
+.Bl -bullet -width x
+.It
+Destroy the supervision tree and stop all services.
+.It
+Kill all processes
+.Em save itself ,
+first gently, then harshly, and
+.Em reap all the zombies .
+.It
+Up until that point we were in stage 3; now we're in stage 4.
+.It
+Unmount all the filesystems.
+.It
+Halt or reboot the machine, depending on what root asked for.
+.El
+.Pp
+This is seemingly very simple, even simpler than stage 1, but
+experience shows that it's trickier than it looks.
+.Pp
+One tricky part is the
+.Ql kill -9 -1
+operation at the end of stage 3: you must make sure that
+.Em process 1
+regains control and keeps running after it, because it will be the
+only process left alive.
+If you are running a stage 3 script as process 1, it is almost
+automatic: your script survives the kill and continues running, up
+into stage 4.
+If you are using another model, the behaviour becomes
+system-dependent: your script may or may not survive the kill, so on
+systems where it does not, you will have to design a way to regain
+control in order to accomplish stage 4 tasks.
+.Pp
+Another tricky part, that is only apparent with practice, is solidity.
+It is even more vital that
+.Em nothing fails
+during stages 3 and 4 than it is in stage 1, because in stage 1, the
+worst that can happen is that the machine does not boot, whereas in
+stages 3 and 4, the worst that can happen is that the machine
+.Em does not shut down ,
+and that is a much bigger issue.
+.Pp
+For these reasons, I now recommend
+.Em not
+tearing down the supervision tree for stages 3-4.
+It is easier to work in a stable environment, as a regular process,
+than it is to manage a whole shutdown sequence as pid 1: the presence
+of
+.Xr s6-svscan 8
+as pid 1, and of a working supervision tree, is a pillar
+you can rely on, and with experience I find it a good idea to keep the
+supervision infrastructure running until the end.
+Of course, that requires the scandir, and the active supervision
+directories, to be on a RAM filesystem such as
+.Ql tmpfs ;
+that is good policy anyway.
+.Pp
+.Sy Is it possible to write stage 3 init in a scripting language?
+.br
+Yes, definitely, just like stage 1.
+.Pp
+However, you really should leave
+.Pa /run/service/.s6-svscan/finish
+.Po
+and the other scripts in
+.Pa /run/service/.s6-svscan
+.Pc
+alone, and write your shutdown sequence without dismantling the
+supervision tree.
+You will still have to stop most of the services, but
+.Xr s6-svscan 8
+should stay.
+.Pp
+For a more in-depth study of what to do in stages 3-4 and how
+to do it, you can look at the source of
+.Ql s6-linux-init-shutdownd
+in the s6-linux-init package[1].
+.Ss How to log the supervision tree's messages
+When the Unix kernel launches your (stage 1) init process, it does it
+with descriptors 0, 1 and 2 open and reading from or writing to
+.Pa /dev/console .
+This is okay for the early boot: you actually want early error
+messages to be displayed to the system console.
+But this is not okay for stage 2: the system console should only be
+used to display extremely serious error messages such as kernel
+errors, or errors from the logging system itself; everything else
+should be handled by the logging system, following the logging chain
+mechanism
+.Po
+refer to
+.Xr s6-log 8
+for details
+.Pc .
+The supervision tree's messages should go to the catch-all logger
+instead of the system console.
+.Po
+And the console should never be read, so no program should run with
+.Pa /dev/console
+as stdin, but this is easy enough to fix:
+.Xr s6-svscan 8
+will be started with stdin redirected from
+.Pa /dev/null .
+.Pc
+.Pp
+The catch-all logger is a service, and we want
+.Em every
+service to run under the supervision tree.
+Chicken and egg problem: before starting
+.Xr s6-svscan 8 ,
+we must redirect
+.Xr s6-svscan 8 Ap
+s output to the input of a program that will only be started once
+.Xr s6-svscan 8
+is running and can start services.
+.Pp
+There are several solutions to this problem, but the simplest one is
+to use a FIFO, a.k.a. named pipe.
+.Xr s6-svscan 8 Ap
+s stdout and stderr can be redirected to a named pipe before
+.Xr s6-svscan 8
+is run, and the catch-all logger service can be made to read from this
+named pipe.
+Only two minor problems remain:
+.Bl -bullet -width x
+.It
+If
+.Xr s6-svscan 8
+or
+.Xr s6-supervise 8
+writes to the FIFO before there is a reader, i.e. before the catch-all
+logging service is started, the write will fail
+.Po
+and a
+.Dv SIGPIPE
+will be emitted
+.Pc .
+This is not a real issue for an s6 installation because
+.Xr s6-svscan 8
+and
+.Xr s6-supervise 8
+ignore
+.Dv SIGPIPE ,
+and they only write to their stderr if an error occurs; and if an
+error occurs before they are able to start the catch-all logger, this
+means that the system is seriously damaged (as if an error occurs
+during stage 1) and the only solution is to reboot with
+.Ql init=/bin/sh
+anyway.
+.It
+Normal Unix semantics
+.Em do not allow
+a writer to open a FIFO before there is a reader: if there is no
+reader when the FIFO is opened for writing, the
+.Xr open 3
+system call
+.Em blocks
+until a reader appears.
+This is obviously not what we want: we want to be able to
+.Em actually start
+.Xr s6-svscan 8
+with its stdout and stderr pointing to the logging FIFO, even without
+a reader process, and we want it to run normally so it can start the
+logging service that will provide such a reader process.
+.El
+.Pp
+This second point cannot be solved in a shell script, and that is why
+you are discouraged to write your stage 1 init script in the shell
+language: you cannot properly set up a FIFO output for
+.Xr s6-svscan 8
+without resorting to horrible and unreliable hacks involving a
+temporary background FIFO reader process.
+.Pp
+Instead, you are encouraged to use the execline[3] language
+\(em
+or, at least, the
+.Xr redirfd 1
+command, which is part of the execline distribution.
+The
+.Xr redirfd 1
+command does just the right amount of trickery with FIFOs for you to
+be able to properly redirect process 1's stdout and stderr to the
+logging FIFO without blocking:
+.Bd -literal
+redirfd -w 1 /run/service/s6-svscan-log/fifo
+.Ed
+.Pp
+blocks if there's no process reading on
+.Pa /run/service/s6-svscan-log/fifo ,
+but
+.Bd -literal
+redirfd -wnb 1 /run/service/s6-svscan-log/fifo
+.Ed
+.Pp
+.Em does not .
+.Pp
+This trick with FIFOs can even be used to avoid potential race
+conditions in the one-time initialization script that runs in stage 2.
+If forked from init-stage1 right before executing
+.Xr s6-svscan 8 ,
+depending on the scheduler mood, this script may actually run a long
+way before
+.Xr s6-svscan 8
+is actually executed and running the initial services
+\(em
+and may do dangerous things, such as writing messages to the logging
+FIFO before there's a reader, and eating a
+.Dv SIGPIPE
+and dying without completing the initialization.
+To avoid that and be sure that
+.Xr s6-svscan 8
+really runs and initial services are really started before the stage 2
+init script is allowed to continue, it is possible to redirect the
+child script's output (stdout and/or stderr)
+.Em once again
+to the logging FIFO, but in the normal way without
+.Xr redirfd 1
+trickery,  before it
+.Xr exec 3 Ns
+s into the init-stage2 script.
+So, the child process blocks on the FIFO until a reader appears, while
+process 1 - which does not block -
+.Xr exec 3 Ns
+s into
+.Xr s6-svscan 8
+and starts the logging service, which then opens the logging FIFO for
+reading and unblocks the child process, which then runs the
+initialization tasks with the guarantee that
+.Xr s6-svscan 8
+is running.
+.Pp
+It really is simpler than it sounds. :-)
+.Ss A working example
+This whole page may sound very theoretical, dry, wordy, and hard to
+grasp without a live example to try things on; unfortunately, s6
+cannot provide live examples without becoming system-specific.
+.Pp
+However, the s6-linux-init package[1] provides you with the
+.Ql s6-linux-init-maker Ns
+[4] command, which produces a set of working scripts, including a
+script that is suitable as
+.Pa /sbin/init ,
+for you to study and edit.
+You can
+.Em run
+the
+.Ql s6-linux-init-maker
+command even on non-Linux systems: it will produce scripts that do not
+work as is for another OS, but can still be used for study and as a
+basis for a working stage 1 script.
+.Sh SEE ALSO
+[1]
+.Lk https://skarnet.org/software/s6-linux-init/
+.Pp
+[2]
+.Lk http://smarden.org/runit/runit.8.html
+.Pp
+[3]
+.Lk https://skarnet.org/software/execline/
+.Pp
+[4]
+.Lk https://skarnet.org/software/s6-linux-init/s6-linux-init-maker.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

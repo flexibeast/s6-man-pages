@@ -1,0 +1,621 @@
+.Dd January 15, 2023
+.Dt S6-OVERVIEW 7
+.Os
+.Sh NAME
+.Nm s6-overview
+.Nd an overview of s6
+.Sh DESCRIPTION
+s6 is a collection of utilities revolving around process supervision
+and management, logging, and system initialization.
+This page is a high-level description of the different parts of s6.
+.Ss Process supervision
+At its core, s6 is a
+.Em process supervision suite ,
+like its ancestor daemontools[1] and its close cousin runit[2].
+.Pp
+.Sy Concept
+.br
+The concept of process supervision comes from several observations:
+.Bl -bullet -width x
+.It
+Unix systems, even minimalistic ones, need to run
+.Em long-lived processes ,
+aka
+.Em daemons .
+That is one of the core design principles of Unix: one service \(-> one daemon.
+.It
+Daemons can die unexpectedly.
+Maybe they are missing a vital resource and cannot handle a certain
+failure; maybe they tripped on a bug; maybe a misconfigured
+administration program killed them; maybe the kernel killed them.
+Processes are fragile, but daemons are vital to a Unix system: a
+fundamental discrepancy that needs to be solved.
+.It
+Automatically restarting daemons when they die is generally a good
+thing.
+In any case, sysadmin intervention is necessary, but at least the
+daemon is providing service, or trying to, until the sysadmin can log
+in and investigate the underlying problem.
+.It
+Ad-hoc shell scripts that restart daemons
+.Em suck ,
+for several reasons that would each justify their own page.
+The difficulty of keeping track of the PID, explained below, is one of
+those reasons.
+.It
+It is sometimes necessary to send signals to a daemon.
+To kill it, of course, but also to make it read its config file again,
+for instance; signalling a daemon is a natural and very common way of
+sending it simple commands.
+.It
+Generally, to send a signal to a daemon, you need to know its PID.
+Without a supervision suite, knowing the proper PID is hard.
+Most non-supervision systems use a hack known as
+.Em .pid files ,
+i.e. the script that starts the daemon stores its PID into a file, and
+other scripts read that file.
+This is a bad mechanism for several reasons, and the case against .pid
+files would also justify its own page; the most important drawback
+of .pid files is that they create race conditions and management
+scripts may kill the wrong process.
+.It
+Non-supervision systems provide scripts to start and stop daemons, but
+those scripts may fail at boot time even though they work when run
+manually, and vice versa.
+If a sysadmin logs in and runs the script to restart a daemon that has
+died, the result might not be the same as if the whole system had been
+rebooted, and the daemon may exhibit strange behaviours!
+This is because the boot-time environment and the restart-time
+environment are not the same when the script is run; and a
+non-supervision system just cannot ensure reproducibility of the
+environment.
+This is a core problem of non-supervision systems: countless bugs have
+been falsely reported because of simple environment differences or
+configuration errors, countless man-hours have been wasted to try and
+understand what was going on.
+.El
+.Pp
+A process supervision system organizes the process hierarchy in a
+radically different way.
+.Bl -bullet -width x
+.It
+A process supervision system starts an independent hierarchy of
+processes at boot time, called a
+.Em supervision tree .
+This supervision tree never dies: when one of its components dies, it
+is restarted automatically.
+To ensure availability of the supervision tree at all times, it should
+be rooted in process 1, which cannot die.
+.It
+A daemon is never started, either manually or in a script, as a scion
+of the script that starts it.
+Instead, to start a daemon, you configure a specific directory which
+contains all the information about your daemon; then you send a
+command to the supervision tree.
+The supervision tree will start the daemon as a leaf.
+.Bf Em
+In a process supervision system, daemons are always spawned by the
+supervision tree, and never by an admin's shell.
+.Ef
+.It
+The parent of your daemon is a
+.Em supervisor .
+Since your daemon is its direct child,
+.Sm off
+.Bf Em
+the supervisor always knows the correct PID of your daemon
+.Ef
+\&.
+.Sm on
+.It
+The supervisor watches your daemon and can restart it when it dies,
+automatically.
+.It
+The supervision tree always has the same environment, so starting
+conditions are reproducible.
+Your daemon will always be started with the same environment, whether
+it is at boot time via init scripts or for the 100th automatic - or
+manual - restart.
+.It
+To send signals to your daemon, you send a command to its supervisor,
+which will then send a signal to the daemon on your behalf.
+Your daemon is identified by the directory containing its information,
+which is stable, instead of by its PID, which is not stable; the
+supervisor maintains the correct association without a race condition
+or the other problems of .pid files.
+.El
+.Pp
+.Sy Implementation
+.br
+s6 is a straightforward implementation of those concepts.
+.Bl -bullet -width x
+.It
+The
+.Xr s6-svscan 8
+and
+.Xr s6-supervise 8
+programs are the components of the
+.Em supervision tree .
+They are long-lived programs.
+.Bl -bullet -width x
+.It
+.Xr s6-supervise 8
+is a daemon's
+.Em supervisor ,
+its direct parent.
+For every long-lived process on a system, there is a corresponding
+.Xr s6-supervise 8
+process watching it.
+This is okay, because every instance of
+.Xr s6-supervise 8
+uses very few resources.
+.It
+.Xr s6-svscan 8
+is, in a manner of speaking, a supervisor for the supervisors.
+It watches and maintains a collection of
+.Xr s6-supervise 8
+processes: it is the branch of the supervision tree that all
+supervisors are stemming from.
+It can be run and supervised by your regular init process, or it can
+run as process 1 itself; refer to
+.Xr s6-svscan-not-as-process-1 7
+an
+.Xr s6-svscan-as-process-1 7 .
+Running
+.Xr s6-svscan 8
+as process 1 requires some effort from the user, because of the
+inherent non-portability of init processes; the s6-linux-init
+package[3] automates that effort and allows users to run s6 as an init
+replacement.
+.It
+The configuration of a daemon to be supervised by
+.Xr s6-supervise 8
+is done via an
+.Xr s6-service-directory 7 .
+.It
+The place to gather all service directories to be watched by an
+.Xr s6-svscan 8
+instance is called an
+.Xr s6-scan-directory 7 .
+.El
+.It
+The command that controls a single supervisor, and allows you to send
+signals to a daemon, is
+.Xr s6-svc 8 .
+It is a short-lived program.
+.It
+The command that controls a set of supervisors, and allows you to
+start and stop supervision trees, is
+.Xr s6-svscanctl 8 .
+It is a short-lived program.
+.El
+.Pp
+These four programs,
+.Xr s6-svscan 8 ,
+.Xr s6-supervise 8 ,
+.Xr s6-svscanctl 8
+and
+.Xr s6-svc 8 ,
+are the very core of s6.
+Technically, once you have them, you have a functional s6
+installation, and the other utilities are just a bonus.
+.Pp
+.Sy Practical usage
+.br
+To use s6's supervision features, you need to perform the following
+steps:
+.Bl -enum -width x
+.It
+For every daemon you potentially want supervised, write an
+.Xr s6-service-directory 7 .
+Make sure that your daemon does not background itself when started in
+the
+.Pa ./run
+script!
+Auto-backgrounding is a historical hack that was implemented when
+supervision suites did not exist; since you're using a supervision
+suite, auto-backgrounding is unnecessary and in this case detrimental.
+.It
+Write a single
+.Xr s6-scan-directory 7
+for the set of daemons you want to actually run.
+This set can be modified at run time.
+.It
+At some point in your initialization scripts, run
+.Xr s6-svscan 7
+on the scan directory.
+This will start the supervision tree, including your set of daemons.
+The exact way of running
+.Xr s6-svscan 8
+depends on your system: it is not quite the same when you want to run
+it as process 1 on a real machine, or under another init on a real
+machine, or as process 1 in a Docker[4] container, or in another
+context entirely.
+.It
+Alternatively, you can start
+.Xr s6-svscan 8
+on an empty scan directory, then populate it step by step and send an
+update command to
+.Xr s6-svscan 8
+via
+.Xr s6-svscanctl 8
+whenever the supervision tree should pick up the differences and start
+the services you added.
+.It
+That's it, your services are running.
+To control them manually, you can use the
+.Xr s6-svc 8
+command.
+.It
+At the end of the system's lifetime, you can use
+.Xr s6-svscanctl 8
+to bring down the supervision tree.
+.El
+.Ss Service-specific logging
+.Xr s6-svscan 8
+can monitor a supervision tree, but it can also do one more thing.
+It can ensure that a daemon's log, i.e. what the daemon outputs to its
+stdout (or stderr if you redirect it), gets processed by another,
+supervised, long-lived process, called a
+.Em logger ;
+and it can make sure that the logs are never lost between the daemon
+and the logger - even if the daemon dies, even if the logger dies.
+.Pp
+If your daemon is outputting messages, you have a decision to make
+about where to send them.
+.Bl -bullet -width x
+.It
+You can do as non-supervision systems do, and send the messages to
+syslog.
+It's entirely possible with a supervision system too.
+However, like auto-backgrounding, syslog is a historical mechanism
+that predates supervision suites, and is technically inferior; it is
+recommended that you do not use it whenever you can avoid it.
+.It
+You can send them to the daemon's stdout/stderr and do nothing special about it.
+The logs will then be sent to
+.Xr s6-svscan 8 Ap
+s stdout/stderr; what mechanism will read them depends on how you
+started
+.Xr s6-svscan 8 .
+.It
+You can use
+.Xr s6-svscan 8 Ap
+s service-specific logging mechanism and dedicate a logger process to
+your daemon's messages.
+.El
+.Pp
+s6 provides you with a long-lived process to use as a logger:
+.Xr s6-log 8 .
+It will store your logs in one (or more) specific directory of your
+choice, and rotate them automatically.
+.Ss Helpers for run scripts
+Creating a working
+.Xr s6-service-directory 7 ,
+and especially a good
+.Em run script ,
+is the most important part of the work when adapting a daemon to a
+supervision framework.
+.Pp
+If you can find your daemon's invocation script on a non-supervision
+system, for instance a System V-style init script, you can see the
+exact options that the daemon is being run with: environment
+variables, uid and gid, open descriptors, etc.
+This is what you need to replicate in your run script.
+.Pp
+.Po
+Do not replicate the auto-backgrounding, or things like
+start-stop-daemon[5] invocation: start-stop-daemon and its friends are
+hideous and kludgy attempts to work around the lack of proper
+supervision mechanisms.
+Now that you have s6, you should remove them from your system, throw
+them into a bonfire, and dance and laugh while they burn.
+Generally speaking, as a system administrator you want daemons that
+have been designed following the principles described in [6], or at
+least you want to use the command-line options that make them behave
+in such a way.
+.Pc
+.Pp
+The vast majority of the tools provided by s6 are meant to be used in
+run scripts: they help you control the process state and environment
+in your script before it executes into your daemon.
+Or, sometimes, they are daemons themselves, designed to be supervised.
+.Pp
+s6, like other skarnet.org
+software[7], makes heavy use of chain loading[8], also known as
+.Dq Bernstein chaining :
+a lot of s6 tools will perform some action that changes the process
+state, then execute into the rest of their command line.
+This allows the user to change the process state in a very flexible
+way, by combining the right components in the right order.
+Very often, a run script can be reduced to a single command line
+\(em
+likely a long one, but still a single one.
+.Po
+That is the main reason why using the execline[9] language to write
+run scripts is recommended: execline makes it natural to handle long
+command lines made of massive amounts of chain loading.
+This is by no means mandatory, though: a run script can be any
+executable file you want, provided that running it eventually results
+in a long-lived process with the same PID.
+.Pc
+.Pp
+Some examples of s6 programs meant to be used in run scripts:
+.Bl -bullet -width x
+.It
+The
+.Xr s6-log 8
+program is a long-lived process.
+It is meant to be executed into by a
+.Pa ./log/run
+script: it will be supervised, and will process what it reads on its
+stdin
+.Po
+i.e. the output of the
+.Pa ./run
+daemon
+.Pc .
+.It
+The
+.Xr s6-envdir 8
+program is a short-lived process that will update its current
+environment according to what it reads in a given directory, then
+execute into the rest of its command line.
+It is meant to be used in a run script to adjust the
+environment with which the final daemon will be executed into.
+.It
+Similarly, the
+.Xr s6-softlimit 8
+program adjusts its resource limits, then executes into the rest of
+its command line: it is meant to set the resources the final daemon
+will have access to.
+.It
+The
+.Xr s6-applyuidgid 8
+program, part of the
+.Ql s6-*uidgid
+family, drops root privileges before executing into the rest of its
+command line: it is meant to be used in run scripts that need root
+privileges when starting but do not need it for the execution of the
+long-lived process.
+.It
+.Xr s6-ipcserverd 8
+is a daemon that listens to a Unix socket and spawns a program for
+every connection.
+It is meant to be supervised, so it should be used in a run script,
+and it's also meant to be a flexible super-server that you can use for
+different applications: so it is a building block that may appear in
+several of your run scripts defining
+.Xr s6-local-service 7 Ns
+s.
+.El
+.Ss Readiness notification and dependency management
+Now that you have a supervision tree, and long-lived processes running
+supervised, you may want to introduce dependencies between them: do not
+perform an action
+.Po
+e.g. start
+.Po
+with
+.Ql s6-svc -u
+.Pc
+the Web server connecting to a database
+.Pc
+before a given daemon is up and running
+.Po
+e.g. the database server
+.Pc .
+s6 provides tools to do that:
+.Bl -bullet -width x
+.It
+The
+.Xr s6-svwait 8 ,
+.Xr s6-svlisten1 8
+and
+.Xr s6-svlisten 8
+programs will wait until a set of daemons is up, ready, down
+.Po
+as soon as the
+.Pa ./run
+process dies
+.Pc
+or really down
+.Po
+when the
+.Pa ./finish
+process has also died
+.Pc .
+.It
+Unfortunately, a daemon being
+.Em up
+does not mean that it is
+.Em ready :
+.Xr s6-notifywhenup 7
+goes into the details.
+s6 supports a simple mechanism: when a daemon wants to signal that it
+is
+.Em ready ,
+it simply writes a newline to a file descriptor of its choice, and
+.Xr s6-supervise 8
+will pick that notification up and broadcast the information to
+processes waiting for it.
+.It
+s6 also has a legacy mechanism for daemons that do not notify their
+own readiness but provide a way for an external program to check
+whether they're ready or not:
+.Xr s6-notifyoncheck 8 .
+This is polling, which is bad, but unfortunately necessary for many
+daemons as of 2019.
+.El
+.Pp
+s6 does not provide a complete dependency management framework, i.e. a
+program to automatically start (or stop) a set of services in a
+specific order - that order being automatically computed from a graph
+of dependencies between services.
+That functionality belongs to a
+.Em service manager ,
+and is implemented for instance in the s6-rc package[10].
+.Ss Fine-grained control over services
+s6 provides you with a few more tools to control and monitor your
+services.
+For instance:
+.Bl -bullet -width x
+.It
+.Xr s6-svstat 8
+gives you access to the detailed state of a service.
+.It
+.Xr s6-svperms 8
+allows you to configure what users can read that state, what users can
+send control commands to your service, and what users can be notified
+of service start/stop events.
+.It
+.Xr s6-svdt 8
+allows you to see what caused the latest deaths of a supervised
+process.
+.El
+.Pp
+These tools make s6 the most powerful and flexible of the existing
+process supervision suites.
+.Ss Additional utilities
+The other programs in the s6 package are various utilities that may be
+useful in designing servers, and more generally multi-process software.
+They can be used with or without a supervision environment, although
+it is of course recommended to have one; but they are not part of the
+core s6 functionality, and you may safely ignore them for now if you
+are just getting into the supervision world.
+.Pp
+.Sy Generic inter-process notification
+.br
+The
+.Ql s6-ftrig*
+family of programs allows notifications between unrelated processes: a
+set of processes can subscribe to a certain channel - identified by a
+directory in the filesystem - and ask to be notified of certain events
+on that channel; another set of processes can send events to the
+channel.
+.Pp
+The underlying mechanism is the same as the one used by the supervision
+tree for readiness notification, but the
+.Ql s6-ftrig*
+tools provide a more generic access to that mechanism.
+.Pp
+.Sy Helpers for designing local services
+.br
+Local services, i.e. daemons listening to a Unix domain socket, are a
+powerful and flexible mechanism, especially with modern Unix systems
+that allow client authentication.
+s6 includes tools to take advantage of that mechanism.
+.Bl -bullet -width x
+.It
+The
+.Ql s6-ipc*
+family of programs is about designing clients or servers that
+communicate over Unix domain sockets.
+.It
+The
+.Ql s6-*access*
+and
+.Xr s6-connlimit 8
+family of programs is about client access control.
+.It
+The
+.Ql s6-sudo*
+family of programs is about using a local service in order to give
+selected clients the ability to run a command line with the privileges
+of the server, without using suid programs.
+.El
+.Pp
+.Sy Keeping file descriptors open
+.br
+Sometimes you want to keep a file descriptor open, even if the program
+normally using it dies - so the program can restart and use the same
+file descriptor without losing any data.
+To do that, you need to
+.Em hold
+the descriptor in another process, i.e. that process should have it
+open but do nothing with it.
+.Pp
+.Xr s6-svscan 8 ,
+for instance, holds the pipe existing between a supervised daemon and
+its logger, so even if the daemon or the logger dies while there are
+logs in the pipe, the pipe remains open and the logs are not lost.
+.Pp
+s6 provides a mechanism to store and retrieve open file descriptors in
+a totally generic way: the
+.Ql s6-fdholder*
+family of programs.
+.Bl -bullet -width x
+.It
+The
+.Xr s6-fdholder-daemon 8
+program is a daemon
+.Po
+or, rather, executes into the
+.Xr s6-fdholderd 8
+daemon
+.Pc ,
+meant to be supervised, that will hold file descriptors on its
+clients' behalf.
+.It
+Other programs in the family, such as
+.Xr s6-fdholder-store 8 ,
+are client programs that interact with this daemon to store and
+retrieve file descriptors.
+.El
+.Pp
+Note that
+.Dq socket activation ,
+one of the main advertised benefits of the systemd[11] init system,
+sounds similar to fd-holding.
+The reality is that socket activation is a mixture of several
+different mechanisms, one of which is fd-holding; s6 allows you to
+implement the healthy parts of socket activation.
+Refer to
+.Xr s6-socket-activation 7
+for details.
+.Pp
+.Sy Other miscellaneous utilities
+.br
+This page does not list or classify every s6 tool.
+Please explore the
+.Dq Reference
+section of the main s6 page[12] for details on a specific program.
+.Sh SEE ALSO
+[1]
+.Lk https://cr.yp.to/daemontools.html
+.Pp
+[2]
+.Lk http://smarden.org/runit/
+.Pp
+[3]
+.Lk https://skarnet.org/software/s6-linux-init/
+.Pp
+[4]
+.Lk https://www.docker.com/
+.Pp
+[5]
+.Lk http://man.he.net/man8/start-stop-daemon
+.Pp
+[6]
+.Lk https://jdebp.uk/FGA/unix-daemon-design-mistakes-to-avoid.html
+.Pp
+[7]
+.Lk https://skarnet.org/software/
+.Pp
+[8]
+.Lk https://en.wikipedia.org/wiki/Chain_loading#Chain_loading_in_Unix
+.Pp
+[9]
+.Lk https://skarnet.org/software/execline/
+.Pp
+[10]
+.Lk https://skarnet.org/software/s6-rc/
+.Pp
+[11]
+.Lk https://www.freedesktop.org/wiki/Software/systemd/
+.Pp
+[12]
+.Lk https://skarnet.org/software/s6/
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

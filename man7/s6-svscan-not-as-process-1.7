@@ -1,0 +1,149 @@
+.Dd January 15, 2023
+.Dt S6-SVSCAN-NOT-AS-PROCESS-1 7
+.Os
+.Sh NAME
+.Nm s6-svscan-not-as-process-1
+.Nd running
+.Xr s6-svscan 8
+under another init process
+.Sh DESCRIPTION
+You can have a reliable supervision tree even if
+.Xr s6-svscan 8
+is not your process 1.
+The supervision tree just has to be
+.Em rooted
+in process 1: that means that your process 1 will have to supervise
+your
+.Xr s6-svscan 8
+process somehow.
+That way, if
+.Xr s6-svscan 8
+dies, it will be restarted, and your set of services will always be
+maintained.
+.Pp
+Be aware, though, that pipes between services and loggers are
+maintained by the
+.Xr s6-svscan 8
+process; if this process dies, the pipes will be closed and some logs
+may be lost.
+.Ss Logging the supervision tree's output
+.Xr s6-svscan 8
+and the various
+.Xr s6-supervise 8
+processes might produce error or warning messages; those messages are written to
+.Xr s6-svscan 8 Ap
+s stderr
+.Po
+which is inherited by the
+.Xr s6-supervise 8
+processes
+.Pc .
+To log these messages:
+.Bl -bullet -width x
+.It
+You can use your init system's logging tools, and make your init
+system launch
+.Xr s6-svscan 8
+as is; its stderr should already be taken care of by the logging
+tools.
+.It
+You can use a trick similar to the
+.Xr s6-svscan-as-process-1 7
+process 1 output logging trick so the supervision tree's messages are
+logged via a service that's maintained by the supervision tree itself.
+Then your init system should not launch
+.Xr s6-svscan 8
+directly, but a wrapper script that performs the proper redirections.
+The
+.Pa examples/s6-svscanboot
+file in the s6 distribution gives an example of such a script.
+Make sure that your initial
+.Xr s6-scan-directory 7
+contains an
+.Xr s6-service-directory 7
+for your initial logging service, that must read on the logging FIFO.
+.El
+.Pp
+In some of the following examples, we'll assume that
+.Pa /command/s6-svscanboot
+is the name of the script you are using to start
+.Xr s6-svscan 8 .
+We will also assume that all of the s6 executables are available
+through the
+.Pa /command
+path.
+Adjust this accordingly.
+.Ss System V init
+Put an appropriate line in your
+.Pa /etc/inittab
+file, then reload this config file with
+.Ql telinit q :
+.Bd -literal
+SV:123456:respawn:/command/s6-svscanboot
+.Ed
+.Ss Upstart
+Put an appropriate configuration file in the
+.Pa /etc/init
+folder, for instance
+.Pa /etc/init/s6-svscan.conf ,
+then start the service with
+.Ql start s6-svscan :
+.Bd -literal
+# s6-svscan
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+oom never
+respawn
+exec /command/s6-svscanboot
+.Ed
+.Ss systemd
+Put an appropriate unit file in the
+.Pa /etc/systemd/system
+folder, for instance
+.Pa /etc/systemd/system/s6.service .
+It will be picked up by systemd at boot time:
+.Bd -literal
+[Unit]
+Description=s6 supervision tree
+Documentation=https://skarnet.org/software/s6/
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/command/s6-svscan /service
+ExecStop=/command/s6-svscanctl -t /service
+ExecReload=/command/s6-svscanctl -an /service
+Restart=always
+RestartSec=1
+.Ed
+.Pp
+Please note that, among other things, systemd performs process
+supervision, so depending on the level of integration with your
+distribution that you wish to achieve, you may be better off using
+systemd to directly manage your daemons.
+Please also note that systemd is a terrible piece of software
+engineering[1], and if at all possible, you should try and switch to a
+distribution that does not use it.
+.Ss BSD init
+Put an appropriate line in your
+.Pa /etc/ttys
+file, then reload this file with
+.Ql kill -s HUP 1 :
+.Bd -literal
+sv /command/s6-svscanboot "" on
+.Ed
+.Ss MacOS launchd
+Like systemd, launchd comes with its own way of supervising
+services[2]; if you are a launchd user, you probably do not need s6.
+.Sh SEE ALSO
+[1]
+.Lk https://skarnet.org/software/systemd.html
+.Pp
+[2]
+.Lk https://developer.apple.com/library/mac/documentation/macosx/conceptual/bpsystemstartup/chapters/CreatingLaunchdJobs.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)
