@@ -1,0 +1,162 @@
+.Dd January 15, 2023
+.Dt S6-INSTANCED-SERVICE 7
+.Os
+.Sh NAME
+.Nm s6-instanced-service
+.Nd dynamic instantiation
+.Sh DESCRIPTION
+An
+.Em instanced service
+is a parameterized service that you want to run several copies of,
+with only the parameter changing.
+Each copy of the service is called an
+.Em instance .
+.Pp
+With s6, an
+.Xr s6-service-directory 7
+can only handle one process at a time.
+So, if we want instanced services, there will have to be one service
+directory per instance, always.
+.Pp
+.Em Static instantiation
+means that the set of possible instances is finite and known in
+advance.
+With s6, it means that all the service directories for all possible
+instances are created, typically by a preprocessor, and instances are
+treated like regular services.
+.Pp
+.Em Dynamic instantiation
+means that instances are created on demand instead of preallocated.
+Starting with version 2.11.2.0, s6 provides a few tools to help users
+set up and manage dynamically instanced services.
+.Ss How to make a dynamically instanced service under s6
+.Bl -bullet -width x
+.It
+Write a template for a service directory that would run under
+.Xr s6-supervise 8 .
+The
+.Pa run
+script should take the name of the instance as its first argument; the
+.Pa finish
+script, if present, should take the name of the instance as its third
+argument.
+.It
+Call the
+.Xr s6-instance-maker 8
+program with this template as first argument, and a path
+.Pa dir
+as second argument.
+.Xr s6-instance-maker 8
+will create a service directory in
+.Pa dir .
+This is an offline tool: it does not interact with any currently
+active services or supervision trees.
+.It
+Supervise
+.Pa dir
+by adding it to your regular
+.Xr s6-scan-directory 7 .
+This will be your instanced service, but it's not running any instances yet.
+It is, instead, a nested supervision tree - the instanced service is an
+.Xr s6-svscan 8
+process that will supervise all the instances.
+.It
+Create and delete instances at will with the
+.Xr s6-instance-create 8
+and
+.Xr s6-instance-delete 8
+programs; you can list all the available instances with
+.Xr s6-instance-list 8 .
+These tools are
+.Em online :
+they work with live service directories, i.e. that are being supervised by
+.Xr s6-supervise 8 .
+.It
+Instances are regular supervised processes.
+You can control individual instances with
+.Xr s6-instance-control 8 ,
+and check their status with
+.Xr s6-instance-status 8 .
+These tools are online as well.
+.El
+.Ss Internal workings
+This section is not normative; users should not rely on it.
+It is only here for informational purposes.
+.Bl -bullet -width x
+.It
+The service directory created by
+.Xr s6-instance-maker 8
+has two specifics subdirectories in it:
+.Pa instance
+and
+.Pa instances .
+They are initially empty, except that the template service directory
+is stored in
+.Pa instances/.template .
+.It
+When the service is active, there is an
+.Xr s6-svscan 8
+process running on
+.Pa instance .
+.It
+.Xr s6-instance-create 8
+makes a copy of
+.Pa instances/.template
+into
+.Pa instances/ Ns Ar name ,
+and
+.Xr s6-svlink 8 Ns
+s
+.Pa instances/ Ns Ar name
+to
+.Pa instance .
+When it returns, there is an
+.Xr s6-supervise 8
+process running on
+.Pa instance/ Ns Ar name ,
+and the instance may be up or not depending on the given options.
+.It
+.Xr s6-instance-control 8
+is syntactic sugar around
+.Xr s6-svc 8
+on
+.Pa instance/ Ns Ar name .
+.It
+.Xr s6-instance-status 8
+is syntactic sugar around
+.Xr s6-svstat 8
+on
+.Pa instance/ Ns Ar name .
+.It
+.Xr s6-instance-delete 8
+is syntactic sugar around
+.Xr s6-svunlink 8
+on
+.Pa instance/ Ns Ar name .
+.It
+.Xr s6-instance-list 8
+is roughly equivalent to
+.Ql ls -1 instance .
+.El
+.Ss Notes
+This implementation of dynamic instances may seem expensive: it
+creates one
+.Xr s6-svscan 8
+process per instanced service, and one
+.Xr s6-supervise 8
+process per instance.
+However, remember that these processes use very little private memory,
+so having additional copies of them is far less expensive than it
+looks.
+It's really a convenient way to implement the feature by reusing
+existing code.
+.Sh SEE ALSO
+.Xr s6-instance-control 8 ,
+.Xr s6-instance-create 8 ,
+.Xr s6-instance-delete 8 ,
+.Xr s6-instance-list 8 ,
+.Xr s6-instance-maker 8 ,
+.Xr s6-instance-status 8
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

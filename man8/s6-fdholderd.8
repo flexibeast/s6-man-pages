@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd January 15, 2023
 .Dt S6-FDHOLDERD 8
 .Os
 .Sh NAME
@@ -234,7 +234,7 @@ This will be checked for storage and deletion of individual file
 descriptors.
 This right is given if a non-empty file named
 .Pa S6_FDHOLDER_STORE_REGEX
-is found is the
+is found in the
 .Pa env/
 subdirectory of one of the subdirectories checked by
 .Fn s6_accessrules_keycheck_uidgid .
@@ -254,7 +254,7 @@ This will be checked for retrieval of individual file
 descriptors.
 This right is given if a non-empty file named
 .Pa S6_FDHOLDER_RETRIEVE_REGEX
-is found is the
+is found in the
 .Pa env/
 subdirectory of one of the subdirectories checked by
 .Fn s6_accessrules_keycheck_uidgid .

@@ -1,0 +1,60 @@
+.Dd January 11, 2023
+.Dt S6-INSTANCE-STATUS 8
+.Os
+.Sh NAME
+.Nm s6-instance-status
+.Nd give the status of a running instance of an
+.Xr s6-instanced-service 7 ,
+as a short human-readable summary or programmatically parsable output
+.Sh SYNOPSIS
+.Nm
+.Op Fl uwNrpest | Fl o No up,wantedup,normallyup,ready,paused,pid,exitcode,signal,signum,updownsince,readysince,updownfor,readyfor
+.Op Fl n
+.Ar servicedir
+.Ar name
+.Sh DESCRIPTION
+.Nm
+expects a running, supervised
+.Xr s6-instanced-service 7
+in
+.Ar servicedir ,
+as well as an existing instance of this service named
+.Ar name .
+.Pp
+It prints information to stdout about the monitored instance of
+.Ar servicedir
+named
+.Ar name .
+.Pp
+It exits 0.
+.Sh OPTIONS
+The options are exactly the same as the ones understood by
+.Xr s6-svstat 8 .
+.Pp
+In fact, s6-instance-status is nothing more than a call to
+.Xr s6-svstat 8
+on the service directory representing the
+.Ar name
+instance.
+It is syntactic sugar so the user does not have to depend on the
+internal representation of instances and the location of instances'
+service directories.
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+.Xr s6-instanced-service 7 ,
+.Xr s6-instance-control 8 ,
+.Xr s6-instance-create 8 ,
+.Xr s6-instance-delete 8 ,
+.Xr s6-instance-list 8 ,
+.Xr s6-instance-maker 8
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

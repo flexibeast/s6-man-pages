@@ -1,0 +1,137 @@
+.Dd January 11, 2023
+.Dt S6-INSTANCE-CREATE 8
+.Os
+.Sh NAME
+.Nm s6-instance-create
+.Nd create a new instance of a currently supervised
+.Xr s6-instanced-service 7
+.Sh SYNOPSIS
+.Nm
+.Op Fl d | Fl D
+.Op Fl P
+.Op Fl f
+.Op Fl t Ar timeout
+.Ar servicedir
+.Ar name
+.Sh DESCRIPTION
+.Nm
+expects a running, supervised
+.Xr s6-instanced-service 7
+in
+.Ar servicedir .
+This service typically has been created by linking the result of an
+.Xr s6-instance-maker 8
+invocation into an existing
+.Xr s6-scan-directory 7 .
+.Pp
+.Nm
+creates a new instance of that service, named
+.Ar name .
+Depending on the given options, it may start it immediately, or keep
+it down until a later
+.Xr s6-instance-control 8
+invocation.
+.Pp
+It waits for the new instance to be ready to take commands from
+.Xr s6-instance-control 8
+.Pp
+It exits 0.
+.Pp
+.Nm
+is similar to
+.Xr s6-svlink 8 ,
+because it uses the same underlying library functions.
+Under the hood, an instance is a regular service running on a
+supervision tree that is specific to the instanced service, and
+.Nm
+adds a service directory to that tree and ensures it gets
+supervised.
+.Pp
+If the template for the service is logged, then
+.Nm
+will wait until supervisors have been spawned for both the instance
+and its logger.
+.Pp
+.Nm
+and
+.Xr s6-instance-delete 8
+are relatively expensive operations, because they have to recursively
+copy or delete directories and use the
+.Xr s6-ftrigr 7
+synchronization mechanism with the instance supervisor, compared to
+.Xr s6-instance-control 8
+which only has to send commands to already existing supervisors.
+If you are going to turn instances on and off on a regular basis, it
+is more efficient to keep the instance existing and control it with
+.Xr s6-instance-control 8
+than it is to repeatedly create and delete it.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl d
+Down.
+The instance supervisor will be started, but the instance
+itself will remain down.
+Any
+.Pa down
+file for the instance will be deleted.
+By default, if neither the
+.Fl d
+nor
+.Fl D
+options have been given, the supervisor auto-starts the instance as
+soon as it runs.
+.It Fl D
+Down, and stay down.
+The instance supervisor will be started, but the instance itself will
+remain down.
+A
+.Pa down
+file will be created for the instance.
+By default, if neither the
+.Fl d
+nor
+.Fl D
+options have been given, the supervisor auto-starts the instance as
+soon as it runs.
+.It Fl P
+Public.
+Everyone will be able to subscribe to the instance supervisor's
+notification.
+By default, only processes running with the same gid as the instanced
+service can subscribe to it.
+.It Fl f
+Force permissions.
+You should never need to use this option, it is only there for testing
+purposes.
+.It Fl t Ar timeout
+If the
+instance supervisor has not started after
+.Ar timeout
+milliseconds,
+.Nm
+will print a message to stderr and exit 99.
+By default,
+.Ar timeout
+is 0, which means no time limit.
+.El
+.Sh EXIT STATUS
+.Bl -tag -width -x
+.It 0
+Success.
+.It 99
+Timeout while waiting for the instance supervisor to start.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+.Xr s6-instanced-service 7 ,
+.Xr s6-instance-control 8 ,
+.Xr s6-instance-delete 8 ,
+.Xr s6-instance-list 8 ,
+.Xr s6-instance-maker 8 ,
+.Xr s6-instance-status 8
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

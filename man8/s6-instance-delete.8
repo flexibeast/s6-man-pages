@@ -1,0 +1,91 @@
+.Dd January 11, 2023
+.Dt S6-INSTANCE-DELETE 8
+.Os
+.Sh NAME
+.Nm s6-instance-delete
+.Nd delete an existing instance of a currently supervised
+.Xr s6-instanced-service 7
+.Sh SYNOPSIS
+.Nm
+.Op Fl X
+.Op Fl t Ar timeout
+.Ar servicedir
+.Ar name
+.Sh DESCRIPTION
+.Nm
+expects a running, supervised
+.Xr s6-instanced-service 7
+in
+.Ar servicedir ,
+as well as an existing instance of this service named
+.Ar name
+(it doesn't matter if the instance is up or down).
+.Pp
+It deletes the
+.Ar name
+instance.
+.Pp
+It exits 0.
+.Pp
+.Nm
+is similar to
+.Xr s6-svunlink 8 ,
+because it uses the same underlying library functions.
+Under the hood, an instance is a regular service running on a
+supervision tree that is specific to the instanced service, and
+.Nm
+removes a service directory from that tree.
+.Pp
+If the template for the service is logged, then
+.Nm
+will delete both the instance and its logger.
+.Pp
+.Nm
+and
+.Xr s6-instance-create 8
+are relatively expensive operations, because they have to recursively
+copy or delete directories and use the
+.Xr s6-ftrigr 7
+synchronization mechanism with the instance supervisor, compared to
+.Xr s6-instance-control 8
+which only has to send commands to already existing supervisors.
+If you are going to turn instances on and off on a regular basis, it
+is more efficient to keep the instance existing and control it with
+.Xr s6-instance-control 8
+than it is to repeatedly create and delete it.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl X
+Don't wait.
+.Nm
+will exit right away, without waiting for the instance (and its
+supervisor) to properly disappear.
+.It Fl t Ar timeout
+If the instance supervisor has not exited after
+.Ar timeout
+milliseconds,
+.Nm
+will still exit.
+By default,
+.Ar timeout
+is 0, which means no time limit.
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+.Xr s6-instanced-service 7 ,
+.Xr s6-instance-control 8 ,
+.Xr s6-instance-create 8 ,
+.Xr s6-instance-list 8 ,
+.Xr s6-instance-maker 8 ,
+.Xr s6-instance-status 8
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

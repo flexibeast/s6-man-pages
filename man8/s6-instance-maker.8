@@ -1,0 +1,300 @@
+.Dd January 15, 2023
+.Dt S6-INSTANCE-MAKER 8
+.Os
+.Sh NAME
+.Nm s6-instance-maker
+.Nd create an
+.Xr s6-service-directory 7
+implementing an
+.Xr s6-instanced-service 7
+.Sh SYNOPSIS
+.Nm
+.Op Fl c Ar maxinstances
+.Op Fl r Ar service Ns Op / Ns Ar logger Ns Op / Ns Ar pipeline
+.Op Fl u Ar user
+.Op Fl l Ar loguser
+.Op Fl L Ar logdir
+.Op Fl t Ar stamptype
+.Op Fl n Ar nfiles
+.Op Fl s Ar filesize
+.Op Fl S Ar maxsize
+.Op Fl P Ar prefix
+.Ar template
+.Ar dir
+.Sh DESCRIPTION
+Give
+.Nm
+a templated service directory describing how to run an instance of a
+service, and it will create a different service directory that can
+launch and manage several instances; each of these instances will be
+running a copy of the service directory you gave.
+.Pp
+Alternatively,
+.Nm
+can create source definition directories for the s6-rc service manager[1].
+.Pp
+.Nm
+creates a service directory in
+.Ar dir
+(which must not already exist).
+The created service will be a supervisor for a set of instances \(em
+initially empty \(em each running a copy of the service directory
+given in
+.Ar template .
+.Pp
+.Nm
+is an
+.Em offline
+tool: it is run before you need instances.
+Once the created service directory is live, i.e. there is a supervisor
+running on it, then you can create and delete individual instances via
+the
+.Xr s6-instance-create 8
+and
+.Xr s6-instance-delete 8
+.Em online
+tools, that work with active services.
+.Pp
+.Nm
+makes use of the fact that execline[2] scripts are much easier to
+generate programmatically and to harden than shell scripts, so it is
+only built if s6 is built with execline support - i.e. the
+.Ql --disable-execline
+switch has
+.Em not
+been given to configure.
+.Pp
+If
+.Nm
+encounters failure (and exits 111), it does not clean up the
+directories it created.
+Make sure to always test
+.Nm Ap
+s return code and clean up after it if needed.
+.Ss The templated service directory
+.Ar template
+should be a directory that looks exactly like a service directory.
+It will not be live, i.e. at no point will
+.Ar template
+itself be supervised; instead, a copy of it is stored under
+.Ar dir
+.Po
+and a copy of that copy will be used for every instance of the
+service
+.Pc .
+You can safely move or delete
+.Ar template
+after running
+.Nm .
+.Pp
+To differentiate between instances, the
+.Pa run
+and
+.Pa finish
+script in
+.Ar template
+should take one additional argument
+.Po
+the first argument for
+.Pa run
+and the third argument for
+.Pa finish
+.Pc .
+This argument will be the name of the instance, as provided by the
+.Xr s6-instance-create 8
+invocation.
+.Ss Logging
+The service is logged: its stderr and stdout are piped to an
+.Xr s6-log 8
+process running as
+.Ar loguser
+and writing to the
+.Ar logdir
+directory.
+This logger is the catch-all logger for all the instances and the
+supervision tree hosting them.
+If
+.Ar user
+and
+.Ar loguser
+are provided, it is recommended to make them distinct from each other.
+.Pp
+Additionally, if
+.Ar template
+has a
+.Ar log
+subdirectory, then each instance will have its own dedicated logger.
+The
+.Pa run
+and
+.Pa finish
+scripts for the logger of an instance named
+.Ar name
+will be called with an additional argument of
+.Ar name Ns /log .
+They should make use of this, to ensure loggers are properly
+differentiated between instances: for instance, it is not possible to
+run several
+.Xr s6-log 8
+processes on the same log directory, so an instance logger script
+containing an invocation of
+.Xr s6-log 8
+on a fixed logdir will fail as soon as there are 2 instances.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl c Ar max
+Plan for a maximum of
+.Ar max
+instances.
+Default is
+.Em 500 .
+You can't set it lower than 2 or higher than 90000.
+If your template service directory is logged, it's unadvisable to set
+this above the default.
+.It Fl r Ar service Ns Op / Ns Ar logger Ns Op / Ns Ar pipeline
+Create s6-rc[1] source definition directories.
+When this option is given,
+.Ar dir
+is not created as a service directory, but as a directory containing
+at least one service:
+.Pa "" Ns Ar dir Ns / Ns Ar service .
+.Ar dir
+is suitable as a source argument to s6-rc-compile[3].
+If a
+.Ar logger
+part is given, then a second service,
+.Pa "" Ns Ar dir Ns /logger ,
+is also created, as a consumer for
+.Pa "" Ns Ar dir Ns / Ns Ar service ,
+and the
+.Fl L
+option must also be used, to provide a directory to store the logs into.
+If the
+.Pa "" Ns / Ns Ar pipeline
+part is also given,
+.Ar pipeline
+is used as a name for a bundle containing both
+.Ar service
+and
+.Pa logger .
+When the
+.Fl r
+option is not given at all,
+.Pa "" Ns Ar dir
+is a regular service directory for direct inclusion (or linking) in a host
+.Xr s6-scan-directory 7 ,
+and if the
+.Fl L
+option is given then the logger for the instance supervisor and all
+its instances is declared in
+.Pa "" Ns Ar dir Ns /log .
+.It Fl u Ar user
+Run the instance supervisor, and all of the instances, as user
+.Ar user .
+This option should only be used when the supervision tree that will
+host the instanced service is run as root.
+The default is that the service runs as the same user as the host
+supervision tree.
+.It Fl l Ar loguser
+Run the logger of the instance supervisor, if any
+.Po
+see
+.Fl L
+below
+.Pc
+as user
+.Ar loguser .
+This option should only be used when the supervision tree that will
+host the instanced service is run as root.
+The default is that the logger runs as the same user as the host
+supervision tree.
+.It Fl L Ar logdir
+Make the service logged via
+.Xr s6-log 8 ,
+and ensure its log messages go into
+.Ar logdir .
+Error messages from the instance supervisor as well as from every
+instance will be logged to
+.Ar logdir .
+If this option is not given, these error messages will fall through to
+the host supervision tree's catch-all logger, if any, or standard
+error otherwise.
+The options listed below are only used to configured the logger and
+are meaningless if
+.Fl L
+is not given.
+.It Fl t Ar stamptype
+How logs are timestamped in
+.Ar logdir .
+0 means no timestamp, 1 means external TAI64N format[4], 2 means ISO
+8601 format[5], and 3 means both.
+Default is
+.Em 1 .
+.It Fl n Ar nfiles
+Maximum number of archive files in
+.Ar logdir .
+Default is
+.Em 10 .
+.It Fl s Ar filesize
+Maximum size of the
+.Pa current
+file
+.Po
+and archive files
+.Pc
+in
+.Ar logdir .
+Default is
+.Em 1000000 .
+.It Fl S Ar maxsize
+Maximum total size of the archives in
+.Ar logdir .
+Default is
+.Em 0 ,
+meaning no limits apart from those enforced by the
+.Fl n
+and
+.Fl s
+options.
+.It Fl P Ar prefix
+when logging to
+.Ar logdir ,
+prefix logged lines with the
+.Ar prefix
+string.
+Default is no prefix.
+.El
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+.Xr s6-instanced-service 7 ,
+.Xr s6-instance-control 8 ,
+.Xr s6-instance-create 8 ,
+.Xr s6-instance-delete 8 ,
+.Xr s6-instance-list 8 ,
+.Xr s6-instance-status 8
+.Pp
+[1]
+.Lk https://skarnet.org/software/s6-rc/
+.Pp
+[2]
+.Lk https://skarnet.org/software/execline/
+.Pp
+[3]
+.Lk https://skarnet.org/software/s6-rc/s6-rc-compile.html
+.Pp
+[4]
+.Lk https://cr.yp.to/libtai/tai64.html
+.Pp
+[5]
+.Lk https://www.iso.org/iso/home/standards/iso8601.htm
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

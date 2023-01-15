@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd January 15, 2023
 .Dt S6-SVC 8
 .Os
 .Sh NAME
@@ -10,7 +10,7 @@ process
 .Nm
 .Op Fl wu | wU | wd | wD | wr | wR
 .Op Fl T Ar timeout
-.Op Fl abqhkti12pcyoduxOr
+.Op Fl abqhkti12pcyroduDUxO
 .Ar servicedir
 .Sh DESCRIPTION
 .Nm
@@ -48,6 +48,63 @@ down.
 To avoid that, make sure your service is wanted up by using
 .Ql s6-svc -ruwr Ar servicedir
 instead.
+.Pp
+The
+.Ql U
+and
+.Ql D
+letters, which convey the same idea as
+.Ql u
+and
+.Ql d
+.Po
+.Em up
+and
+.Em down
+.Pc
+but with added emphasis, do not have the same meaning in the
+.Fl U
+/
+.Fl D
+and
+.Fl wU
+/
+.Fl wD
+options.
+In the
+.Fl U
+/
+.Fl D
+case, they mean
+.Do
+change the external service configuration to match what the supervisor
+has been instructed that the starting state of the service should be
+.Dc .
+In the
+.Fl wU
+/
+.Fl wD
+case, they mean
+.Do
+wait until the service has reached the wanted state
+.Em and also
+is ready
+.Dc
+.Po
+or
+.Do
+ready to be started again
+.Dc
+for
+.Fl wD
+.Pc .
+The thing to remember is
+.Do
+it's up/down, with something more
+.Dc ,
+but the
+.Dq something
+isn't the same.
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl a
@@ -87,10 +144,24 @@ The SIGTERM default can be changed by editing the
 .Pa ./down-signal
 file in the
 .Xr s6-service-directory 7 .
+.It Fl D
+Down, and create a
+.Pa ./down
+file so the service does not restart automatically if the supervisor
+dies.
+This option is mostly used by automated systems working on top of s6;
+as a human user, you probably don't need it.
 .It Fl u
 Up.
 If the supervised process is down, start it.
 Automatically restart it when it dies.
+.It Fl U
+Up, and remove any
+.Pa ./down
+file that may exist, in order to make sure the service is
+automatically restarted even if the supervisor dies.
+This option is mostly used by automated systems working on top of s6;
+as a human user, you probably don't need it.
 .It Fl x
 Exit.
 When the service is asked to be down and the supervised process dies,

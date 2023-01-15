@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd January 15, 2023
 .Dt S6-SETUIDGID 8
 .Os
 .Sh NAME
@@ -9,6 +9,15 @@
 .Ar account
 .Ar prog...
 .Sh DESCRIPTION
+If
+.Ar account
+is the empty string, then
+.Nm
+directly
+.Xr exec 3 Ns
+s into
+.Ar prog...
+without any state changes.
 If
 .Ar account
 contains a colon, it is interpreted as
@@ -36,6 +45,9 @@ according to the group database.
 Then it executes into
 .Ar prog... .
 .Pp
+Unless
+.Ar account
+is empty,
 .Nm
 can only be run as root.
 Its main use is to drop root privileges before starting a daemon.

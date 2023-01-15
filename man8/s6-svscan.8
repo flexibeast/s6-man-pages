@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd January 15, 2023
 .Dt S6-SVSCAN 8
 .Os
 .Sh NAME
@@ -358,14 +358,15 @@ If you're not sure what to use this option for, or how, you don't need it.
 Maintain services for up to max service directories.
 Default is 500.
 Lower limit is 2.
-There is no upper limit, but:
+Upper limit is 90000.
+If you're increasing this value from the default, please note that:
 .Bl -bullet -width x
 .It
 The higher
 .Ar max
 is, the more stack memory
 .Nm
-will use, approximately 50 bytes per service.
+will use, up to 100 bytes per service.
 .It
 .Nm
 uses 2 file descriptors per logged service.

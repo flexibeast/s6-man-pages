@@ -1,4 +1,4 @@
-.Dd June 15, 2022
+.Dd January 15, 2023
 .Dt S6-SERVICE-DIRECTORY 7
 .Os
 .Sh NAME
@@ -37,12 +37,37 @@ This file is the most important one in your service directory: it
 contains the commands that will setup and run your
 .Em foo
 service.
+.Bl -bullet -width x
+.It
 It is forked and executed by
 .Xr s6-supervise 8
 every time the service must be started, i.e. normally when
 .Xr s6-supervise 8
 starts, and whenever the service goes down when it is supposed to be
 up.
+.It
+It is given one argument, which is the same argument that the
+.Xr s6-supervise 8
+process is running with, i.e. the name of the service directory
+\(em
+or, if
+.Xr s6-supervise 8
+is run under
+.Xr s6-svscan 8 ,
+the name of the service directory as seen by
+.Xr s6-svscan 8
+in its
+.Xr s6-scan-directory 7 .
+That is,
+.Pa "" Ns Ar foo
+or
+.Pa "" Ns Ar foo Ns /log ,
+if
+.Ar foo
+is the name of the
+.Em symbolic link
+in the scan directory.
+.El
 A run script should normally:
 .Bl -bullet -width x
 .It
@@ -156,10 +181,18 @@ execution can be configured via the
 .Pa timeout-finish
 file, see below.
 .It
-The finish script is executed with two arguments: the exit code from
-the run script (resp. 256 if the run script was killed by a signal),
-and an undefined number (resp. the number of the signal that killed
-the run script).
+The finish script is executed with three arguments:
+.Bl -enum -width x
+.It
+the exit code from the run script (resp. 256 if the run script was
+killed by a signal);
+.It
+an undefined number (resp. the number of the signal that killed the
+run script);
+.It
+the name of the service directory, the same that has been given to
+.Pa ./run .
+.El
 .It
 If the finish script exits 125, then
 .Xr s6-supervise 8
@@ -188,7 +221,7 @@ It is automatically created by
 if it does not exist.
 This is where
 .Xr s6-supervise 8
-stores its information.
+stores its internal information.
 The directory must be writable.
 .It
 An optional, empty, regular file named
@@ -317,10 +350,20 @@ named
 It is automatically created by
 .Xr s6-supervise 8
 if it does not exist.
-.Pa foo/event
+.Pa "" Ns Ar foo Ns /event
 is the rendez-vous point for listeners, where
 .Xr s6-supervise 8
 will send notifications when the service goes up or down.
+.It
+Optional directories named
+.Pa instance
+and
+.Pa instances .
+Those are internal subdirectories created by
+.Xr s6-instance maker 8
+in a templated service directory.
+Outside of instanced services, these directories should never appear,
+and you should never create them manually.
 .It
 An optional service directory named
 .Pa log .

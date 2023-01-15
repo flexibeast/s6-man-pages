@@ -11,13 +11,18 @@ man7_targets = \
 	s6-fifodir.7 \
 	s6-ftrigr.7 \
 	s6-ftrigw.7 \
+	s6-instanced-service.7 \
 	s6-libftrig.7 \
 	s6-libs6.7 \
 	s6-local-service.7 \
 	s6-notifywhenup.7 \
+	s6-overview.7 \
 	s6-s6lock.7 \
 	s6-scan-directory.7 \
-	s6-service-directory.7
+	s6-service-directory.7 \
+	s6-socket-activation.7 \
+	s6-svscan-as-process-1.7 \
+	s6-svscan-not-as-process-1.7
 
 man8_targets = \
 	s6-accessrules-cdb-from-fs.8 \
@@ -42,6 +47,12 @@ man8_targets = \
 	s6-ftrig-notify.8 \
 	s6-ftrig-wait.8 \
 	s6-ftrigrd.8 \
+	s6-instance-control.8 \
+	s6-instance-create.8 \
+	s6-instance-delete.8 \
+	s6-instance-list.8 \
+	s6-instance-maker.8 \
+	s6-instance-status.8 \
 	s6-ioconnect.8 \
 	s6-ipcclient.8 \
 	s6-ipcserver-access.8 \

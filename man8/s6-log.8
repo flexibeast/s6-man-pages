@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd January 15, 2023
 .Dt S6-LOG 8
 .Os
 .Sh NAME
@@ -301,6 +301,24 @@ By default,
 .Ar statussize
 is 1001.
 .Sm off
+.It p Ns Ar prefix
+Set
+.Ar prefix
+as a prefix to be printed on every output line.
+For instance, a
+.Ql pfoobar:\&
+directive means that the next action directives should prepend every
+line with
+.Ql foobar:\&
+.Po
+plus a space
+.Pc
+before outputting it.
+Note that a prefix is always printed
+.Em after
+the timestamps, if any.
+To remove a prefix for the next action directives, use a standalone
+.Ql p .
 .It ! Ar processor
 .Sm on
 Registers

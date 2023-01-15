@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd January 15, 2023
 .Dt S6-USERTREE-MAKER 8
 .Os
 .Sh NAME
@@ -7,7 +7,7 @@
 .Xr s6-service-directory 7
 implementing a service that runs an
 .Xr s6-svscan 8
-instance owned by a given user, on an
+process owned by a given user, on an
 .Xr s6-scan-directory 7
 belonging to that user
 .Sh SYNOPSIS
@@ -21,6 +21,7 @@ belonging to that user
 .Op Fl n Ar nfiles
 .Op Fl s Ar filesize
 .Op Fl S Ar maxsize
+.Op Fl P Ar prefix
 .Ar user
 .Ar logdir
 .Ar dir
@@ -413,6 +414,12 @@ meaning no limits apart from those enforced by the
 and
 .Fl s
 options.
+.It Fl P Ar prefix
+When logging to
+.Ar logdir ,
+prefix logged lines with the
+.Ar prefix
+string.
 .El
 .Sh EXIT STATUS
 .Bl -tag -width x

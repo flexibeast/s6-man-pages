@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd January 15, 2023
 .Dt S6-SUPERVISE 8
 .Os
 .Sh NAME
@@ -199,6 +199,27 @@ file),
 .Nm
 spawns
 .Pa ./run .
+One argument is given to the
+.Pa ./run
+program:
+.Ar servicedir ,
+the name of the directory
+.Nm
+is being run on.
+It is given exactly as given to s6-supervise, without
+recanonicalization.
+In particular, if
+.Nm
+is being managed by
+.Xr s6-svscan 8 ,
+.Ar servicedir
+is always of the form
+.Pa "" Ns Ar foo
+or
+.Pa "" Ns Ar foo Ns /log ,
+and
+.Ar foo
+contains no slashes.
 .It
 .Nm
 sends a
@@ -252,7 +273,9 @@ was signaled; it will have the number of the signal that killed
 .Pa ./run
 as second argument, or an undefined number if
 .Pa ./run
-was not signaled.
+was not signalled; and it will have
+.Ar servicedir
+as third argument.
 .It
 By default,
 .Pa ./finish
@@ -299,6 +322,13 @@ There is a minimum 1-second delay between two
 spawns, to avoid busylooping if
 .Pa ./run
 exits too quickly.
+If the service has been
+.Em ready
+for more than one second, it will restart immediately, but if it's not
+.Em ready
+when it dies,
+.Nm
+will always pause for 1 second before spawning it again.
 .It
 When killed or asked to exit, it waits for the service to go down one
 last time, then sends a
@@ -384,6 +414,29 @@ and
 /event
 .Sm on
 need to be read-write.
+.Pp
+If
+.Ar servicedir
+isn't writable by
+.Nm ,
+for any reason, then the
+.Xr s6-svc 8
+.Fl D
+and
+.Fl U
+commands will not work properly since
+.Nm
+will be unable to create or delete a
+.Pa "" Ns Ar servicedir Ns /down
+file; in this case
+.Nm
+will print a warning on stderr, and perform the equivalent of
+.Fl d
+or
+.Fl u
+instead
+\(em
+it will just be unable to change the permanent service configuration.
 .Sh OPTIONS
 .Nm
 does not support options, because it is normally not run manually via

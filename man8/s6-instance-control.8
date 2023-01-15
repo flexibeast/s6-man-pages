@@ -1,0 +1,67 @@
+.Dd January 11, 2023
+.Dt S6-INSTANCE-CONTROL 8
+.Os
+.Sh NAME
+.Nm s6-instance-control
+.Nd send commands to a running instance of an
+.Xr s6-instanced-service 7
+.Sh SYNOPSIS
+.Nm
+.Op Fl wu | Fl wU | Fl wd | Fl wD | Fl wr | Fl wR ]
+.Op Fl T Ar timeout
+.Op Fl abqhkti12pcyroduDUxO
+.Ar servicedir
+.Ar name
+</pre>
+.Sh DESCRIPTION
+.Nm
+expects a running, supervised
+.Xr s6-instanced-service 7
+in
+.Ar servicedir ,
+as well as an existing instance of this service named
+.Ar name .
+.Pp
+It sends the given series of commands to the supervisor monitoring the
+.Ar name
+instance.
+.Pp
+It exits 0.
+.Sh OPTIONS
+The options, and the commands they represent, are exactly the same as
+the ones understood by
+.Xr s6-svc 8 .
+.Pp
+In fact,
+.Nm
+is nothing more than a call to
+.Xr s6-svc 8
+on the service directory representing the
+.Ar name
+instance.
+It is syntactic sugar so the user does not have to depend on the
+internal representation of instances and the location of instances'
+service directories.
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+Success.
+.It 99
+With one of the
+.Fl w
+options, timed out while waiting for the command to complete.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+.Xr s6-instanced-service 7 ,
+.Xr s6-instance-create 8 ,
+.Xr s6-instance-delete 8 ,
+.Xr s6-instance-list 8 ,
+.Xr s6-instance-maker 8 ,
+.Xr s6-instance-status 8
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)
