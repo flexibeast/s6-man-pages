@@ -1,4 +1,4 @@
-.Dd January 15, 2023
+.Dd February 19, 2023
 .Dt S6-INSTANCED-SERVICE 7
 .Os
 .Sh NAME
@@ -86,13 +86,13 @@ It is only here for informational purposes.
 .It
 The service directory created by
 .Xr s6-instance-maker 8
-has two specifics subdirectories in it:
+has three specifics subdirectories in it:
 .Pa instance
 and
-.Pa instances .
-They are initially empty, except that the template service directory
-is stored in
-.Pa instances/.template .
+.Pa instances ,
+which are initially empty, and
+.Pa template ,
+storing the template service directory.
 .It
 When the service is active, there is an
 .Xr s6-svscan 8
@@ -101,7 +101,7 @@ process running on
 .It
 .Xr s6-instance-create 8
 makes a copy of
-.Pa instances/.template
+.Pa template
 into
 .Pa instances/ Ns Ar name ,
 and

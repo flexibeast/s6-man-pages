@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd February 19, 2023
 .Dt S6-IOCONNECT 8
 .Os
 .Sh NAME
@@ -9,10 +9,6 @@
 .Op Fl t Ar millisecs
 .Op Fl r Ar fdr
 .Op Fl w Ar fdw
-.Op Fl 0
-.Op Fl 1
-.Op Fl 6
-.Op Fl 7
 .Sh DESCRIPTION
 .Nm
 reads data from its stdin and writes it as-is to file descriptor 7,
@@ -24,14 +20,6 @@ open, and writes it as-is to its stdout.
 When both sides have transmitted EOF and
 .Nm
 has flushed its buffers, it exits 0.
-.Pp
-Transmitting EOF across full-duplex sockets is ugly[1].
-The right thing in every case cannot be automatically determined, so
-it is up to the user to mention that a socket must be shut down.
-Most of the time, though, shutting down sockets after EOF is the right
-thing to do, so
-.Ql s6-ioconnect -67
-should be the common use case.
 .Pp
 The point of
 .Nm
@@ -56,6 +44,22 @@ utility was once part of the s6-networking suite, which is why the
 examples here involve TCP.
 Nevertheless, it can be used with connections across Unix domain
 sockets as well, and has its place in the s6 package.
+.Pp
+If one of the endpoints is a socket,
+.Nm
+will call
+.Xr shutdown 2
+on it (for reading or writing, depending on the endpoint) when it
+needs to transmit EOF.
+This is a necessary workaround to a misdesign[1] of the socket API,
+but it could have unintended consequences when the socket is shared
+among several processes that expect a persistent connection.
+Most of the time, however, it is a mistake to share a data socket
+between processes, so
+.Nm Ap s
+behaviour is suited to an overwhelming majority of cases, and the
+exceptions are specialized enough that they won't need to use
+.Nm .
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl t Ar millisecs
@@ -79,19 +83,21 @@ Use fd
 for
 .Dq remote
 writing instead of fd 7.
-.It Fl 0
-Assume stdin is a socket and needs to be shut down for reading after
-an EOF.
-.It Fl 1
-Assume stdout is a socket and needs to be shut down for writing to
-correctly transmit an EOF.
-.It Fl 6
-Assume the remote reading fd is a socket and needs to be shut down for
-reading after an EOF.
-.It Fl 7
-Assume the remote writing fd is a socket and needs to be shut down for
-writing to correctly transmit an EOF.
 .El
+.Pp
+The
+.Fl 0 ,
+.Fl 1 ,
+.Fl 6
+and
+.Fl 7
+options are still recognized for compatibility, but do nothing; they
+are deprecated.
+They were previously used to tell
+.Nm
+that the local reading, local writing, remote reading and remote
+writing endpoints, respectively, were sockets \(em but this is now
+autodetected.
 .Sh SEE ALSO
 .Xr s6-accessrules-cdb-from-fs 8 ,
 .Xr s6-accessrules-fs-from-cdb 8 ,

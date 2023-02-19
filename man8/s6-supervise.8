@@ -1,4 +1,4 @@
-.Dd January 15, 2023
+.Dd February 19, 2023
 .Dt S6-SUPERVISE 8
 .Os
 .Sh NAME
@@ -273,7 +273,7 @@ was signaled; it will have the number of the signal that killed
 .Pa ./run
 as second argument, or an undefined number if
 .Pa ./run
-was not signalled; and it will have
+was not signaled; and it will have
 .Ar servicedir
 as third argument.
 .It
@@ -324,7 +324,7 @@ spawns, to avoid busylooping if
 exits too quickly.
 If the service has been
 .Em ready
-for more than one second, it will restart immediately, but if it's not
+for more than one second, it will restart immediately, but if it is not
 .Em ready
 when it dies,
 .Nm
