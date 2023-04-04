@@ -1,8 +1,8 @@
 DESTDIR  =
 PREFIX   = /usr
-MANPATH ?= $(PREFIX)/share/man
-man7_dir = $(MANPATH)/man7
-man8_dir = $(MANPATH)/man8
+MAN_DIR ?= $(PREFIX)/share/man
+man7_dir = $(MAN_DIR)/man7
+man8_dir = $(MAN_DIR)/man8
 
 man7_targets = \
 	s6-accessrules.7 \
