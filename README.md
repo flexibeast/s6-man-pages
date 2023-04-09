@@ -1,4 +1,5 @@
 # Summary
+## NOTE: This repository is now read-only - official repository now at https://git.sr.ht/~flexibeast/s6-man-pages
 
 This repository provides [mdoc(7)](https://man.openbsd.org/mdoc.7)
 ports of the HTML documentation for the [s6 supervision
